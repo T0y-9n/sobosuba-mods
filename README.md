@@ -32,6 +32,14 @@ Those merges count towards your score. There is no 7, since nothing could ever c
 2. Put `override.cfg` next to `sobosuba.exe`. If your Steam library is on another drive, fix the path inside it.
 3. Start the game from Steam as usual.
 
+On Linux (the game's native Linux version), the steps are the same, but `override.cfg` holds a Windows path. Put `override.cfg` in the game folder, next to the game's executable, and change the path inside it to where the mod is, for example:
+
+```
+PrimeSobo="*/home/<you>/.local/share/Steam/steamapps/common/sobosuba/mods/prime_sobo/prime_sobo.gd"
+```
+
+The mod was checked on the Linux build of Godot with the game's files. Steam features (friends, screenshots) haven't been tried on Linux yet, so reports are welcome.
+
 ### Playing the original game
 
 Turn off `prime balls` in Settings → game and you're back to the normal game, with the mod still installed. No prime balls, and your scores and achievements go to Steam as usual.
@@ -64,7 +72,7 @@ A score that has been sent can't be removed later. Turning `send scores` off onl
 
 Looking at the world ranking sends no score, but it does send Steam IDs: yours to show your rank, and yours and your friends' for friends only. To turn the world ranking off completely, set `enabled` to `false` in `mods/prime_sobo/online.cfg`.
 
-The first time you send a score, a key is saved in `%APPDATA%\Godot\app_userdata\sobosuba\prime_sobo_online.json`. The server ties your Steam ID to the first key it sees, so keep that file to yourself, and copy it over if you play on another PC. The server can't ask Steam whether an ID is really yours, so whoever sends a score for a Steam ID first holds that row.
+The first time you send a score, a key is saved in `%APPDATA%\Godot\app_userdata\sobosuba\prime_sobo_online.json` (on Linux, `~/.local/share/godot/app_userdata/sobosuba/prime_sobo_online.json`). The server ties your Steam ID to the first key it sees, so keep that file to yourself, and copy it over if you play on another PC. The server can't ask Steam whether an ID is really yours, so whoever sends a score for a Steam ID first holds that row.
 
 The server keeps your Steam ID, Steam name, a hash of the key, your best score, and a log of submitted scores that is deleted after 30 days. It doesn't store your IP address or the key itself. Please don't bother keepee about the ranking.
 
@@ -130,6 +138,14 @@ sobosuba の玉は 1, 2, 4, 8… と 2 の累乗しかありません。この M
 2. `override.cfg` を `sobosuba.exe` と同じ場所に置きます。Steam のライブラリが別のドライブにあるときは、中に書いてあるパスを直してください。
 3. いつもどおり Steam から起動します。
 
+Linux (ゲームの Linux 版) でも手順は同じですが、`override.cfg` には Windows のパスが書いてあります。`override.cfg` をゲームのフォルダ (ゲームの実行ファイルと同じ場所) に置き、中のパスを MOD の場所に直してください。例:
+
+```
+PrimeSobo="*/home/<名前>/.local/share/Steam/steamapps/common/sobosuba/mods/prime_sobo/prime_sobo.gd"
+```
+
+Linux 版の Godot にゲームのファイルを読ませて動くことは確かめました。Linux での Steam の部分 (フレンド・スクリーンショット) はまだ試していないので、試した方は教えてください。
+
 ### 本家のまま遊びたいとき
 
 設定 → game の `prime balls` を切ると、MOD を入れたまま本家と同じ遊び方に戻ります。素数の玉は出なくなり、Steam のランキングと実績も本家どおりに記録されます。
@@ -162,7 +178,7 @@ MOD の文字はゲームの言語の設定に合わせて変わります。英�
 
 世界ランキングを見るときは、点数は送りませんが Steam ID は送ります。自分の順位を出すときは自分の Steam ID を、friends only では自分とフレンドの Steam ID を送ります。世界ランキングをまったく使わないときは、`mods/prime_sobo/online.cfg` の `enabled` を `false` にしてください。
 
-初めて送ったときに `%APPDATA%\Godot\app_userdata\sobosuba\prime_sobo_online.json` に鍵ができます。サーバは最初に届いた鍵でその Steam ID を覚えるので、このファイルは人に渡さないでください。別の PC で遊ぶときはこのファイルを写してください。サーバは Steam に本人かどうかを確かめられないので、ある Steam ID で最初に点数を送った人がその行を持つことになります。
+初めて送ったときに `%APPDATA%\Godot\app_userdata\sobosuba\prime_sobo_online.json` (Linux では `~/.local/share/godot/app_userdata/sobosuba/prime_sobo_online.json`) に鍵ができます。サーバは最初に届いた鍵でその Steam ID を覚えるので、このファイルは人に渡さないでください。別の PC で遊ぶときはこのファイルを写してください。サーバは Steam に本人かどうかを確かめられないので、ある Steam ID で最初に点数を送った人がその行を持つことになります。
 
 サーバに残るのは Steam ID、Steam の名前、鍵のハッシュ、最高点と、届いた点数の記録 (30 日で消えます) です。IP アドレスと鍵そのものは保存しません。ランキングのことで、ゲームの作者さんへ連絡するのはご遠慮ください。
 

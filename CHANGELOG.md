@@ -2,6 +2,10 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### README, 2026-10-31
+
+- How to install on Linux: put `override.cfg` next to the game's executable and change the path inside it. The mod and the zip are unchanged, so there is nothing to reinstall.
+
 ### 1.2.3-1.0.0, 2026-10-31
 
 - The version name now matches the game. sobosuba's version is 1.2.3, so this mod is `1.2.3-1.0.0`. The first release was named `1.23-1.0.0` by mistake.
@@ -19,6 +23,10 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### README、2026-10-31
+
+- Linux での入れ方を足しました。`override.cfg` をゲームの実行ファイルの横に置き、中のパスを直します。MOD と zip は変わっていないので、入れ直しは要りません。
 
 ### 1.2.3-1.0.0、2026-10-31
 
