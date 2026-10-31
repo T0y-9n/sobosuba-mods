@@ -90,6 +90,20 @@ test("the mod's version names the game version it was made for, and README says 
   assert.equal(readme.split("sobosuba 1.23").length - 1 >= 2, true, "and in Japanese");
 });
 
+// What changed is written where players look (2026-10-31 21:14), in English and Japanese, and every
+// release of the mod has its entry. Server-only changes are listed too, with no new mod version.
+test("CHANGELOG has the mod's version and the server change, in English and Japanese", async () => {
+  const log = (await readFile(resolve(repo, "CHANGELOG.md"), "utf8")).replace(/\r\n/g, "\n");
+  const online = await readFile(resolve(repo, "mods/prime_sobo/prime_online.gd"), "utf8");
+  const version = online.match(/^const MOD_VERSION:= "([^"]*)"/m)[1];
+  const [en, ja] = log.split("## 日本語");
+  assert.ok(ja, "there is a Japanese part");
+  for (const [part, server] of [[en, /nothing to reinstall/], [ja, /入れ直しは要りません/]]) {
+    assert.match(part, new RegExp(`^### ${version.replace(/\./g, "\\.")}\\b`, "m"), "the mod's version has an entry");
+    assert.match(part, server, "the server change says the mod is unchanged");
+  }
+});
+
 // The credits match the announcement in #sobosuba (2026-10-31 19:31): keepee for the game and the OK,
 // and Kinkan（Maccha） as a test player, in both languages.
 test("the credits thank keepee and name Kinkan（Maccha） as a test player", async () => {
