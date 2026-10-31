@@ -1,0 +1,9 @@
+# Public entrance for the mod (Cloudflare Pages, advanced mode with public/_worker.js).
+# It holds no data of its own; the ranking Worker named below does all the work.
+name = "sobosuba-ranking"
+pages_build_output_dir = "./public"
+compatibility_date = "2026-10-29"
+
+[[services]]
+binding = "RANKING"
+service = "sobosuba-ranking"

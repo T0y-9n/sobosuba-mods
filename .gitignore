@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+server/node_modules/
+server/.wrangler/
+server/pages/.wrangler/
+server/.dev.vars*
+server/.env*
+server/dist/
+server/wrangler.production.toml
+mods/**/selftest.flag
+mods/**/selftest.flag.off
+mods/**/noguard.flag
+mods/**/online_selftest.flag
+mods/**/selftest_result*.txt
+mods/**/selftest_result.prev.txt
+mods/**/selftest_shot*.png
+mods/**/selftest_scores*.png
