@@ -89,3 +89,15 @@ test("the mod's version names the game version it was made for, and README says 
   assert.match(readme, /`1\.23-1\.0\.0`/, "README explains the version");
   assert.equal(readme.split("sobosuba 1.23").length - 1 >= 2, true, "and in Japanese");
 });
+
+// The credits match the announcement in #sobosuba (2026-10-31 19:31): keepee for the game and the OK,
+// and Kinkan（Maccha） as a test player, in both languages.
+test("the credits thank keepee and name Kinkan（Maccha） as a test player", async () => {
+  const readme = (await readFile(resolve(repo, "README.md"), "utf8")).replace(/\r\n/g, "\n");
+  const en = readme.split("### Special thanks")[1]?.split("###")[0] ?? "";
+  const ja = readme.split("### 謝辞")[1]?.split("###")[0] ?? "";
+  assert.match(en, /^- keepee, for making sobosuba and saying yes to mods$/m);
+  assert.match(en, /^- Kinkan（Maccha）, test player$/m);
+  assert.match(ja, /^- sobosuba を作り、MOD を認めてくれた keepee さん$/m);
+  assert.match(ja, /^- テストプレイヤーの Kinkan（Maccha）さん$/m);
+});

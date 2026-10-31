@@ -93,7 +93,8 @@ One catch: if you have a saved run with prime balls on the board, the game crash
 
 ### Special thanks
 
-- Kinkan（Maccha）
+- keepee, for making sobosuba and saying yes to mods
+- Kinkan（Maccha）, test player
 
 ### License
 
@@ -190,7 +191,8 @@ MOD の文字はゲームの言語の設定に合わせて変わります。英�
 
 ### 謝辞
 
-- Kinkan（Maccha）
+- sobosuba を作り、MOD を認めてくれた keepee さん
+- テストプレイヤーの Kinkan（Maccha）さん
 
 ### ライセンス
 
