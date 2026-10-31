@@ -751,10 +751,11 @@ func run_selftest() -> void:
 	var shot_saved:= ""
 	for f in 240:
 		for p: Array in pairs:
+			# A merged pair is freed; a debug build refuses to put a freed instance in a typed variable.
+			if alive(p[1]) == false || alive(p[2]) == false:
+				continue
 			var s0: Sobo = p[1]
 			var s1: Sobo = p[2]
-			if alive(s0) == false || alive(s1) == false:
-				continue
 			if f < 90:
 				var d: Vector2 = s0.center.direction_to(s1.center)
 				s0.apply_uniform_acceleration(d * 300.0)
@@ -1261,8 +1262,9 @@ func wait_new_run(before: Node) -> bool:
 	return false
 
 
-func alive(s: Sobo) -> bool:
-	return is_instance_valid(s) && s.is_queued_for_deletion() == false
+## Untyped on purpose: the self test keeps sobos across frames, and they may be freed by then.
+func alive(s: Variant) -> bool:
+	return is_instance_valid(s) && (s as Object).is_queued_for_deletion() == false
 
 
 func count_primes() -> int:

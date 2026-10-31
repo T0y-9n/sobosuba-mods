@@ -37,7 +37,7 @@ func run() -> void:
 	root.add_child(online)
 	# The lines are checked in Japanese (prime_text.gd), and once more in English below.
 	TranslationServer.set_locale("ja")
-	check(online.MOD_VERSION == "1.23-1.0.0", "MOD_VERSION is 1.23-1.0.0")
+	check(online.MOD_VERSION == "1.2.3-1.0.0", "MOD_VERSION is 1.2.3-1.0.0")
 	var disabled: Dictionary = await online.submit_score(100, 20, 0.10)
 	check(disabled.is_empty() and not FileAccess.file_exists(online.identity_path), "disabled is silent and creates no identity")
 	cfg.set_value("online", "enabled", true)

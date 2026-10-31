@@ -46,7 +46,7 @@ func run() -> void:
 	online.config_path = config_path
 	online.identity_path = args[2].path_join("pages_identity.json")
 	root.add_child(online)
-	check(online.MOD_VERSION == "1.23-1.0.0", "MOD_VERSION is the first public version")
+	check(online.MOD_VERSION == "1.2.3-1.0.0", "MOD_VERSION is the first public version")
 
 	# Disabled: no reads, no identity file.
 	check((await online.fetch_page(0)).is_empty(), "disabled config reads no page")

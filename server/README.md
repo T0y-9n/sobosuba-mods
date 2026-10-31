@@ -31,11 +31,14 @@ If `http://127.0.0.1:8787/v1/health` returns `{"ok":true}`, it's running. If you
 $env:GODOT_BIN = '<Godot 4.7.2 console exe>'
 $env:POWERSHELL_BIN = (Get-Process -Id $PID).Path   # PowerShell 7.2 or later
 $env:SOBOSUBA_QA_ROOT = '<folder for test work files>'
+$env:SOBOSUBA_GAME_PCK = '<the game folder>\sobosuba.exe'   # optional, see below
 npm test
 npm run check
 ```
 
 `npm test` starts a real workerd with a local D1 and talks to it over HTTP. The mod's network and settings scripts run in a standalone [Godot 4.7.2](https://github.com/godotengine/godot/releases/tag/4.7.2-stable) against the real server (not the game exe). Test work folders go under `SOBOSUBA_QA_ROOT` and are not cleaned up automatically.
+
+With `SOBOSUBA_GAME_PCK` set, `npm test` also runs the mod's self-test to the end in the standalone Godot, headless, reading the game's data out of a copy of `sobosuba.exe` (the exe itself is never started). The standalone Godot is a debug build and catches script errors the game's own build lets through. Without it that test is reported as skipped.
 
 `npm test` doesn't run the game. The mod's self-test checks part of what happens inside the game (the screens, the flow of a run, Steam submissions staying off), but it doesn't replace playing the game.
 
@@ -119,11 +122,14 @@ npm run dev
 $env:GODOT_BIN = '<Godot 4.7.2 console exe>'
 $env:POWERSHELL_BIN = (Get-Process -Id $PID).Path   # PowerShell 7.2 or later
 $env:SOBOSUBA_QA_ROOT = '<試験の作業フォルダ>'
+$env:SOBOSUBA_GAME_PCK = '<ゲームのフォルダ>\sobosuba.exe'   # 任意。下を参照
 npm test
 npm run check
 ```
 
 `npm test` は本物の workerd とローカルの D1 を立てて HTTP で試します。MOD 側の通信や設定の部品は、[Godot 4.7.2](https://github.com/godotengine/godot/releases/tag/4.7.2-stable) を単体で動かして本物のサーバに当てます (ゲームの exe は使いません)。試験の作業フォルダは `SOBOSUBA_QA_ROOT` に作られ、自動では消えません。
+
+`SOBOSUBA_GAME_PCK` を指すと、`npm test` は MOD の自己試験も単体の Godot で窓を出さずに最後まで流します。ゲームのデータは `sobosuba.exe` の写しから読みます (exe そのものは起動しません)。単体の Godot は検査つきの版なので、ゲームの書き出しでは素通りするスクリプトの誤りも捕まえます。指さないときは、その試験は飛ばしたと表示されます。
 
 `npm test` はゲームを動かしません。ゲームの中での動き (画面、試合の流れ、Steam への送信を止めていること) の一部は MOD の自己試験で確かめますが、実際に遊んで確かめることの代わりにはなりません。
 

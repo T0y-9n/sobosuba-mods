@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 
@@ -77,17 +78,33 @@ test("LICENSE and README say what the license covers, what the checks can't catc
   assert.equal(readme.split("Kinkan（Maccha）").length - 1, 2, "the credits name Kinkan（Maccha） in both languages");
 });
 
-// The version is "<game>-<mod>" (2026-10-31 18:26): 1.23-1.0.0 is mod 1.0.0 for sobosuba 1.23.
+// The version is "<game>-<mod>" (2026-10-31 18:26): 1.2.3-1.0.0 is mod 1.0.0 for sobosuba 1.2.3.
+// The first release said 1.23 by misreading the game's 1.2.3 (fixed 2026-10-31 23:4x).
 // The server takes it as it is ([\w.-], so no "+"), and README says which game version it was made for.
 test("the mod's version names the game version it was made for, and README says so", async () => {
   const online = await readFile(resolve(repo, "mods/prime_sobo/prime_online.gd"), "utf8");
   const version = online.match(/^const MOD_VERSION:= "([^"]*)"/m)?.[1];
-  assert.equal(version, "1.23-1.0.0");
+  assert.equal(version, "1.2.3-1.0.0");
   assert.match(version, /^[\w.-]{1,32}$/, "the server's mod_version check takes it");
   const readme = await readFile(resolve(repo, "README.md"), "utf8");
-  assert.match(readme, /sobosuba 1\.23/, "README names the game version in English");
-  assert.match(readme, /`1\.23-1\.0\.0`/, "README explains the version");
-  assert.equal(readme.split("sobosuba 1.23").length - 1 >= 2, true, "and in Japanese");
+  assert.match(readme, /made for sobosuba 1\.2\.3\./, "README names the game version in English");
+  assert.match(readme, /`1\.2\.3-1\.0\.0`/, "README explains the version");
+  assert.doesNotMatch(readme, /sobosuba 1\.23\b/, "the misread 1.23 is gone");
+  assert.equal(readme.split("sobosuba 1.2.3").length - 1 >= 2, true, "and in Japanese");
+});
+
+// The game part must be the game's own config/version, read from the decompiled game when it is at hand.
+test("the game part of the mod's version is the game's config/version when its source is at hand", async t => {
+  const project = process.env.SOBOSUBA_GAME_SRC ? resolve(process.env.SOBOSUBA_GAME_SRC, "project.godot.txt") : "";
+  if (!project || !existsSync(project)) {
+    t.skip(`game source not found (${project}); the game version was not compared`);
+    return;
+  }
+  const game = (await readFile(project, "utf8")).replaceAll("\0", "").match(/config\/version\s*=\s*"([^"]+)"/)?.[1];
+  assert.ok(game, "project.godot has config/version");
+  const online = await readFile(resolve(repo, "mods/prime_sobo/prime_online.gd"), "utf8");
+  const version = online.match(/^const MOD_VERSION:= "([^"]*)"/m)?.[1];
+  assert.equal(version.split("-")[0], game);
 });
 
 // What changed is written where players look (2026-10-31 21:14), in English and Japanese, and every

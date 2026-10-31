@@ -60,7 +60,7 @@ test("a game end reads about two rows per player ahead, not the whole board", as
 test("the player count follows new players, repeat scores and deleted rows", async () => {
   const count = async () => (await players(db)).players;
   const real = async () => (await db.prepare("SELECT COUNT(*) AS n FROM players").first()).n;
-  const p = { mod: "prime_sobo", mod_version: "1.23-1.0.0", player_id: sid(N + 1), player_key: randomBytes(32).toString("hex"),
+  const p = { mod: "prime_sobo", mod_version: "1.2.3-1.0.0", player_id: sid(N + 1), player_key: randomBytes(32).toString("hex"),
     name: "new", score: 100, duration_s: 20, prime_chance: 0.11 };
   const post = body => fetch(new URL("/v1/scores", base), { method: "POST",
     headers: { "content-type": "application/json", "CF-Connecting-IP": "127.0.0.1" }, body: JSON.stringify(body) }).then(r => r.json());

@@ -9,7 +9,7 @@ A mod that mixes prime numbers into [sobosuba](https://store.steampowered.com/ap
 You need the game. No game files are included here.
 keepee, the developer, said mods are fine as long as they need the game, that GitHub and streaming are fine, and that mod scores should go to our own server. Thanks, keepee!
 
-Version `1.23-1.0.0` is mod version 1.0.0, made for sobosuba 1.23. What changed is in [CHANGELOG.md](CHANGELOG.md).
+Version `1.2.3-1.0.0` is mod version 1.0.0, made for sobosuba 1.2.3. What changed is in [CHANGELOG.md](CHANGELOG.md).
 
 ### Prime balls
 
@@ -107,7 +107,7 @@ MIT, see [LICENSE](LICENSE). The license covers only the code written for this m
 ゲーム本体が必要です。このリポジトリにゲームのファイルは入っていません。
 作者の keepee さんから「ゲーム本体が要る作りならよい、GitHub と配信もよい、MOD の点数は自前のサーバで」と了承をもらっています。
 
-版の `1.23-1.0.0` は、sobosuba 1.23 向けに作った MOD の 1.0.0 という意味です。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
+版の `1.2.3-1.0.0` は、sobosuba 1.2.3 向けに作った MOD の 1.0.0 という意味です。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
 
 ### 素数の玉
 

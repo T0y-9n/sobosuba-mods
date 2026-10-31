@@ -74,9 +74,9 @@ window/stretch/aspect="keep_height"
     const expected = scenario === "first" ? 1 : 6;
     assert.equal((await db.prepare("SELECT COUNT(*) AS n FROM players").first()).n, expected);
     assert.equal((await db.prepare("SELECT COUNT(*) AS n FROM submissions WHERE accepted=1").first()).n, expected);
-    // Godot's row is its Steam ID with the Steam name (not the name in online.cfg), version 1.23-1.0.0.
+    // Godot's row is its Steam ID with the Steam name (not the name in online.cfg), version 1.2.3-1.0.0.
     const own = await db.prepare("SELECT p.name, s.mod_version FROM players p JOIN submissions s ON s.player_id=p.player_id WHERE p.player_id=?").bind(godotSteamId).first();
-    assert.deepEqual(own, { name: "Godot player", mod_version: "1.23-1.0.0" });
+    assert.deepEqual(own, { name: "Godot player", mod_version: "1.2.3-1.0.0" });
   } finally {
     for (const socket of connections) socket.destroy();
     if (proxy) await new Promise(resolve => proxy.close(resolve));
