@@ -1,8 +1,6 @@
 import { Rejection, readScore, steamId, steamIdList, integerParam } from "./validation";
+import { type Entry, position, page, around, friends } from "./board";
 interface Env { DB: D1Database; IP_HASH_SECRET: string; POST_RATE: RateLimit; GET_RATE: RateLimit }
-interface Entry { player_id: string; name: string; best: number; rank: number }
-const ranking = `SELECT player_id, name, best,
-  ROW_NUMBER() OVER (ORDER BY best DESC, best_at, player_id) AS rank FROM players`;
 function json(body: unknown, status = 200): Response {
   return Response.json(body, { status, headers: {
     "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
@@ -26,11 +24,6 @@ async function frontRate(request: Request, env: Env): Promise<Response | undefin
 // Like a row of the game's Steam leaderboard, a row carries the Steam ID (spec §2).
 function publicEntry(entry: Entry) {
   return { rank: entry.rank, steam_id: entry.player_id, name: entry.name, best: entry.best };
-}
-async function position(db: D1Database, id: string) {
-  const row = await db.prepare(`SELECT * FROM (${ranking}) WHERE player_id=?`).bind(id).first<Entry>();
-  const count = await db.prepare("SELECT COUNT(*) AS n FROM players").first<{ n: number }>();
-  return { row, players: count!.n };
 }
 async function submit(request: Request, env: Env): Promise<Response> {
   const now = Date.now();
@@ -76,26 +69,22 @@ async function route(request: Request, env: Env): Promise<Response> {
       const offset = integerParam(url.searchParams.get("offset"), 0, 0, 10000);
       // Never reused (spec §7): the scores screen counts pages from players, so every read is fresh
       // from D1 and the answer stays Cache-Control: no-store like every other response.
-      const entries = await env.DB.prepare(`${ranking} LIMIT ? OFFSET ?`).bind(limit, offset).all<Entry>();
-      const count = await env.DB.prepare("SELECT COUNT(*) AS n FROM players").first<{ n: number }>();
-      return json({ ok: true, entries: entries.results.map(publicEntry), players: count!.n });
+      const result = await page(env.DB, limit, offset);
+      return json({ ok: true, entries: result.entries.map(publicEntry), players: result.players });
     }
     if (request.method === "GET" && url.pathname === "/v1/leaderboard/around") {
       const playerId = url.searchParams.get("player_id") ?? "";
       if (!steamId.test(playerId)) throw new Rejection("INVALID_PLAYER");
       const span = integerParam(url.searchParams.get("span"), 3, 0, 24);
-      const result = await position(env.DB, playerId);
-      if (!result.row) return json({ ok: false, error: "PLAYER_NOT_FOUND" }, 404);
-      const entries = await env.DB.prepare(`SELECT * FROM (${ranking}) WHERE rank BETWEEN ? AND ? ORDER BY rank`)
-        .bind(result.row.rank - span, result.row.rank + span).all<Entry>();
-      return json({ ok: true, entries: entries.results.map(e => ({ ...publicEntry(e), you: e.player_id === playerId })), rank: result.row.rank, players: result.players });
+      const result = await around(env.DB, playerId, span);
+      if (!result) return json({ ok: false, error: "PLAYER_NOT_FOUND" }, 404);
+      return json({ ok: true, entries: result.entries.map(e => ({ ...publicEntry(e), you: e.player_id === playerId })), rank: result.rank, players: result.players });
     }
     if (request.method === "GET" && url.pathname === "/v1/leaderboard/friends") {
       // The game's FRIENDS download: only the listed players on the board, best first, world rank kept.
       const ids = steamIdList(url.searchParams.get("ids"));
-      const entries = await env.DB.prepare(`SELECT * FROM (${ranking}) WHERE player_id IN (SELECT value FROM json_each(?)) ORDER BY rank`)
-        .bind(JSON.stringify(ids)).all<Entry>();
-      return json({ ok: true, entries: entries.results.map(publicEntry) });
+      const result = await friends(env.DB, ids);
+      return json({ ok: true, entries: result.entries.map(publicEntry) });
     }
     return json({ ok: false, error: "NOT_FOUND" }, 404);
 }
