@@ -2,6 +2,11 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### 1.2.3-1.0.2, 2026-11-02
+
+- More fixes to how a run's mode is saved, found in testing. The mod plays the same.
+- After a rare save failure, a normal run is no longer mistaken for a prime run once the disk recovers (which would have kept your score off the game's own leaderboard).
+
 ### 1.2.3-1.0.1, 2026-11-01
 
 - Bug fixes found in testing. The mod plays the same, and these are behind-the-scenes fixes, so if `1.2.3-1.0.0` works for you there is no rush to reinstall.
@@ -31,6 +36,11 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### 1.2.3-1.0.2、2026-11-02
+
+- 試合のモードの保存まわりのバグ直し (試験で見つけた)。遊び方は同じです。
+- まれに保存に失敗した後、通常の試合が素数の試合と間違えられ、点数が本家のランキングに送られなくなることがありました。ディスクが戻れば正しく読まれるように直しました。
 
 ### 1.2.3-1.0.1、2026-11-01
 

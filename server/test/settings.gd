@@ -159,5 +159,51 @@ func run() -> void:
 	selftest.set_enabled(false)
 	selftest.start_run(false)
 	check(FileAccess.get_md5(real_path) == real_before and written(dir.path_join("selftest.json")).get("enabled") == false, "another path leaves the real file as it was")
+
+	# The prime marker (save_run_state): a prime run that cannot save its mode and cannot remove the
+	# stale file leaves a marker, so a restart stays prime. The marker holds the settings file's MD5,
+	# so a later save that rewrites the file retires it even when it was not removed, and a successful
+	# save removes it.
+	var marker_path: String = dir.path_join("marker.json")
+	var base: RefCounted = fresh(script, marker_path)
+	base.enabled = false
+	base.run_prime = false
+	check(base.save_file(), "a file with run_prime false is written")
+	var count_at_marker: int = base.save_count
+	check(base.write_prime_marker() and fresh(script, marker_path).run_prime == true, "a marker matching the file's save_count keeps a restart on the prime side")
+	# A normal run saves the same run_prime = false: the contents match, but the save_count rises.
+	var normal: RefCounted = fresh(script, marker_path)
+	normal.run_prime = false
+	check(normal.save_file() and normal.save_count > count_at_marker, "saving the same mode again still raises the save_count")
+	# A marker left from before that save (its removal failed) holds the old count and is ignored.
+	var leftover:= FileAccess.open(marker_path + ".prime", FileAccess.WRITE)
+	leftover.store_string(str(count_at_marker))
+	leftover.close()
+	check(fresh(script, marker_path).run_prime == false, "a marker left from before a same-contents save is ignored, not read as prime")
+	# A successful save_run_state removes a matching marker.
+	var recovered: RefCounted = fresh(script, marker_path)
+	check(recovered.write_prime_marker() and FileAccess.file_exists(marker_path + ".prime"), "a marker is written again")
+	recovered.run_prime = false
+	check(recovered.save_run_state() and not FileAccess.file_exists(marker_path + ".prime"), "a successful save removes the marker")
+	# A marker from an older mod (not a save_count: the literal "prime") is honoured once, so updating
+	# from a version that wrote that format does not lose a prime recovery.
+	var old_path: String = dir.path_join("old-marker.json")
+	var old_base: RefCounted = fresh(script, old_path)
+	old_base.enabled = false
+	old_base.run_prime = false
+	check(old_base.save_file(), "a file with run_prime false is written for the old-marker case")
+	var old_marker:= FileAccess.open(old_path + ".prime", FileAccess.WRITE)
+	old_marker.store_string("prime")
+	old_marker.close()
+	check(fresh(script, old_path).run_prime == true, "the old 'prime' marker is honoured once as a prime recovery")
+	check(FileAccess.get_file_as_string(old_path + ".prime").is_valid_int(), "reading it migrated the marker to a save_count form")
+	var migrated: RefCounted = fresh(script, old_path)
+	migrated.run_prime = false
+	check(migrated.save_run_state() and not FileAccess.file_exists(old_path + ".prime"), "a later normal save then removes the migrated marker")
+	var empty_marker:= FileAccess.open(old_path + ".prime", FileAccess.WRITE)
+	empty_marker.store_string("")
+	empty_marker.close()
+	check(fresh(script, old_path).run_prime == false, "an empty marker is not 'prime' and is ignored")
+
 	print("SETTINGS_DONE failures=%d" % failures)
 	quit(1 if failures else 0)

@@ -24,6 +24,9 @@ var run_prime:= true
 ## null while unknown (no file, or a file from before this was kept).
 var older_save: Variant = null
 var send_scores:= false
+## Rises on every successful save. The marker records it, so a later save retires the marker even when
+## the file's contents are otherwise unchanged (a normal run writing the same run_prime = false).
+var save_count:= 0
 
 
 func load_file() -> void:
@@ -46,9 +49,19 @@ func load_file() -> void:
 		older_save = data.older_save
 	if data.get("send_scores") is bool:
 		send_scores = data.send_scores
-	# The marker (see save_run_state) outranks a stale run_prime = false in the file.
-	if FileAccess.file_exists(prime_marker_path()):
+	if data.get("save_count") is float:
+		save_count = int(data.save_count)
+	# The marker (see save_run_state) outranks a stale run_prime = false, but only while its save_count
+	# still matches the file. Every successful save raises the count, so a later save retires the
+	# marker even when it could not be deleted and the rest of the file is unchanged.
+	if not run_prime and marker_matches_file():
 		run_prime = true
+	# An older mod (before save_count) wrote the marker as the exact text "prime". Honour that one
+	# known form once as a prime recovery and rewrite it in this file's save_count form, so from then
+	# on the save_count rule governs it. An empty or garbled marker is not "prime", so it is ignored.
+	elif not run_prime and FileAccess.file_exists(prime_marker_path()) and FileAccess.get_file_as_string(prime_marker_path()) == "prime":
+		run_prime = true
+		write_prime_marker()
 
 
 func save_file() -> bool:
@@ -56,13 +69,16 @@ func save_file() -> bool:
 	if file == null:
 		push_warning("[prime_sobo] settings not saved: %s (%s)" % [path, error_string(FileAccess.get_open_error())])
 		return false
-	var data:= {"enabled": enabled, "run_prime": run_prime, "send_scores": send_scores}
+	var next_count:= save_count + 1
+	var data:= {"enabled": enabled, "run_prime": run_prime, "send_scores": send_scores, "save_count": next_count}
 	if older_save is String:
 		data.older_save = older_save
 	file.store_string(JSON.stringify(data))
 	file.flush()
 	var error: Error = file.get_error()
 	file.close()
+	if error == OK:
+		save_count = next_count
 	return error == OK
 
 
@@ -115,7 +131,9 @@ func start_run(continued: bool, save_holds_primes:= false, save_id:= "") -> bool
 ## Returns whether the file was written.
 func save_run_state() -> bool:
 	if save_file():
-		# The file is current again; a marker left by an earlier failed write is out of date.
+		# The file now holds the current mode. The marker was written against an older file, so its
+		# MD5 no longer matches and load_file ignores it; removing it is tidy-up, and a failure here
+		# no longer makes a normal run read back as prime.
 		if FileAccess.file_exists(prime_marker_path()):
 			DirAccess.remove_absolute(prime_marker_path())
 		return true
@@ -134,17 +152,27 @@ func save_run_state() -> bool:
 	return false
 
 
-## A second file next to the settings file. It only ever says "prime": load_file reads its presence as
-## run_prime = true, and a successful save_run_state removes it.
+## A second file next to the settings file, holding the settings file's save_count as it was when the
+## marker was written. load_file reads it as run_prime = true only while that count still matches the
+## file. Every successful save raises the count, so a later save retires the marker even when the
+## file's contents are otherwise unchanged and the marker could not be removed.
 func prime_marker_path() -> String:
 	return path + ".prime"
+
+
+## Whether a marker is there and still matches the file's save_count. A save raises the count, so the
+## marker no longer matches and is ignored, even when the rest of the file is unchanged.
+func marker_matches_file() -> bool:
+	if not FileAccess.file_exists(prime_marker_path()):
+		return false
+	return FileAccess.get_file_as_string(prime_marker_path()) == str(save_count)
 
 
 func write_prime_marker() -> bool:
 	var file:= FileAccess.open(prime_marker_path(), FileAccess.WRITE)
 	if file == null:
 		return false
-	file.store_string("prime")
+	file.store_string(str(save_count))
 	file.flush()
 	var error: Error = file.get_error()
 	file.close()
