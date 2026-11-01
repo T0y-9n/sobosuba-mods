@@ -46,6 +46,9 @@ func load_file() -> void:
 		older_save = data.older_save
 	if data.get("send_scores") is bool:
 		send_scores = data.send_scores
+	# The marker (see save_run_state) outranks a stale run_prime = false in the file.
+	if FileAccess.file_exists(prime_marker_path()):
+		run_prime = true
 
 
 func save_file() -> bool:
@@ -99,8 +102,61 @@ func start_run(continued: bool, save_holds_primes:= false, save_id:= "") -> bool
 	if not continued:
 		run_prime = enabled
 		older_save = save_id
-		save_file()
+		save_run_state()
 	elif not run_prime and (save_holds_primes or save_id == "" or save_id == UNREADABLE_SAVE or not older_save is String or older_save == UNREADABLE_SAVE or save_id == older_save):
 		run_prime = true
-		save_file()
+		save_run_state()
 	return run_prime
+
+
+## Writes the run's mode. A write that fails is reported. If it fails while this run is prime and the
+## file on disk still says the latest run was not (it would read back as the game's own run, with the
+## game's Steam upload and achievements), the file is removed: no file reads back as prime.
+## Returns whether the file was written.
+func save_run_state() -> bool:
+	if save_file():
+		# The file is current again; a marker left by an earlier failed write is out of date.
+		if FileAccess.file_exists(prime_marker_path()):
+			DirAccess.remove_absolute(prime_marker_path())
+		return true
+	push_warning("[prime_sobo] run mode not saved (run_prime=%s); a restart may not know it" % run_prime)
+	if run_prime and file_says_not_prime():
+		var error: Error = DirAccess.remove_absolute(path)
+		if error != OK:
+			push_warning("[prime_sobo] stale run mode could not be removed: %s (%s)" % [path, error_string(error)])
+			# The stale file stays and would read back as the game's own run. A second file, which
+			# load_file reads as "the latest run was prime", keeps the restart on the prime side.
+			if not write_prime_marker():
+				# TODO-138: nothing could be written. This run stays prime in memory (start_run returns
+				# run_prime), but a restart reads the stale file; start_run's save_holds_primes check
+				# is then the only thing left that treats a continued save as prime.
+				push_warning("[prime_sobo] prime run could not be remembered on disk: a restart may read the older mode")
+	return false
+
+
+## A second file next to the settings file. It only ever says "prime": load_file reads its presence as
+## run_prime = true, and a successful save_run_state removes it.
+func prime_marker_path() -> String:
+	return path + ".prime"
+
+
+func write_prime_marker() -> bool:
+	var file:= FileAccess.open(prime_marker_path(), FileAccess.WRITE)
+	if file == null:
+		return false
+	file.store_string("prime")
+	file.flush()
+	var error: Error = file.get_error()
+	file.close()
+	return error == OK
+
+
+## Whether the file on disk holds run_prime = false. A missing or broken file reads back as prime.
+func file_says_not_prime() -> bool:
+	if not FileAccess.file_exists(path):
+		return false
+	var json:= JSON.new()
+	if json.parse(FileAccess.get_file_as_string(path)) != OK or not json.data is Dictionary:
+		return false
+	var value: Variant = json.data.get("run_prime")
+	return value is bool and value == false

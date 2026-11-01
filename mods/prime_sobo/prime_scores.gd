@@ -31,6 +31,8 @@ var label: Label
 var online: Node = null
 var _round_started_ms:= 0
 var _round_finished:= false
+## Counts game overs, so the screenshot after the wait can tell whether it is still the same one.
+var _over_serial:= 0
 ## The board belongs on screen after a game over, until the next game starts.
 var _board_wanted:= false
 ## Hidden while the prime scores screen is open (it would cover the source row). Set by prime_sobo.gd.
@@ -201,6 +203,8 @@ func on_game_over() -> void:
 		return
 	var score: int = ScoreManager.current_score
 	_round_finished = true
+	_over_serial += 1
+	var serial: int = _over_serial
 	last_score = score
 	last_rank = add_local_score(score)
 	publish_best()
@@ -214,6 +218,10 @@ func on_game_over() -> void:
 	print("[prime_sobo] game over: score=%d local_rank=%d best=%d friends=%d" % [score, last_rank, best_local(), friends.size()])
 	await get_tree().create_timer(SCREENSHOT_DELAY, true).timeout
 	await RenderingServer.frame_post_draw
+	# A next run (or another game over) in the meantime: the screen is no longer this score's.
+	if serial != _over_serial or _round_finished == false:
+		print("[prime_sobo] screenshot skipped: the game over it was for is over")
+		return
 	save_steam_screenshot(score)
 
 

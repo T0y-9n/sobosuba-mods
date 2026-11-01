@@ -2,6 +2,14 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### 1.2.3-1.0.1, 2026-11-01
+
+- Bug fixes found in testing. The mod plays the same, and these are behind-the-scenes fixes, so if `1.2.3-1.0.0` works for you there is no rush to reinstall.
+- After sending a score, if the ranking could not be read, it no longer looks as if the score was not sent.
+- The end-of-run screenshot is no longer taken for the wrong run when a new run starts during the short delay.
+- A rare save failure no longer lets a restart read a prime run as the normal game.
+- The scores screen no longer copies stale row data when it is cloned.
+
 ### README, 2026-10-31
 
 - How to install on Linux: put `override.cfg` next to the game's executable and change the path inside it. The mod and the zip are unchanged, so there is nothing to reinstall.
@@ -23,6 +31,14 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### 1.2.3-1.0.1、2026-11-01
+
+- 試験で見つかったバグの直しです。遊び方は同じで、裏側の直しなので、`1.2.3-1.0.0` で困っていなければ急いで入れ直す必要はありません。
+- 点数を送った後、ランキングが読めなかったときに、送れていないように見えることがなくなりました。
+- 試合終わりのスクショが、短い待ちの間に次の試合が始まると別の試合のものになることがなくなりました。
+- まれな保存の失敗で、再開時に素数試合を通常試合として読むことがなくなりました。
+- スコア画面を複製するときに、古い行のデータを写すことがなくなりました。
 
 ### README、2026-10-31
 

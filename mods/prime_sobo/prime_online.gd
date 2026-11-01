@@ -6,7 +6,7 @@ extends Node
 ## and the friends' rows, each within its own five seconds.
 signal updated(text: String)
 
-const MOD_VERSION:= "1.2.3-1.0.0"
+const MOD_VERSION:= "1.2.3-1.0.1"
 const TIMEOUT_MS:= 5000
 const BOARD_ROWS:= 5
 const PAGE_ROWS:= 10
@@ -156,6 +156,19 @@ func fail(generation: int) -> Dictionary:
 	return {"ok": false}
 
 
+## The server accepted the score (it cannot be taken back) but a later read of the ranking failed.
+## Not a failed send: the rank and player count of the accepted answer are shown, with a line saying
+## the list could not be read. ok stays false (the ranking was not fully read); sent says what happened.
+func sent_but_unread(generation: int, posted: Dictionary) -> Dictionary:
+	busy = false
+	var result:= {"ok": false, "sent": true, "rank": int(posted.rank), "best": posted.best, "own_found": false}
+	if generation == _generation:
+		last_result = result
+		world_text = word("world rank") % [int(posted.rank), int(posted.players)] + "\n" + word("sent, ranking not read")
+		updated.emit(world_text)
+	return result
+
+
 ## The mod's words in the game's language (prime_text.gd next to this script).
 func word(key: String) -> String:
 	return load((get_script() as Script).resource_path.get_base_dir().path_join("prime_text.gd")).get_text(key)
@@ -205,14 +218,14 @@ func submit_score(score: int, duration_s: int, prime_chance: float) -> Dictionar
 		busy = false
 		return {}
 	if not valid_entries(board.get("entries")):
-		return fail(generation)
+		return sent_but_unread(generation, posted)
 	# Always retrieve the fresh own row; its you flag marks the player.
 	var around: Dictionary = await exchange("/v1/leaderboard/around?mod=prime_sobo&player_id=%s&span=2" % steam_id, HTTPClient.METHOD_GET, "", deadline)
 	if generation != _generation:
 		busy = false
 		return {}
 	if not valid_entries(around.get("entries"), true) or not positive_integer(around.get("rank")) or not positive_integer(around.get("players")):
-		return fail(generation)
+		return sent_but_unread(generation, posted)
 	var own: Dictionary = {}
 	var own_count:= 0
 	for entry: Dictionary in around.entries:
@@ -220,7 +233,7 @@ func submit_score(score: int, duration_s: int, prime_chance: float) -> Dictionar
 			own = entry
 			own_count += 1
 	if own_count != 1 or own.rank != around.rank:
-		return fail(generation)
+		return sent_but_unread(generation, posted)
 	var entries: Array = board.entries
 	# When the player is displayed in the top three, span=2 includes that entire
 	# top section. Use its fresh you flags rather than guessing from public ranks.

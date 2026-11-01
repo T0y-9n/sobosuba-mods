@@ -50,6 +50,10 @@ const SCORES_SCREEN_SCENE:= "res://ui/menu/screens/scores_screen/scores_screen.t
 const TOGGLE_TEXT:= "prime balls"
 const SEND_TEXT:= "send scores"
 const MENU_WAIT_FRAMES:= 600
+## ScoresScreen members that the screen fills in while it runs (rows made in _ready, paging state).
+## They are not copied from the game's live screen: the copy builds its own rows and starts at its
+## own defaults (copying the row array would turn every row into null).
+const SCORES_SCREEN_RUNTIME_MEMBERS: Array[String] = ["entries", "page", "source", "friends_only", "steam_user_rank", "_hover_self_on_next_generate"]
 const LEVEL_FONT_SIZE:= 32
 const LEVEL_MARGIN:= 96
 
@@ -409,6 +413,8 @@ func clone_scores_screen(original: ScoresScreen) -> Node:
 	var values: Dictionary = {}
 	for prop: Dictionary in original.get_property_list():
 		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE && prop.usage & PROPERTY_USAGE_STORAGE:
+			if SCORES_SCREEN_RUNTIME_MEMBERS.has(prop.name):
+				continue
 			values[prop.name] = value_for_copy(original.get(prop.name), original, copy)
 	copy.set_script(load(mod_dir().path_join("prime_scores_screen.gd")))
 	for key: String in values:

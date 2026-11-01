@@ -175,6 +175,20 @@ const WORDS:= {
 		"zh_CN": "无法连接全球排行榜",
 		"zh_TW": "無法連線全球排行榜",
 	},
+	# The score was accepted by the world ranking; only the list could not be read afterwards.
+	"sent, ranking not read": {
+		"en": "sent, but the ranking list couldn't be read",
+		"ja": "送信済み。ランキング一覧は読み込めなかった",
+		"de": "gesendet, aber die Rangliste konnte nicht gelesen werden",
+		"es": "enviado, pero no se pudo leer la clasificación",
+		"it": "inviato, ma non è stato possibile leggere la classifica",
+		"cs": "odesláno, ale žebříček se nepodařilo načíst",
+		"pl": "wysłano, ale nie udało się wczytać rankingu",
+		"ru": "отправлено, но рейтинг прочитать не удалось",
+		"sr": "poslato, ali rang lista nije mogla da se učita",
+		"zh_CN": "已上传，但无法读取排行榜",
+		"zh_TW": "已上傳，但無法讀取排行榜",
+	},
 	"no steam": {
 		"en": "not connected to Steam",
 		"ja": "Steam に繋がっていない",
