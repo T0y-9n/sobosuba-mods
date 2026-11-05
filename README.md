@@ -2,6 +2,12 @@
 
 [English](#english) | [日本語](#日本語)
 
+## Mod manager / MOD管理アプリ
+
+The Windows mod manager alpha supports sobosuba 1.2.3 and 1.3.10. Download it from [Releases](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-alpha-20261105). Source and build instructions are in [manager/README.md](manager/README.md).
+
+Windows用のMOD管理アプリのα版です。sobosuba 1.2.3と1.3.10に対応します。上のリンクからダウンロードでき、ソースとビルド手順は `manager/` にあります。
+
 ## English
 
 A mod that mixes prime numbers into [sobosuba](https://store.steampowered.com/app/1946560/sobosuba).
