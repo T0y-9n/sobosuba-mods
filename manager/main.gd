@@ -945,7 +945,10 @@ func check_updates() -> void:
 		for mod in selected:
 			if mod.manual or not mod.compatible or not settings.mod_updates_enabled(mod_key(mod)) or not catalog.has_update(mod):
 				continue
-			var result := await auto_update_mod(mod, catalog.find(mod.id))
+			var latest := catalog.find(mod.id)
+			if not Versions.supports_game(latest.get("game_versions", []), store.game_version):
+				continue
+			var result := await auto_update_mod(mod, latest)
 			if not result.ok:
 				notice_error = str(result.get("error", "invalid_metadata"))
 				notice_args = result.get("args", [])

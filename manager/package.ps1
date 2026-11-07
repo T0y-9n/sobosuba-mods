@@ -19,11 +19,11 @@ function Read-Map([string]$Text) {
 }
 function Test-GameCompatibility([string]$SelectedVersion,[object[]]$DeclaredVersions) {
     if($SelectedVersion -in $DeclaredVersions){return $true}
-    if($SelectedVersion -cnotmatch '^1\.3\.(0|[1-9][0-9]*)$'){return $false}
+    if($SelectedVersion -cnotmatch '^1\.3\.(0|[1-9][0-9]*)\z'){return $false}
     $selectedPatch=0
     if(-not [int]::TryParse($Matches[1],[ref]$selectedPatch)){return $false}
     foreach($declared in $DeclaredVersions){
-        if($declared -isnot [string] -or $declared -cnotmatch '^1\.3\.(0|[1-9][0-9]*)$'){continue}
+        if($declared -isnot [string] -or $declared -cnotmatch '^1\.3\.(0|[1-9][0-9]*)\z'){continue}
         $declaredPatch=0
         if([int]::TryParse($Matches[1],[ref]$declaredPatch) -and $declaredPatch -le $selectedPatch){return $true}
     }
