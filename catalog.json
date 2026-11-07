@@ -1,0 +1,12 @@
+{
+  "mods": [
+    {
+      "id": "prime_sobo",
+      "name": "Prime sobos",
+      "version": "1.2.3-1.0.2",
+      "summary": "Prime-numbered sobos that only merge when the sum is a power of two.",
+      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.2.3-1.0.2/sobosuba-prime-balls-1.2.3-1.0.2.zip",
+      "sha256": "7a7130cf61b2e494d6208446c149cf96b1379e85f0cc6b84dfb2eaacc3115df0"
+    }
+  ]
+}
