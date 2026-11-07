@@ -15,6 +15,7 @@ static func library_paths(steam: String) -> Array[String]:
 
 static func find_game() -> String:
 	var steam := "C:/Program Files (x86)/Steam"
+	var roots: Array[String] = []
 	if OS.get_name() == "Windows":
 		var output: Array = []
 		var exit_code := OS.execute("reg.exe", ["query", "HKCU\\Software\\Valve\\Steam", "/v", "SteamPath"], output, false, false)
@@ -24,8 +25,17 @@ static func find_game() -> String:
 			var found := pattern.search(str(output[0]))
 			if found != null:
 				steam = found.get_string(1).strip_edges().replace("\\", "/")
-	for library in library_paths(steam):
-		var game := library.path_join("steamapps/common/sobosuba")
-		if FileAccess.file_exists(game.path_join("sobosuba.exe")):
-			return game
+		roots.append(steam)
+	elif OS.get_name() == "Linux":
+		var home := OS.get_environment("HOME")
+		for relative in [".local/share/Steam", ".steam/steam", ".var/app/com.valvesoftware.Steam/.local/share/Steam"]:
+			var output: Array = []
+			if OS.execute("/usr/bin/realpath", ["-e", home.path_join(relative)], output, false) == 0 and not output.is_empty():
+				roots.append(str(output[0]).strip_edges())
+	for root in roots:
+		for library in library_paths(root):
+			var game := library.path_join("steamapps/common/sobosuba")
+			var executable := "sobosuba.x86_64" if OS.get_name() == "Linux" else "sobosuba.exe"
+			if FileAccess.file_exists(game.path_join(executable)):
+				return game
 	return ""

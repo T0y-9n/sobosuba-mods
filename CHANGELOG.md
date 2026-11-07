@@ -2,6 +2,18 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Manager 0.3.0-alpha.5, 2026-11-07
+
+- Added Windows and Linux setup downloads with the same version number.
+- Added a lighter interface, mod descriptions, prerequisites and automatic updates.
+- Added the toolbox icon and all 22 game languages.
+- Detects Steam beta 1.3.11 and keeps incompatible disabled mods disabled.
+
+### Prime Sobos 1.3.11-1.0.0, 2026-11-07
+
+- Added a separate beta 1.3.11 package for the mod manager and manual installation.
+- The stable 1.2.3 package remains available.
+
 ### 1.2.3-1.0.2, 2026-11-02
 
 - More fixes to how a run's mode is saved, found in testing. The mod plays the same.

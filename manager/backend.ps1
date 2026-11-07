@@ -3,27 +3,37 @@ $ErrorActionPreference='Stop'
 $env:PSModulePath=Join-Path $PSHOME 'Modules'
 . (Join-Path $PSScriptRoot 'package.ps1')
 . (Join-Path $PSScriptRoot 'transaction.ps1')
+. (Join-Path $PSScriptRoot 'dependencies.ps1')
 function Json-Bytes($Value) {return ,([Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $Value -Depth 15)))}
 function Get-Target($Request) {
     $game=Full-Path $Request.game_folder
-    if(-not [IO.File]::Exists((Join-Path $game 'sobosuba.exe'))) {Stop-Manager 'game_missing' @($game)}
+    $gameNames=if($script:managerWindows){@('sobosuba.exe')}else{@('sobosuba.x86_64','sobosuba')}
+    if(-not @($gameNames|Where-Object {[IO.File]::Exists((Join-Path $game $_))}).Count){Stop-Manager 'game_missing' @($game)}
     $version=[string]$Request.game_version
-    if($version -notin @('1.2.3','1.3.10')) {Stop-Manager 'unknown_version'}
+    if($version -notin @('1.2.3','1.3.10','1.3.11')) {Stop-Manager 'unknown_version'}
     $detected='';$build=''
     $steamapps=[IO.Path]::GetDirectoryName([IO.Path]::GetDirectoryName($game))
     if([IO.Directory]::Exists($steamapps)) {
         foreach($manifest in [IO.Directory]::GetFiles($steamapps,'appmanifest_*.acf')) {
             $text=[IO.File]::ReadAllText($manifest)
             if($text -match '"installdir"\s+"([^"\r\n]+)"' -and $Matches[1] -eq [IO.Path]::GetFileName($game) -and $text -match '"buildid"\s+"([0-9]+)"') {
-                $build=$Matches[1];if($build -eq '26393791'){$detected='1.3.10'}
+                $build=$Matches[1]
+                if($build -eq '26393791'){$detected='1.3.10'}
+                if($build -eq '26465074'){$detected='1.3.11'}
             }
         }
     }
+    if($Request.action -eq 'detect' -and $detected){$version=$detected}
     if($detected -and $version -ne $detected) {Stop-Manager 'version_mismatch' @($version,$detected)}
     $user=$Request.user_data
-    if(-not $user) {$user=Join-Path ([Environment]::GetFolderPath('ApplicationData')) 'Godot/app_userdata/sobosuba'}
+    if(-not $user){
+        if($script:managerWindows){$user=Join-Path ([Environment]::GetFolderPath('ApplicationData')) 'Godot/app_userdata/sobosuba'}else{
+            $dataRoot=if($env:XDG_DATA_HOME){$env:XDG_DATA_HOME}else{Join-Path $env:HOME '.local/share'}
+            $user=Join-Path $dataRoot 'godot/app_userdata/sobosuba'
+        }
+    }
     $user=Full-Path $user
-    # 根とその親のリンクも確認する。ルートの直下を検査用に指定。
+    # Check links at the root and its parents before using the target.
     $null=Guard-Path (Join-Path $game '.sobo-mod-manager') $game
     $null=Guard-Path (Join-Path $user '.sobo-mod-manager') $user
     return @{game=$game;user=$user;version=$version;detected=$detected;build=$build;root=$(if($version -eq '1.2.3'){$game}else{$user})}
@@ -47,9 +57,9 @@ function Autoload-Entry([string]$Line) {
     }
     return $null
 }
-function Public-Config($Target,$Metadata,[bool]$Enable) {
+function Public-Config($Target,$Metadata,[bool]$Enable,$Text=$null) {
     $path=Guard-Path (Join-Path $Target.game 'override.cfg') $Target.game
-    $text=if([IO.File]::Exists($path)){[IO.File]::ReadAllText($path)}else{''}
+    $text=if($null -ne $Text){[string]$Text}elseif([IO.File]::Exists($path)){[IO.File]::ReadAllText($path)}else{''}
     $folder=(Join-Path $Target.game ('mods/'+$Metadata.id)).Replace('\','/')
     $expected='*'+$folder+'/'+$Metadata.entry
     $lines=[Collections.Generic.List[string]]::new();$inSection=$false;$insert=-1
@@ -58,8 +68,8 @@ function Public-Config($Target,$Metadata,[bool]$Enable) {
         elseif($inSection) {
             $entry=Autoload-Entry $line
             if($entry) {
-                if($entry.value.StartsWith('*'+$folder+'/',[StringComparison]::OrdinalIgnoreCase)){continue}
-                if($Enable -and $entry.key -eq $Metadata.autoload){Stop-Manager 'file_conflict' @($path)}
+                if($entry.value.StartsWith('*'+$folder+'/',$script:pathComparison)){continue}
+                if($Enable -and $entry.key -ceq $Metadata.autoload){Stop-Manager 'file_conflict' @($path)}
             }
         }
         $lines.Add($line)
@@ -82,7 +92,7 @@ function Is-Enabled($Target,$Receipt) {
         if($line -match '^\s*\[([^\]]+)\]') {$inAutoload=$Matches[1] -eq 'autoload';continue}
         if(-not $inAutoload){continue}
         $item=Autoload-Entry $line
-        if($item -and $item.key -eq $Receipt.autoload -and $item.value -eq $expected){return $true}
+        if($item -and $item.key -ceq $Receipt.autoload -and $item.value.Equals($expected,$script:pathComparison)){return $true}
     }
     return $false
 }
@@ -94,7 +104,7 @@ function All-Mods($Target) {
             $mods+=,$r;$seen[$r.layout+'|'+$r.id]=$true
         }
     }
-    # 公開版の手動導入はmod.jsonを読み、コードを実行せずに一覧へ載せる。
+    # List manually installed public mods from mod.json without executing their code.
     $modsFolder=Guard-Path (Join-Path $Target.game 'mods') $Target.game
     if([IO.Directory]::Exists($modsFolder)) {
         foreach($folder in [IO.Directory]::GetDirectories($modsFolder)) {
@@ -139,8 +149,7 @@ function Guard-OtherVersion($Target,[string]$AdoptingId="") {
         if($r.enabled -and -not $r.compatible){Stop-Manager 'other_version_active' @($r.name)}
     }
 }
-function Install-Package($Target,$Package,$Request) {
-    Guard-OtherVersion $Target $Package.id
+function Get-PackageOperations($Target,$Package,$Request,$Context) {
     if($Request.sha256 -ne $Package.sha256) {Stop-Manager 'zip_changed'}
     if($Target.version -notin @($Package.game_versions)) {Stop-Manager 'version_mismatch' @($Target.version,($Package.game_versions -join ', '))}
     $root=$Target.root;$receiptPath=Receipt-Path $root $Package.id
@@ -151,6 +160,7 @@ function Install-Package($Target,$Package,$Request) {
     $old=@((Read-Receipts $root) | Where-Object {$_.id -eq $Package.id})
     $enabled=$true;$hashes=@{};$operations=@();$hadUnowned=$false
     if($old.Count) {$old=$old[0];$null=Owned-Operations $old $false;$enabled=Is-Enabled $Target $old}else{$old=$null}
+    if($Request.ContainsKey('force_enabled')){$enabled=[bool]$Request.force_enabled}
     foreach($relative in $Package.files) {
         $path=Guard-Path (Join-Path $root $relative) $root
         $data=$Package.contents[$relative];$hash=Bytes-Hash $data;$current=Current-Hash $path
@@ -166,6 +176,7 @@ function Install-Package($Target,$Package,$Request) {
     if($hadUnowned -and -not $Request.adopt){Stop-Manager 'adopt_required'}
     if($old) {foreach($relative in $old.hashes.Keys) {if($relative -notin @($Package.files)) {$operations+=,@{path=(Guard-Path (Join-Path $root $relative) $root);bytes=$null}}}}
     $receipt=@{format=1;id=$Package.id;name=$Package.name;version=$Package.version;game_versions=@($Package.game_versions);layout=$Package.layout;entry=$Package.entry;autoload=$Package.autoload;hashes=$hashes;source_sha256=$Package.sha256}
+    foreach($field in @('description','author','readme','readme_text','readme_unavailable','dependencies')){$receipt[$field]=$Package[$field]}
     if($Package.layout -eq 'user-data-styles') {
         $receipt.bootstrap=$Package.bootstrap;$receipt.bootstrap_bytes=[Convert]::ToBase64String($Package.contents[$Package.bootstrap]);$receipt.bootstrap_hash=Bytes-Hash $Package.contents[$Package.bootstrap]
         $boot=Guard-Path (Join-Path $root $Package.bootstrap) $root
@@ -178,9 +189,12 @@ function Install-Package($Target,$Package,$Request) {
             if($oldHash){$operations+=,@{path=$oldBoot;bytes=$null}}
         }
         $operations+=,@{path=$boot;bytes=$(if($enabled){$Package.contents[$Package.bootstrap]}else{$null})}
-    } else {$operations+=,(Public-Config $Target $Package $enabled)}
+    } else {
+        $config=Public-Config $Target $Package $enabled $Context.config_text
+        $Context.config_text=[Text.Encoding]::UTF8.GetString($config.bytes);$Context.config_changed=$true
+    }
     $operations+=,@{path=$receiptPath;bytes=(Json-Bytes $receipt)}
-    Write-Transaction $root $operations
+    return ,$operations
 }
 function Invoke-Manager($Request) {
     $mutex=[Threading.Mutex]::new($false,'Local\SoboModManager-FileOperations')
@@ -189,17 +203,27 @@ function Invoke-Manager($Request) {
         try {$held=$mutex.WaitOne(0)}catch [Threading.AbandonedMutexException]{$held=$true}
         if(-not $held){Stop-Manager 'busy'}
         $target=Get-Target $Request
-        if($Request.action -eq 'target') {return @{ok=$true;data=$target}}
+        if($Request.action -in @('target','detect')) {return @{ok=$true;data=$target}}
         $mutating=$Request.action -in @('install','enable','disable','uninstall','recover')
         if($mutating) {
-            if(@(Get-Process -Name sobosuba -ErrorAction SilentlyContinue).Count){Stop-Manager 'game_running'}
+            if(@(Get-Process -Name sobosuba,sobosuba.x86_64,sobosuba.exe -ErrorAction SilentlyContinue).Count){Stop-Manager 'game_running'}
             foreach($root in @($target.game,$target.user)|Select-Object -Unique){Recover-Transaction $root}
         }
-        if($Request.action -eq 'inspect' -or $Request.action -eq 'install') {
+        if($Request.action -eq 'inspect') {
             $p=Read-Package $Request.zip
             if($target.version -notin @($p.game_versions)){Stop-Manager 'version_mismatch' @($target.version,($p.game_versions -join ', '))}
-            if($Request.action -eq 'install'){Install-Package $target $p $Request}
             $p.Remove('contents');return @{ok=$true;data=$p}
+        }
+        if($Request.action -eq 'find_dependency'){return @{ok=$true;data=(Find-DependencyZip $Request)}}
+        if($Request.action -in @('resolve','install','enable')) {
+            foreach($root in @($target.game,$target.user)){if([IO.File]::Exists((Guard-Path (Join-Path $root '.sobo-mod-manager/pending.json') $root))){Stop-Manager 'recovery_needed'}}
+            $plan=Get-DependencyPlan $target $Request
+            if($Request.action -ne 'resolve') {
+                if($Request.token -and $Request.token -ne $plan.token){Stop-Manager 'plan_changed'}
+                Write-Transaction $target.root $plan.operations
+            }
+            $data=$plan.root.Clone();$data.Remove('contents');$data.changes=@($plan.changes);$data.token=$plan.token
+            return @{ok=$true;data=$data}
         }
         if($Request.action -eq 'recover'){return @{ok=$true;data=@{}}}
         foreach($root in @($target.game,$target.user)){if([IO.File]::Exists((Guard-Path (Join-Path $root '.sobo-mod-manager/pending.json') $root))){Stop-Manager 'recovery_needed'}}
@@ -208,17 +232,10 @@ function Invoke-Manager($Request) {
         $m=@($mods | Where-Object {$_.id -eq $Request.id -and (-not $Request.layout -or $_.layout -eq $Request.layout)})
         if($m.Count -ne 1 -or $m[0].manual){Stop-Manager 'adopt_required'};$m=$m[0]
         if($Request.action -notin @('enable','disable','uninstall')){Stop-Manager 'invalid_request'}
-        $enable=$Request.action -eq 'enable'
-        if($enable -and -not $m.compatible){Stop-Manager 'version_mismatch' @($target.version,($m.game_versions -join ', '))}
-        if($enable){Guard-OtherVersion $target}
-        $ops=@();if($Request.action -ne 'disable'){$ops=Owned-Operations $m ($Request.action -eq 'uninstall')}
-        if($enable) {foreach($relative in $m.hashes.Keys){if(-not [IO.File]::Exists((Join-Path $m.root $relative))){Stop-Manager 'file_conflict' @($relative)}}}
-        if($m.layout -eq 'user-data-styles') {
-            $boot=Guard-Path (Join-Path $m.root $m.bootstrap) $m.root;$current=Current-Hash $boot
-            if($current -and $current -ne $m.bootstrap_hash){Stop-Manager 'file_conflict' @($boot)}
-            $ops+=,@{path=$boot;bytes=$(if($enable){[Convert]::FromBase64String($m.bootstrap_bytes)}else{$null})}
-        } else {$ops+=,(Public-Config $target $m $enable)}
-        if($Request.action -eq 'uninstall'){$ops+=,@{path=(Receipt-Path $m.root $m.id);bytes=$null}}
+        Assert-DependencyRemoval $mods $m $Request.action
+        $context=@{config_text=$null;config_changed=$false}
+        $ops=Get-StateOperations $target $m $Request.action $context
+        if($context.config_changed){$ops+=,@{path=(Join-Path $target.game 'override.cfg');bytes=[Text.Encoding]::UTF8.GetBytes($context.config_text)}}
         Write-Transaction $m.root $ops
         return @{ok=$true;data=@{}}
     } catch {
@@ -229,5 +246,8 @@ function Invoke-Manager($Request) {
 }
 if($RequestPath) {
     [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
-    try {$result=Invoke-Manager (Read-Map ([IO.File]::ReadAllText($RequestPath)));$result|ConvertTo-Json -Depth 18 -Compress} catch {@{ok=$false;error='invalid_request';args=@()}|ConvertTo-Json -Compress}
+    try {$result=Invoke-Manager (Read-Map ([IO.File]::ReadAllText($RequestPath)))} catch {$result=@{ok=$false;error='invalid_request';args=@()}}
+    # Return ASCII JSON independently of the Windows console code page.
+    $json=ConvertTo-Json -InputObject $result -Depth 18 -Compress
+    [Console]::WriteLine([Text.RegularExpressions.Regex]::Replace($json,'[^\x00-\x7f]',{param($match) '\u{0:x4}' -f [int][char]$match.Value}))
 }

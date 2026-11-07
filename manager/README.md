@@ -1,14 +1,30 @@
-# Sobo Mod Manager for Windows
+# Sobosuba Mod Manager
 
-Manage mods for sobosuba **1.2.3** and **1.3.10**. The game is required.
+Manage mods for sobosuba **1.2.3**, **1.3.10** and **1.3.11**. The game is required.
 
-1. Extract the ZIP and open `SoboModManager.exe`.
-2. Check the game folder. Use **Change** if it is wrong.
-3. Select the installed game version. Steam build 26393791 is detected as 1.3.10. Other installations require you to check the version shown in the game; the manager labels your choice as unverified.
-4. Choose **Install from ZIP**, select a mod ZIP and check its name, version and install location before confirming.
-5. Use **Enable**, **Disable** or **Uninstall** on each installed mod. Close the game before making changes.
+1. Extract the common setup ZIP. On Windows, download and open the Windows setup EXE. On Linux x86_64, download the Linux setup file and open a terminal in its folder and run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.5.run`. Then open **Sobosuba Mod Manager** from the Start menu or application menu. See `INSTALL-en.md` for locations and removal. Portable downloads can still run their manager executable directly.
 
-Choose your language at the top right. The first launch uses the Windows locale. File pickers use the Windows display language.
+2. Check the game folder. Use **Choose folder** if it is wrong or missing.
+
+3. Check the selected game version. On startup and when choosing a folder, Steam builds 26393791 and 26465074 select 1.3.10 and 1.3.11 automatically. Other installations require you to check the version shown in the game. The manager labels your choice as unverified.
+
+4. Choose **Install from ZIP**, or drop one mod ZIP into the window. Check its name, version and install location before confirming.
+
+5. If required mods are listed, review the whole group before confirming. The manager installs and enables the prerequisites along with the selected mod.
+
+6. Select a mod in the list. Use **Enable**, **Disable** or **Uninstall** at the bottom of its details. Close the game before making changes.
+
+Search by name or ID, or filter the list by **Enabled**, **Disabled** or **Manually installed**. **Clear filters** brings the full list back. The count next to **Installed mods** is the total installed, including mods hidden by your filters. Mod details and actions always refer to the selected row. The result of each operation stays at the bottom of the window.
+
+Select a mod to read its overview, author and included README in the details pane. JSON descriptions can be supplied in several languages. The manager chooses the interface language when available and shows which language is being displayed. The manager keeps this text with its installation record. Older installations show the information they already contain. Installing or updating from a ZIP with a README adds it to the record.
+
+Mod authors can use **MOD-PACKAGING-en.md** and the two JSON examples included with this app to prepare a package. Use the example for your game version.
+
+Required mods are matched by ID and exact version. The manager first checks installed mods, then ZIPs beside the package and its own cache, then the configured catalog. Catalog downloads must have a SHA256 in the catalog or dependency definition. An unavailable or mismatched dependency stops the operation before game files are changed.
+
+Enabling a mod also prepares its prerequisites. A prerequisite used by an enabled mod is protected from disabling, removal and an incompatible update. Disable the dependent mod first. Updating a disabled mod preserves its disabled state. Changes in one group are recovered together if writing fails.
+
+Choose your language at the top right. The first launch uses your system language. File pickers use the desktop language.
 
 **Disable** stops loading the mod and keeps its files. **Uninstall** removes only the files recorded as belonging to that mod. Settings, saves and other files are kept. A saved run that uses a mod may still need that mod to resume.
 
@@ -16,37 +32,56 @@ Files installed manually are marked separately. To bring them under management, 
 
 If a file operation is interrupted, choose **Restore interrupted changes** before continuing. If the files have changed again since the interruption, the manager stops and keeps the recovery record instead of overwriting them.
 
-The catalog is optional. It is checked only when you press **Check catalog**. ZIP installation does not require a network connection. Installing a ZIP does not execute its mod code; only install mods from authors you trust, as the game will execute them later.
+Use **Auto-update this mod** in a managed mod's details to allow automatic updates. This is off until you select it for that mod. The manager checks on startup and every 30 minutes; **Check for updates** checks immediately. A newer compatible version is downloaded and verified before it is applied. Disabled mods stay disabled. The game must be closed. Checks wait while a file picker, confirmation or another operation is open. Updates do not adopt manually installed files or downgrade a prerequisite.
+
+**Auto-update manager** is on by default. A new manager release is downloaded from this project's GitHub Releases. Windows installations in Program Files use the newer setup and ask for administrator approval when you close the app. Setup checks the expected version and tests startup in separate application data before keeping the new files. Portable Windows and Linux copies use a helper to replace the executable and restore it if startup fails. You can also choose **Update and restart**. Settings, game files and saves are kept. A failed package is not retried automatically. Keep the previous executable backup until you have used the new version.
+
+The catalog is also checked when a prerequisite cannot be found locally. Installing ZIPs with all prerequisites already present works offline. Installing a ZIP does not execute its mod code; only install mods from authors you trust, as the game will execute them later.
 
 ## Supported packages
 
 - Existing public 1.2.3 packages with `mods/<id>/mod.json` and `game_version: "1.2.3"`.
+
 - The previously distributed Prime Sobos 1.2.3-1.0.2 ZIP, recognized by its SHA256.
+
 - The previously distributed Special Sobos 1.3.10 alpha and magnet-tuning ZIPs, recognized by SHA256.
+
 - The Prime Sobos and Special Sobos native UI ZIPs for 1.3.10, with `mod-package.json`.
 
 A package's declared game version must match the selected version. Unknown game versions are rejected rather than guessed. Public builds use `mods` and the game's `override.cfg`; 1.3.10 uses the user's `prime_mod` or `special_mod` and its own `styles/*_bootstrap.tres`. The manager will not enable a mod for another game version. Turn off mods for an earlier version before switching installation layouts.
 
-The app uses Windows PowerShell 5.1, standard .NET ZIP support and the Windows tar utility. It does not require a separately installed Godot engine. The helper scripts are embedded in the EXE and unpacked into the manager's own application data. A ZIP is checked for CRC errors before installation. Windows 10 version 1803 or later, or Windows 11, is required for the built-in tar utility. If Windows policy blocks PowerShell, the operation stops; do not weaken your system policy to use this app.
+Windows uses the built-in PowerShell 5.1 and tar utility. Linux x86_64 includes the official PowerShell 7.4 LTS runtime inside the app and requires the system Python 3 and tar commands. The runtime is checked against its pinned SHA256 and extracted into the manager's application data on first use. Linux ZIP checks use Python's standard library in isolated mode. Ubuntu 22.04 or later is supported by the bundled runtime. Ubuntu 24.04 under WSL is used for checks. It does not require a separately installed Godot engine. The helper scripts are embedded in the executable and unpacked into the manager's own application data. A ZIP is checked for CRC errors before installation. Windows 10 version 1803 or later, or Windows 11, is required for the Windows tar utility. If Windows policy blocks PowerShell, the operation stops; do not weaken your system policy to use this app.
 
 ## Languages and checks
 
-The interface has the same 22 locales as sobosuba 1.3.10. All message keys and arguments are checked. Japanese, German, Simplified Chinese, Korean and Russian screens have been visually checked. Native-speaker proofreading outside Japanese and English is still needed.
+The interface has the same 22 locales as sobosuba 1.3.10. All message keys and arguments are checked. Japanese, English, German, Simplified Chinese, Korean and Russian screens have been visually checked. Native-speaker proofreading outside Japanese and English is still needed.
 
 Storage checks use real release ZIPs and a QA copy of the actual game executable. They cover both installation layouts, independent mod toggles, settings preservation, version mismatch, ZIP paths, changed files, interrupted updates and rollback. The game is not launched in these manager checks. These checks do not certify gameplay with every combination of mods.
 
-## Build from source
+## Build and test from source
 
-Use Godot 4.7.2 with its matching Windows export templates. Set `GODOT_BIN` to the console executable for your Godot installation.
-
-From the repository root, run these commands in PowerShell.
+Use isolated APPDATA and LOCALAPPDATA on Windows. On Linux, isolate HOME, XDG_DATA_HOME, XDG_CONFIG_HOME and XDG_CACHE_HOME. The Linux runtime build input is `manager/runtime/powershell-linux-x64.tar.gz`; its source URL and pinned digest are in `manager/runtime/linux.json`. Obtain that exact archive before exporting the Linux preset. Obtain Godot 4.7.2 and its matching Windows export templates from the official distribution.
 
 ```powershell
-New-Item -ItemType Directory -Force dist
+
 & $env:GODOT_BIN --headless --editor --path manager --quit
-& $env:GODOT_BIN --headless --path manager --export-release 'Windows Desktop' (Join-Path (Get-Location) 'dist/SoboModManager.exe')
+
+& $env:GODOT_BIN --headless --path manager --export-release 'Windows Desktop' "$env:SOBOSUBA_BUILD_ROOT/SobosubaModManager.exe"
+
+node --test server/test/manager.test.mjs
+
 ```
 
-The output is `dist/SoboModManager.exe`. ZIP inspection and file operations use the embedded PowerShell helpers. Read `backend.ps1`, `package.ps1` and `transaction.ps1` for those operations. The interface is built by `main.gd`, and its translations are in `locales.json`.
+Tests require `GODOT_BIN`, `SOBOSUBA_QA_ROOT` and `SOBOSUBA_GAME_COPY`. `SOBOSUBA_GAME_COPY` must point to a QA copy of the real `sobosuba.exe`. No dummy game or invented mod is used. The ZIP paths are listed in `server/test/manager_versions.ps1`. Exported release builds do not run the external SceneTree test script through `--script`; use the source runner, then check the exported window and embedded backend separately.
 
-The published alpha's checks and known limitations are in `TESTED-en.md` inside the Windows download.
+## Publishing manager updates
+
+The main download is one common ZIP named `Sobosuba-Mod-Manager-Setup-v<version>.zip`, containing the Windows setup EXE, Linux x86_64 setup script and one set of instructions. Automatic updates use the matching OS asset described below.
+
+Manager update tags use `manager-v<version>`, for example `manager-v0.3.0-alpha.1`. Attach `Sobosuba-Mod-Manager-Windows-v0.3.0-alpha.1.zip` with `SobosubaModManager.exe` and a root-level `VERSION.txt` containing only `0.3.0-alpha.1`. For Linux, attach `Sobosuba-Mod-Manager-Linux-x86_64-v0.3.0-alpha.1.zip` with `SobosubaModManager.x86_64` and the same `VERSION.txt`. The Linux runtime is embedded in its executable and is updated with it. GitHub must provide a `sha256:` asset digest. The update check accepts that exact repository, tag, asset name and download URL. The earlier date-only alpha tag is not treated as a newer semantic version.
+
+Stable releases only update to newer stable releases. Alpha builds can also receive newer prereleases in the same version series. Unknown version formats and unordered prerelease labels are skipped. MOD catalog entries must include the ZIP URL and SHA256; the downloaded metadata must match the listed ID, version, game version and install layout.
+
+The source update checks use `server/test/manager_updates.gd` with a separate QA directory. Self-update checks use `server/test/manager_self_update.py --root <QA> --old <old manager EXE> --new <new manager EXE>`. Both EXEs must be actual exports of this manager. These tests never start the game.
+
+The first launch under the Sobosuba name imports saved manager settings from the earlier Sobo name when no new settings exist.

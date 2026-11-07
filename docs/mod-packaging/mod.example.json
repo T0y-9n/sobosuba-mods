@@ -1,0 +1,15 @@
+{
+  "id": "prime_sobo",
+  "name": "Prime Sobos",
+  "version": "1.0.2",
+  "game_version": "1.2.3",
+  "autoload": "PrimeSobo",
+  "entry": "prime_sobo.gd",
+  "description": {
+    "en": "Changes ball numbers to prime numbers.",
+    "ja": "玉の数字を素数に変更します。"
+  },
+  "author": "Your name",
+  "readme": "README-en.md",
+  "dependencies": []
+}

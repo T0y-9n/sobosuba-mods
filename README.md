@@ -1,12 +1,17 @@
 # sobosuba-mods
 
+## Downloads by game version
+
+| Game | Prime Sobos download |
+| --- | --- |
+| Stable 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) |
+| Beta 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) |
+
+[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.5)
+manages mods for 1.2.3, 1.3.10 and 1.3.11. Choose the mod package matching your game.
+For beta installation, see [the beta package guide](beta-1.3.8/PRIME-SOBOS-en.md).
+
 [English](#english) | [日本語](#日本語)
-
-## Mod manager / MOD管理アプリ
-
-The Windows mod manager alpha supports sobosuba 1.2.3 and 1.3.10. Download it from [Releases](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-alpha-20261105). Source and build instructions are in [manager/README.md](manager/README.md).
-
-Windows用のMOD管理アプリのα版です。sobosuba 1.2.3と1.3.10に対応します。上のリンクからダウンロードでき、ソースとビルド手順は `manager/` にあります。
 
 ## English
 
@@ -32,6 +37,16 @@ Prime balls don't merge with anything, so they mostly get in your way. The only 
 
 Those merges count towards your score. There is no 7, since nothing could ever clear it.
 
+### Special sobos
+
+The separate `special_sobo` mod (`1.2.3-0.2.0`) occasionally adds small, puffy or magnet sobos. Small sobos borrow the game's smaller shapes without changing their number or score; puffy sobos feel half the normal gravity after leaving the bar. One special sobo passes its property on when merging with an ordinary one; two special sobos cancel both properties. Symbols above the number identify the property.
+
+Magnet sobos gently attract nearby non-magnet sobos in the stack, but not sobos on the bar.
+
+`special sobos` in Settings → game is on by default and applies from the next run. A special run never sends scores, live friend scores or achievements to Steam, or scores to the prime world ranking, even if no special sobo appears. Prime sobos never receive special properties. The mod manager adds the autoload; the example `override.cfg` is unchanged.
+
+Saved special runs keep their properties and ranking restrictions when continued. Finish an in-progress special run before removing the mod; use the toggle instead if you just want the next run to be ordinary.
+
 ### Install
 
 1. Copy the `mods` folder into the game folder (`C:\Program Files (x86)\Steam\steamapps\common\sobosuba\`).
@@ -49,6 +64,8 @@ The mod was checked on the Linux build of Godot with the game's files. Steam fea
 ### Playing the original game
 
 Turn off `prime balls` in Settings → game and you're back to the normal game, with the mod still installed. No prime balls, and your scores and achievements go to Steam as usual.
+
+If Special sobos is also installed, turn off `special sobos` too before starting an ordinary run.
 
 The switch applies from your next run. If you flip it in the middle of a run, that run finishes with prime balls, so a prime run never ends up on the official leaderboard. A run you continue from a save keeps the mode it started with.
 
@@ -138,6 +155,16 @@ sobosuba の玉は 1, 2, 4, 8… と 2 の累乗しかありません。この M
 
 合体した分は点数に入ります。7 は相手がいなくて消せないので入れていません。
 
+### 特別なソボ
+
+別の MOD `special_sobo` (`1.2.3-0.2.0`) は、ときどき小さいソボ、ふわふわのソボ、磁石のソボを混ぜます。小さいソボは本家の小さな形を借り、番号と点数は変えません。ふわふわのソボは棒を離れてから重力が半分になります。特別なソボと普通のソボが合体すると性質を引き継ぎ、特別どうしでは両方の性質が消えます。番号の上の記号で見分けられます。
+
+磁石のソボは山にいる磁石以外のソボを近くへ弱く引き寄せます。棒の上のソボは引きません。
+
+設定 → game の `special sobos` は最初は有効で、切り替えは次の試合からです。特別なソボが一つも出なかった試合でも、点数・フレンドへのライブの点数・実績を Steam に送らず、素数 MOD の世界ランキングにも送りません。素数のソボに性質は付きません。読み込みの行は管理ツールが追加するため、例の `override.cfg` は変えていません。
+
+保存した特別な試合は、再開後も性質とランキングへの送信禁止を引き継ぎます。MOD を外す前には進行中の特別な試合を終えてください。次の試合を普通にするだけなら、削除せずトグルを切ってください。
+
 ### 入れ方
 
 1. `mods` フォルダをゲームのフォルダ (`C:\Program Files (x86)\Steam\steamapps\common\sobosuba\`) にコピーします。
@@ -155,6 +182,8 @@ Linux 版の Godot にゲームのファイルを読ませて動くことは確�
 ### 本家のまま遊びたいとき
 
 設定 → game の `prime balls` を切ると、MOD を入れたまま本家と同じ遊び方に戻ります。素数の玉は出なくなり、Steam のランキングと実績も本家どおりに記録されます。
+
+特別なソボも入れている場合は、`special sobos` も切ってから普通の試合を始めてください。
 
 切り替えは次の試合から効きます。遊んでいる途中で切っても、その試合は素数の玉ありのまま終わります。素数の玉が出た試合の点が、本家のランキングに載らないようにするためです。続きから再開した試合も、始めたときのモードのままです。
 

@@ -1,0 +1,37 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="1"]
+script/source = "extends Resource
+
+var _f: FileAccess
+
+func _init() -> void:
+	_f = FileAccess.open(\"user://prime_boot_probe.txt\", FileAccess.WRITE)
+	_log(\"init ran\")
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		_log(\"no tree\")
+		return
+	var path := \"user://prime_mod/prime_sobo.gd\"
+	if not FileAccess.file_exists(path):
+		_log(\"prime_sobo.gd missing\")
+		return
+	var gd := GDScript.new()
+	gd.source_code = FileAccess.get_file_as_string(path)
+	gd.take_over_path(path)
+	var err := gd.reload()
+	_log(\"compile err=\" + str(err))
+	if err != OK:
+		return
+	var node: Object = gd.new()
+	tree.root.add_child.call_deferred(node)
+	_log(\"prime_sobo add_child deferred\")
+
+func _log(msg: String) -> void:
+	if _f:
+		_f.store_string(msg + \"\\n\")
+		_f.flush()
+"
+
+[resource]
+script = SubResource("1")

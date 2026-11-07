@@ -1,7 +1,13 @@
-﻿function Full-Path([string]$Path) {return [IO.Path]::GetFullPath($Path).TrimEnd('\','/')}
+﻿$script:managerWindows=[IO.Path]::DirectorySeparatorChar -eq '\'
+$script:pathComparison=if($script:managerWindows){[StringComparison]::OrdinalIgnoreCase}else{[StringComparison]::Ordinal}
+function Full-Path([string]$Path) {
+    $full=[IO.Path]::GetFullPath($Path)
+    if($full -eq [IO.Path]::GetPathRoot($full)){return $full}
+    return $full.TrimEnd([IO.Path]::DirectorySeparatorChar)
+}
 function Guard-Path([string]$Path,[string]$Root) {
     $full=Full-Path $Path; $base=Full-Path $Root
-    if(-not $full.StartsWith($base+'\',[StringComparison]::OrdinalIgnoreCase)) {Stop-Manager 'unsafe_path' @($full)}
+    if(-not $full.StartsWith($base.TrimEnd([IO.Path]::DirectorySeparatorChar)+[IO.Path]::DirectorySeparatorChar,$script:pathComparison)) {Stop-Manager 'unsafe_path' @($full)}
     $part=$full
     while($part) {
         if(Test-Path -LiteralPath $part) {
@@ -14,10 +20,13 @@ function Guard-Path([string]$Path,[string]$Root) {
 }
 function Atomic-Write([string]$Path,[byte[]]$Bytes) {
     [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($Path)) | Out-Null
+    $mode=$null
+    if(-not $script:managerWindows -and [IO.File]::Exists($Path)){$mode=[IO.File]::GetUnixFileMode($Path)}
     $tmp=$Path+'.sobo-'+[guid]::NewGuid().ToString('N')+'.tmp'
     $stream=[IO.FileStream]::new($tmp,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
     try {$stream.Write($Bytes,0,$Bytes.Length);$stream.Flush($true)} finally {$stream.Dispose()}
     try {
+        if($null -ne $mode){[IO.File]::SetUnixFileMode($tmp,$mode)}
         if([IO.File]::Exists($Path)) {[IO.File]::Replace($tmp,$Path,[NullString]::Value)}else{[IO.File]::Move($tmp,$Path)}
     } finally {if([IO.File]::Exists($tmp)){[IO.File]::Delete($tmp)}}
 }
@@ -45,6 +54,7 @@ function Recover-Transaction([string]$Root) {
     [IO.File]::Delete($journal)
 }
 function Write-Transaction([string]$Root,[object[]]$Operations) {
+    if($Operations.Count -gt 1024){Stop-Manager 'dependency_limit'}
     Recover-Transaction $Root
     $journal=Guard-Path (Join-Path $Root '.sobo-mod-manager/pending.json') $Root
     $items=@();$seen=@{}

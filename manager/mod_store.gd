@@ -1,7 +1,9 @@
 extends RefCounted
 
+const Platform = preload("platform.gd")
+
 var game_folder := ""
-var game_version := "1.3.10"
+var game_version := "1.3.11"
 var user_data := ""
 var last_result: Dictionary = {}
 var backend_dir := ""
@@ -11,7 +13,7 @@ func prepare_backend() -> bool:
 	backend_dir = ProjectSettings.globalize_path("user://backend")
 	if DirAccess.make_dir_recursive_absolute(backend_dir) != OK:
 		return false
-	for name in ["backend.ps1", "package.ps1", "transaction.ps1"]:
+	for name in ["backend.ps1", "package.ps1", "transaction.ps1", "dependencies.ps1", "self_update.ps1"]:
 		var bytes := FileAccess.get_file_as_bytes(source.path_join(name))
 		if bytes.is_empty():
 			return false
@@ -22,8 +24,8 @@ func prepare_backend() -> bool:
 		file.close()
 	return true
 
-# OS.executeの引数は配列で渡し、パスやZIP名をシェルのコードへ混ぜない。
-# この関数は画面側のワーカースレッドから1件ずつ呼ぶ。
+# Pass OS.execute arguments as an array without shell interpolation.
+# The UI worker calls this function one operation at a time.
 func request(action: String, extra: Dictionary = {}) -> Dictionary:
 	if backend_dir.is_empty() and not prepare_backend():
 		return {"ok": false, "error": "io_error", "args": []}
@@ -38,8 +40,11 @@ func request(action: String, extra: Dictionary = {}) -> Dictionary:
 	file.store_string(JSON.stringify(data))
 	file.close()
 	var output: Array = []
-	var powershell := OS.get_environment("SystemRoot").path_join("System32/WindowsPowerShell/v1.0/powershell.exe")
-	var code := OS.execute(powershell, ["-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", backend_dir.path_join("backend.ps1"), "-RequestPath", request_path], output, true, false)
+	var powershell := Platform.powershell()
+	if powershell.is_empty():
+		DirAccess.remove_absolute(request_path)
+		return {"ok":false, "error":"io_error", "args":[]}
+	var code := OS.execute(powershell, Platform.shell_arguments(backend_dir.path_join("backend.ps1"), ["-RequestPath", request_path]), output, true, false)
 	DirAccess.remove_absolute(request_path)
 	if code == 0 and not output.is_empty():
 		var parsed: Variant = JSON.parse_string(str(output[0]).strip_edges())

@@ -27,10 +27,10 @@ func word(key: String, args: Array = []) -> String:
 	return text
 
 func error_word(key: String, args: Array = []) -> String:
-	var mapping := {"version_mismatch": "err_version", "unknown_version": "err_target", "game_missing": "err_target", "invalid_metadata": "err_zip", "unsafe_zip": "err_zip", "zip_read": "err_zip", "zip_changed": "err_changed", "unsafe_path": "err_conflict", "file_conflict": "err_conflict", "recovery_needed": "err_recovery", "game_running": "err_running", "busy": "loading", "io_error": "err_io", "invalid_request": "error", "adopt_required": "err_adopt", "other_version_active": "err_other"}
+	var mapping := {"manager_update_failed":"err_manager_update", "dependency_missing":"err_dependency_missing", "dependency_cycle":"err_dependency_cycle", "dependency_version":"err_dependency_version", "dependency_required":"err_dependency_required", "dependency_limit":"err_dependency_limit", "dependency_download":"err_dependency_download", "plan_changed":"err_plan_changed", "version_mismatch": "err_version", "unknown_version": "err_target", "game_missing": "err_target", "invalid_metadata": "err_zip", "unsafe_zip": "err_zip", "zip_read": "err_zip", "zip_changed": "err_changed", "unsafe_path": "err_conflict", "file_conflict": "err_conflict", "recovery_needed": "err_recovery", "game_running": "err_running", "busy": "loading", "io_error": "err_io", "invalid_request": "error", "adopt_required": "err_adopt", "other_version_active": "err_other"}
 	var message := word(mapping.get(key, "error"))
-	# 保存層が返す構造化した道・版・MOD名だけを表示する。OSの英語エラーは混ぜない。
-	if key in ["file_conflict", "unsafe_path", "recovery_needed", "game_missing", "zip_read", "version_mismatch", "other_version_active"]:
+	# Display structured paths, versions and mod names returned by storage.
+	if key.begins_with("dependency_") or key == "plan_changed" or key in ["file_conflict", "unsafe_path", "recovery_needed", "game_missing", "zip_read", "version_mismatch", "other_version_active"]:
 		for detail in args:
 			message += "\n" + str(detail)
 	return message

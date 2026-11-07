@@ -2,16 +2,17 @@ extends Node
 
 const DEFAULT_URL := "https://raw.githubusercontent.com/T0y-9n/sobosuba-mods/main/catalog.json"
 const Manifest = preload("manifest.gd")
+const Versions = preload("versions.gd")
 
 var mods: Array = []
 var error_message := ""
 
-func request_bytes(url: String) -> Dictionary:
+func request_bytes(url: String, limit: int = 32 * 1024 * 1024) -> Dictionary:
 	if not url.begins_with("https://"):
 		return {"error": ERR_INVALID_PARAMETER, "body": PackedByteArray()}
 	var request := HTTPRequest.new()
 	request.timeout = 30.0
-	request.body_size_limit = 64 * 1024 * 1024
+	request.body_size_limit = limit
 	add_child(request)
 	var error := request.request(url)
 	if error != OK:
@@ -50,6 +51,8 @@ func refresh(source: String = DEFAULT_URL) -> int:
 				return invalid_catalog(source)
 		if not Manifest.valid_id(mod.id) or mod.id in ids or not mod.zip.begins_with("https://"):
 			return invalid_catalog(source)
+		if mod.has("sha256") and (not mod.sha256 is String or not valid_hash(mod.sha256)):
+			return invalid_catalog(source)
 		ids.append(mod.id)
 	mods = parsed.mods
 	error_message = ""
@@ -67,4 +70,33 @@ func find(mod_id: String) -> Dictionary:
 
 func has_update(installed: Dictionary) -> bool:
 	var latest := find(installed.id)
-	return not latest.is_empty() and installed.version != latest.version
+	return not latest.is_empty() and Versions.newer(latest.version, installed.version)
+
+static func valid_hash(value: String) -> bool:
+	var pattern := RegEx.new()
+	pattern.compile("^[a-fA-F0-9]{64}$")
+	return pattern.search(value) != null
+
+func download_verified(entry: Dictionary, sha256: String, limit: int = 32 * 1024 * 1024) -> Dictionary:
+	if not valid_hash(sha256):
+		return {"error":ERR_INVALID_DATA}
+	var result: Dictionary = await request_bytes(str(entry.get("zip", "")), limit)
+	if result.error != OK:
+		return result
+	var context := HashingContext.new()
+	context.start(HashingContext.HASH_SHA256)
+	context.update(result.body)
+	if context.finish().hex_encode() != sha256.to_lower():
+		return {"error":ERR_INVALID_DATA}
+	var folder := ProjectSettings.globalize_path("user://packages")
+	if DirAccess.make_dir_recursive_absolute(folder) != OK:
+		return {"error":ERR_CANT_CREATE}
+	var path := folder.path_join(sha256.to_lower() + ".zip")
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		return {"error":ERR_CANT_CREATE}
+	file.store_buffer(result.body)
+	file.flush()
+	var error := file.get_error()
+	file.close()
+	return {"error":error, "zip":path}

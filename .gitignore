@@ -1,4 +1,6 @@
 __pycache__/
+manager/.godot/
+manager/export_credentials.cfg
 *.pyc
 server/node_modules/
 server/.wrangler/
