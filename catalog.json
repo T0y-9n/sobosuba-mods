@@ -17,6 +17,20 @@
       "summary": "Beta for sobosuba 1.3.11 with Small, Puffy, Magnet and Throwing sobos and 20 numeric settings.",
       "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.5.1/Special-Sobos-1.3.11-0.5.1.zip",
       "sha256": "0e4bf6b2186aeeaf46fd67504abaaff5c84d583843a641fce0de537b0657c939"
+    },
+    {
+      "id": "sobosandbox",
+      "name": "SoboSandbox",
+      "version": "1.3.0",
+      "game_versions": [
+        "1.3.11",
+        "1.3.10",
+        "1.3.9"
+      ],
+      "summary": "Sandbox mode with developer hotkeys, no game over, and disabled achievements and scores.",
+      "author": "Typhe681",
+      "zip": "https://github.com/Typhe681/SoboSandbox/releases/download/v1.3.0/SoboSandbox1.3.0.zip",
+      "sha256": "9cac7816ae47c0236d4477468a7a4d72acd5214399eb9a4f668c6f5644c66c60"
     }
   ]
 }

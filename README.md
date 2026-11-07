@@ -2,10 +2,12 @@
 
 ## Downloads by game version
 
-| Game | Prime Sobos download | Special Sobos download |
-| --- | --- | --- |
-| Current 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) | [0.5.1 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1) |
-| Older 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) | — |
+| Game | Prime Sobos download | Special Sobos download | SoboSandbox download |
+| --- | --- | --- | --- |
+| Current 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) | [0.5.1 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1) | [1.3.0 by Typhe681](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) |
+| Older 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) | — | — |
+
+SoboSandbox mod version 1.3.0 lists game versions 1.3.9, 1.3.10 and 1.3.11.
 
 [Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.6)
 manages mods for 1.2.3, 1.3.10 and 1.3.11. Choose the mod package matching your game.
@@ -137,10 +139,12 @@ MIT, see [LICENSE](LICENSE). The license covers only the code written for this m
 
 ### ゲームの版ごとのダウンロード
 
-| ゲーム | 素数MOD | 特別なソボ |
-| --- | --- | --- |
-| 現在の通常版 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) | [0.5.1（beta）](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1) |
-| 前の版 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) | — |
+| ゲーム | 素数MOD | 特別なソボ | SoboSandbox |
+| --- | --- | --- | --- |
+| 現在の通常版 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) | [0.5.1（beta）](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1) | [1.3.0（作者 Typhe681）](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) |
+| 前の版 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) | — | — |
+
+SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.3.11が挙げられています。
 
 1.3.11への導入は、英語の[導入案内](beta-1.3.8/PRIME-SOBOS-en.md)を参照してください。
 
