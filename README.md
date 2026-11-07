@@ -4,12 +4,12 @@
 
 | Game | Prime Sobos download |
 | --- | --- |
-| Stable 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) |
-| Beta 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) |
+| Current 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) |
+| Older 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) |
 
 [Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.5)
 manages mods for 1.2.3, 1.3.10 and 1.3.11. Choose the mod package matching your game.
-For beta installation, see [the beta package guide](beta-1.3.8/PRIME-SOBOS-en.md).
+For 1.3.11 installation, see [the package guide](beta-1.3.8/PRIME-SOBOS-en.md).
 
 [English](#english) | [日本語](#日本語)
 
@@ -20,7 +20,9 @@ A mod that mixes prime numbers into [sobosuba](https://store.steampowered.com/ap
 You need the game. No game files are included here.
 keepee, the developer, said mods are fine as long as they need the game, that GitHub and streaming are fine, and that mod scores should go to our own server. Thanks, keepee!
 
-Version `1.2.3-1.0.0` is mod version 1.0.0, made for sobosuba 1.2.3. What changed is in [CHANGELOG.md](CHANGELOG.md).
+The current download is mod version `1.3.11-1.0.0`, made for sobosuba 1.3.11.
+The manual installation steps below cover the older game version 1.2.3.
+Use the linked package guide for 1.3.11. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ### Prime balls
 
@@ -133,12 +135,21 @@ MIT, see [LICENSE](LICENSE). The license covers only the code written for this m
 
 ## 日本語
 
+### ゲームの版ごとのダウンロード
+
+| ゲーム | 素数MOD |
+| --- | --- |
+| 現在の通常版 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) |
+| 前の版 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) |
+
+1.3.11への導入は、英語の[導入案内](beta-1.3.8/PRIME-SOBOS-en.md)を参照してください。
+
 [sobosuba](https://store.steampowered.com/app/1946560/sobosuba) に素数の玉を混ぜる MOD です。
 
 ゲーム本体が必要です。このリポジトリにゲームのファイルは入っていません。
 作者の keepee さんから「ゲーム本体が要る作りならよい、GitHub と配信もよい、MOD の点数は自前のサーバで」と了承をもらっています。
 
-版の `1.2.3-1.0.0` は、sobosuba 1.2.3 向けに作った MOD の 1.0.0 という意味です。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
+現在の配布版 `1.3.11-1.0.0` は、sobosuba 1.3.11向けのMOD 1.0.0です。以下の手動導入手順は前の版1.2.3を対象としています。1.3.11は上の導入案内を使ってください。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
 
 ### 素数の玉
 

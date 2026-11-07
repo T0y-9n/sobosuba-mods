@@ -1,7 +1,7 @@
-# Prime Sobos for sobosuba beta 1.3.11
+# Prime Sobos for sobosuba 1.3.11
 
-Mod version 1.3.11-1.0.0. Requires sobosuba beta 1.3.11.
-For the stable game version 1.2.3, download mod version 1.2.3-1.0.2 instead:
+Mod version 1.3.11-1.0.0. Requires sobosuba 1.3.11, the current regular release.
+For the older game version 1.2.3, download mod version 1.2.3-1.0.2:
 https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2
 
 ## Install
@@ -14,7 +14,7 @@ For manual installation, copy prime_mod and styles into the game's user-data
 folder. On Windows this is %APPDATA%\Godot\app_userdata\sobosuba.
 On Linux it is ~/.local/share/godot/app_userdata/sobosuba.
 Keep the folders inside that location. The bootstrap belongs at
-styles/prime_bootstrap.tres. No override.cfg is needed for this beta.
+styles/prime_bootstrap.tres. No override.cfg is needed for this version.
 
 ## Play
 
@@ -29,7 +29,7 @@ containing prime sobos may need the mod to resume.
 
 ## Checked and remaining issues
 
-On Windows, the installed beta 1.3.11 executable, build 26465074, loaded the
+On Windows, the installed 1.3.11 executable, build 26465074, loaded the
 mod through the custom-style bootstrap. Sixteen focused checks had no failures,
 covering settings switches, spawning, 3 + 5 = 8, two 3s staying separate,
 achievement and official leaderboard suppression, and rendered screens.
