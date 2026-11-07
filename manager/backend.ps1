@@ -100,7 +100,7 @@ function All-Mods($Target) {
     $mods=@();$seen=@{}
     foreach($root in @($Target.game,$Target.user) | Select-Object -Unique) {
         foreach($r in (Read-Receipts $root)) {
-            $r.enabled=Is-Enabled $Target $r;$r.compatible=$Target.version -in @($r.game_versions);$r.manual=$false
+            $r.enabled=Is-Enabled $Target $r;$r.compatible=Test-GameCompatibility $Target.version $r.game_versions;$r.manual=$false
             $mods+=,$r;$seen[$r.layout+'|'+$r.id]=$true
         }
     }
@@ -151,7 +151,7 @@ function Guard-OtherVersion($Target,[string]$AdoptingId="") {
 }
 function Get-PackageOperations($Target,$Package,$Request,$Context) {
     if($Request.sha256 -ne $Package.sha256) {Stop-Manager 'zip_changed'}
-    if($Target.version -notin @($Package.game_versions)) {Stop-Manager 'version_mismatch' @($Target.version,($Package.game_versions -join ', '))}
+    if(-not (Test-GameCompatibility $Target.version $Package.game_versions)) {Stop-Manager 'version_mismatch' @($Target.version,($Package.game_versions -join ', '))}
     $root=$Target.root;$receiptPath=Receipt-Path $root $Package.id
     foreach($other in (Read-Receipts $root)) {
         if($other.id -eq $Package.id){continue}
@@ -211,7 +211,7 @@ function Invoke-Manager($Request) {
         }
         if($Request.action -eq 'inspect') {
             $p=Read-Package $Request.zip
-            if($target.version -notin @($p.game_versions)){Stop-Manager 'version_mismatch' @($target.version,($p.game_versions -join ', '))}
+            if(-not (Test-GameCompatibility $target.version $p.game_versions)){Stop-Manager 'version_mismatch' @($target.version,($p.game_versions -join ', '))}
             $p.Remove('contents');return @{ok=$true;data=$p}
         }
         if($Request.action -eq 'find_dependency'){return @{ok=$true;data=(Find-DependencyZip $Request)}}

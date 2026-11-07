@@ -29,6 +29,7 @@ var detected_label: Label
 var notice: Label
 var rows: VBoxContainer
 var version_picker: OptionButton
+var show_older_mods_check: CheckBox
 var language_picker: OptionButton
 var folder_dialog: FileDialog
 var zip_dialog: FileDialog
@@ -58,6 +59,7 @@ var pending_mod: Dictionary = {}
 var notice_key := ""
 var notice_error := ""
 var notice_args: Array = []
+var notice_mod: Dictionary = {}
 
 func _ready() -> void:
 	get_window().min_size = Vector2i(1040, 680)
@@ -180,6 +182,7 @@ func build_screen() -> void:
 	for code in Words.LANGUAGES:
 		language_picker.add_item(Words.LANGUAGES[code])
 		language_picker.set_item_metadata(language_picker.item_count - 1, code)
+		language_picker.get_popup().set_item_as_radio_checkable(language_picker.item_count - 1, true)
 		if code == words.locale:
 			language_picker.select(language_picker.item_count - 1)
 	language_picker.item_selected.connect(func(index): change_locale(str(language_picker.get_item_metadata(index))))
@@ -199,8 +202,9 @@ func build_screen() -> void:
 	path_label.clip_text = true
 	path_row.add_child(path_label)
 	action(path_row, "choose_location", choose_folder)
-	var version_row := HBoxContainer.new()
-	version_row.add_theme_constant_override("separation", UiTheme.SPACE_MD)
+	var version_row := HFlowContainer.new()
+	version_row.add_theme_constant_override("h_separation", UiTheme.SPACE_MD)
+	version_row.add_theme_constant_override("v_separation", UiTheme.SPACE_SM)
 	location.add_child(version_row)
 	var version_label := caption(version_row, "version", 14)
 	version_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -214,6 +218,7 @@ func build_screen() -> void:
 	version_picker.item_selected.connect(select_version)
 	version_row.add_child(version_picker)
 	controls.append(version_picker)
+	show_older_mods_check = update_checkbox(version_row, "show_older_mods", false, func(_enabled: bool): render_rows())
 	detected_label = label("", 14)
 	version_row.add_child(detected_label)
 	manager_update_check = update_checkbox(version_row, "manager_auto_update", settings.manager_auto_update, set_manager_updates)
@@ -420,6 +425,9 @@ func read_state() -> void:
 	var result: Dictionary = await invoke("list")
 	if result.ok:
 		mods = result.data.mods
+		for mod: Dictionary in mods:
+			if not mod.get("manual", false):
+				mod.compatible = Versions.supports_game(mod.get("game_versions", []), store.game_version)
 		target = result.data.target
 	else:
 		mods = []
@@ -455,17 +463,18 @@ func ignore_pointer(parent: Node) -> void:
 
 func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	var key := mod_key(mod)
+	var layout_blocked := legacy_layout_blocked(mod)
 	var button := Button.new()
-	button.custom_minimum_size.y = 92
+	button.custom_minimum_size.y = 112
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.toggle_mode = true
 	button.set_meta("mod_key", key)
 	button.button_pressed = key == selected_mod_key
-	button.add_theme_stylebox_override("normal", UiTheme.box(UiTheme.SURFACE))
+	button.add_theme_stylebox_override("normal", UiTheme.box(UiTheme.DISABLED if layout_blocked else UiTheme.SURFACE))
 	button.add_theme_stylebox_override("hover", UiTheme.box(UiTheme.ACCENT_SOFT, UiTheme.ACCENT))
 	button.add_theme_stylebox_override("pressed", UiTheme.box(UiTheme.ACCENT_SOFT, UiTheme.ACCENT))
 	button.pressed.connect(select_mod.bind(key))
-	button.tooltip_text = str(mod.name)
+	button.tooltip_text = words.word("legacy_layout_incompatible") if layout_blocked else str(mod.name)
 	rows.add_child(button)
 	controls.append(button)
 	var content := HBoxContainer.new()
@@ -483,12 +492,36 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	name_label.clip_text = true
+	if layout_blocked:
+		name_label.add_theme_color_override("font_color", UiTheme.DISABLED_INK)
 	text.add_child(name_label)
-	var version_label := label(str(mod.get("version", "")), 14)
+	var version_label := label("MOD " + str(mod.get("version", "")), 14)
+	var latest := catalog.find(mod.id)
+	if not is_catalog and catalog.has_update(mod) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
+		version_label.text += " → " + str(latest.version)
 	version_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	version_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	version_label.clip_text = true
 	text.add_child(version_label)
+	var game_versions: Array = mod.get("game_versions", [])
+	var game_label := label(words.word("supported", [", ".join(game_versions) if not game_versions.is_empty() else "—"]), 14)
+	game_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	game_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	game_label.clip_text = true
+	text.add_child(game_label)
+	if layout_blocked:
+		version_label.add_theme_color_override("font_color", UiTheme.DISABLED_INK)
+		game_label.add_theme_color_override("font_color", UiTheme.DISABLED_INK)
+	else:
+		button.tooltip_text = str(mod.name) + "\n" + version_label.text + "\n" + game_label.text
+	var warning_text := compatibility_warning(mod)
+	if not warning_text.is_empty():
+		var warning := label(warning_text, 13)
+		warning.name = "CompatibilityWarning"
+		warning.add_theme_color_override("font_color", UiTheme.DANGER)
+		text.add_child(warning)
+	text.minimum_size_changed.connect(func(): button.custom_minimum_size.y = maxf(112.0, text.get_combined_minimum_size().y + 24.0))
+	button.custom_minimum_size.y = maxf(112.0, text.get_combined_minimum_size().y + 24.0)
 	if not is_catalog:
 		var badge := status_badge(mod)
 		badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -508,6 +541,8 @@ func select_mod(key: String) -> void:
 	render_details()
 
 func matches_filters(mod: Dictionary) -> bool:
+	if not matches_game_version(mod):
+		return false
 	var query := search_box.text.strip_edges()
 	var searchable := str(mod.name) + " " + str(mod.id) + " " + str(mod.get("version", ""))
 	if not query.is_empty() and searchable.findn(query) < 0:
@@ -521,6 +556,24 @@ func matches_filters(mod: Dictionary) -> bool:
 		return false
 	return bool(mod.get("enabled", false)) == (filter == "enabled")
 
+func matches_game_version(mod: Dictionary) -> bool:
+	if mod.has("layout"):
+		return true
+	var declared: Array = mod.get("game_versions", [])
+	if declared.has(store.game_version):
+		return true
+	return show_older_mods_check != null and show_older_mods_check.button_pressed and (legacy_layout_blocked(mod) or Versions.supports_game(declared, store.game_version))
+
+func legacy_layout_blocked(mod: Dictionary) -> bool:
+	var declared: Array = mod.get("game_versions", [])
+	return store.game_version.begins_with("1.3.") and declared.has("1.2.3") and not Versions.supports_game(declared, store.game_version)
+
+func compatibility_warning(mod: Dictionary) -> String:
+	var declared: Array = mod.get("game_versions", [])
+	if mod.get("manual", false) or declared.has(store.game_version) or not Versions.supports_game(declared, store.game_version):
+		return ""
+	return words.word("compatibility_warning", [", ".join(declared), store.game_version])
+
 func render_rows() -> void:
 	clear_children(rows)
 	path_label.text = store.game_folder if not store.game_folder.is_empty() else words.word("err_target")
@@ -528,7 +581,8 @@ func render_rows() -> void:
 	detected_label.text = words.word("detected", [target.detected]) if not str(target.get("detected", "")).is_empty() else words.word("selected")
 	library_count.text = words.word("mod_count", [mods.size()])
 	var installed: Array = mods.filter(matches_filters)
-	var available: Array = catalog.mods.filter(matches_filters)
+	var installed_ids: Array = mods.map(func(mod: Dictionary) -> String: return str(mod.id))
+	var available: Array = catalog.mods.filter(func(mod: Dictionary) -> bool: return mod.id not in installed_ids and matches_filters(mod))
 	var visible_mods := installed + available
 	var keys: Array = visible_mods.map(mod_key)
 	if selected_mod_key not in keys:
@@ -566,12 +620,16 @@ func render_details() -> void:
 		return
 	var mod := selected_mod
 	details.add_child(label(str(mod.name), 24))
-	details.add_child(label(str(mod.get("version", "")), 14))
+	details.add_child(label("MOD " + str(mod.get("version", "")), 14))
 	var notes := mod_notes(mod)
 	if not mod.has("layout"):
 		if not notes.is_empty():
 			details.add_child(label(notes, 14))
-		action(detail_actions, "install_zip", download_mod.bind(mod), "primary")
+		var install := action(detail_actions, "install_zip", download_mod.bind(mod), "primary")
+		var blocked := not Versions.supports_game(mod.get("game_versions", []), store.game_version)
+		install.set_meta("blocked", blocked)
+		install.disabled = busy or blocked
+		install.tooltip_text = words.word("legacy_layout_incompatible") if legacy_layout_blocked(mod) else words.word("incompatible") if blocked else ""
 		return
 	var badge := status_badge(mod)
 	badge.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -587,6 +645,10 @@ func render_details() -> void:
 		caption(details, "err_adopt", 14)
 		action(detail_actions, "install_zip", choose_zip, "primary")
 		return
+	var latest := catalog.find(mod.id)
+	if catalog.has_update(mod) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
+		details.add_child(label(words.word("plan_update") + " " + str(latest.version), 14))
+		action(details, "plan_update", download_mod.bind(latest), "primary")
 	mod_update_check = update_checkbox(details, "mod_auto_update", settings.mod_updates_enabled(mod_key(mod)), set_mod_updates.bind(mod_key(mod)))
 	if not notes.is_empty():
 		details.add_child(label(notes, 14))
@@ -602,8 +664,11 @@ func render_details() -> void:
 
 func render_notice() -> void:
 	notice.text = words.error_word(notice_error, notice_args) if not notice_error.is_empty() else words.word(notice_key) if not notice_key.is_empty() else words.word("ready")
+	var warning := compatibility_warning(notice_mod) if notice_key == "changed" and notice_error.is_empty() else ""
+	if not warning.is_empty():
+		notice.text += "\n" + warning
 	notice.tooltip_text = notice.text
-	notice.add_theme_color_override("font_color", UiTheme.DANGER if not notice_error.is_empty() else UiTheme.SUCCESS if notice_key == "changed" else UiTheme.MUTED)
+	notice.add_theme_color_override("font_color", UiTheme.DANGER if not notice_error.is_empty() or not warning.is_empty() else UiTheme.SUCCESS if notice_key == "changed" else UiTheme.MUTED)
 	recovery_button.visible = notice_error == "recovery_needed"
 
 func translate_dialogs() -> void:
@@ -845,6 +910,7 @@ func finish_operation(result: Dictionary) -> void:
 	notice_error = "" if result.ok else str(result.error)
 	notice_args = [] if result.ok else result.get("args", [])
 	notice_key = "changed" if result.ok else ""
+	notice_mod = result.get("data", {}) if result.ok else {}
 	await read_state()
 	set_busy(false)
 	render_rows()
@@ -887,6 +953,7 @@ func check_updates() -> void:
 					update_timer.start(60.0)
 				break
 			notice_key = "changed"
+			notice_mod = result.get("data", {})
 			await read_state()
 	if settings.manager_auto_update:
 		if not store.prepare_backend() or not await self_update.check_update(catalog):

@@ -42,7 +42,7 @@ function Find-DependencyZip($Request) {
         if($paths.Count -gt 128){Stop-Manager 'dependency_limit'}
         foreach($path in $paths){
             try{$package=Read-Package $path}catch{continue}
-            if($package.id -ceq $Request.id -and $package.version -ceq $Request.version -and $Request.game_version -in $package.game_versions -and (-not $Request.sha256 -or $package.sha256 -eq $Request.sha256)){
+            if($package.id -ceq $Request.id -and $package.version -ceq $Request.version -and (Test-GameCompatibility $Request.game_version $package.game_versions) -and (-not $Request.sha256 -or $package.sha256 -eq $Request.sha256)){
                 return @{zip=$path;sha256=$package.sha256}
             }
         }
@@ -63,7 +63,7 @@ function Get-DependencyPlan($Target,$Request) {
         if($packageInput -isnot [hashtable] -or $packageInput.zip -isnot [string] -or $packageInput.sha256 -isnot [string]){Stop-Manager 'invalid_request'}
         $package=Read-Package $packageInput.zip
         if($package.sha256 -ne $packageInput.sha256){Stop-Manager 'zip_changed'}
-        if($Target.version -notin $package.game_versions -or $package.layout -ne $layout){Stop-Manager 'version_mismatch' @($Target.version,($package.game_versions -join ', '))}
+        if(-not (Test-GameCompatibility $Target.version $package.game_versions) -or $package.layout -ne $layout){Stop-Manager 'version_mismatch' @($Target.version,($package.game_versions -join ', '))}
         if($packages.ContainsKey($package.id) -and $packages[$package.id].sha256 -ne $package.sha256){Stop-Manager 'dependency_version' @($package.id)}
         $packages[$package.id]=$package
         foreach($bytes in $package.contents.Values){$total+=$bytes.Length}

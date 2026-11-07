@@ -81,7 +81,10 @@
     "check_updates": "Check for updates",
     "update_restart": "Update and restart",
     "manager_update_ready": "Version {0} is ready. It will be installed when you close the manager.",
-    "err_manager_update": "The manager update failed. Your previous version has been kept."
+    "err_manager_update": "The manager update failed. Your previous version has been kept.",
+    "show_older_mods": "Show mods for older versions",
+    "compatibility_warning": "Built for {0}. Not checked on {1}. If the game behaves unexpectedly, disable this mod first.",
+    "legacy_layout_incompatible": "Mods for 1.2.3 use a different loading method and do not work on 1.3.x."
   },
   "ja": {
     "title": "Sobosuba MOD管理",
@@ -165,7 +168,10 @@
     "check_updates": "更新を確認",
     "update_restart": "更新して再起動",
     "manager_update_ready": "版 {0} を取得しました。管理アプリを閉じると更新します。",
-    "err_manager_update": "管理アプリを更新できませんでした。前の版を保持しています。"
+    "err_manager_update": "管理アプリを更新できませんでした。前の版を保持しています。",
+    "show_older_mods": "下の版向けのMODも出す",
+    "compatibility_warning": "{0}向けのMODです。{1}では動作未確認です。ゲームの動作がおかしいときは、まずこのMODを無効にしてください。",
+    "legacy_layout_incompatible": "1.2.3はMODの読み込み方が異なるため、1.3系では動作しません。"
   },
   "de": {
     "title": "Sobosuba-Modverwaltung",
@@ -249,7 +255,10 @@
     "check_updates": "Nach Updates suchen",
     "update_restart": "Aktualisieren und neu starten",
     "manager_update_ready": "Version {0} ist bereit und wird beim Schließen installiert.",
-    "err_manager_update": "Die Aktualisierung ist fehlgeschlagen. Die vorherige Version bleibt erhalten."
+    "err_manager_update": "Die Aktualisierung ist fehlgeschlagen. Die vorherige Version bleibt erhalten.",
+    "show_older_mods": "Mods für ältere Versionen anzeigen",
+    "compatibility_warning": "Für {0} entwickelt. Mit {1} nicht geprüft. Wenn sich das Spiel ungewöhnlich verhält, deaktiviere zuerst diesen Mod.",
+    "legacy_layout_incompatible": "Mods für 1.2.3 werden anders geladen und funktionieren nicht mit 1.3.x."
   },
   "es": {
     "title": "Gestor de mods de Sobosuba",
@@ -333,7 +342,10 @@
     "check_updates": "Buscar actualizaciones",
     "update_restart": "Actualizar y reiniciar",
     "manager_update_ready": "La versión {0} está lista. Se instalará al cerrar el gestor.",
-    "err_manager_update": "No se pudo actualizar el gestor. Se conserva la versión anterior."
+    "err_manager_update": "No se pudo actualizar el gestor. Se conserva la versión anterior.",
+    "show_older_mods": "Mostrar mods para versiones anteriores",
+    "compatibility_warning": "Creado para {0}. No se ha probado en {1}. Si el juego se comporta de forma extraña, desactiva primero este mod.",
+    "legacy_layout_incompatible": "Los mods para 1.2.3 se cargan de otra forma y no funcionan en 1.3.x."
   },
   "es_MX": {
     "title": "Administrador de mods de Sobosuba",
@@ -417,7 +429,10 @@
     "check_updates": "Buscar actualizaciones",
     "update_restart": "Actualizar y reiniciar",
     "manager_update_ready": "La versión {0} está lista. Se instalará al cerrar el gestor.",
-    "err_manager_update": "No se pudo actualizar el gestor. Se conserva la versión anterior."
+    "err_manager_update": "No se pudo actualizar el gestor. Se conserva la versión anterior.",
+    "show_older_mods": "Mostrar mods para versiones anteriores",
+    "compatibility_warning": "Creado para {0}. No se ha probado en {1}. Si el juego se comporta de forma extraña, desactiva primero este mod.",
+    "legacy_layout_incompatible": "Los mods para 1.2.3 se cargan de otra forma y no funcionan en 1.3.x."
   },
   "fr": {
     "title": "Gestionnaire de mods Sobosuba",
@@ -501,7 +516,10 @@
     "check_updates": "Rechercher des mises à jour",
     "update_restart": "Mettre à jour et redémarrer",
     "manager_update_ready": "La version {0} est prête. Elle sera installée à la fermeture.",
-    "err_manager_update": "La mise à jour a échoué. La version précédente est conservée."
+    "err_manager_update": "La mise à jour a échoué. La version précédente est conservée.",
+    "show_older_mods": "Afficher les mods pour les anciennes versions",
+    "compatibility_warning": "Conçu pour {0}. Non testé sur {1}. Si le jeu se comporte de façon inhabituelle, désactivez d’abord ce mod.",
+    "legacy_layout_incompatible": "Les mods pour 1.2.3 se chargent autrement et ne fonctionnent pas sur 1.3.x."
   },
   "it": {
     "title": "Gestore mod Sobosuba",
@@ -585,7 +603,10 @@
     "check_updates": "Cerca aggiornamenti",
     "update_restart": "Aggiorna e riavvia",
     "manager_update_ready": "La versione {0} è pronta. Verrà installata alla chiusura.",
-    "err_manager_update": "Aggiornamento non riuscito. La versione precedente è stata conservata."
+    "err_manager_update": "Aggiornamento non riuscito. La versione precedente è stata conservata.",
+    "show_older_mods": "Mostra mod per versioni precedenti",
+    "compatibility_warning": "Creato per {0}. Non verificato su {1}. Se il gioco si comporta in modo anomalo, disattiva prima questa mod.",
+    "legacy_layout_incompatible": "Le mod per 1.2.3 usano un metodo di caricamento diverso e non funzionano su 1.3.x."
   },
   "pt_BR": {
     "title": "Gerenciador de mods Sobosuba",
@@ -669,7 +690,10 @@
     "check_updates": "Verificar atualizações",
     "update_restart": "Atualizar e reiniciar",
     "manager_update_ready": "A versão {0} está pronta e será instalada ao fechar o gerenciador.",
-    "err_manager_update": "A atualização falhou. A versão anterior foi mantida."
+    "err_manager_update": "A atualização falhou. A versão anterior foi mantida.",
+    "show_older_mods": "Mostrar mods para versões anteriores",
+    "compatibility_warning": "Criado para {0}. Não testado na versão {1}. Se o jogo apresentar problemas, desative este mod primeiro.",
+    "legacy_layout_incompatible": "Os mods para 1.2.3 usam outro método de carregamento e não funcionam em 1.3.x."
   },
   "cs": {
     "title": "Správce modů Sobosuba",
@@ -753,7 +777,10 @@
     "check_updates": "Zkontrolovat aktualizace",
     "update_restart": "Aktualizovat a restartovat",
     "manager_update_ready": "Verze {0} je připravena. Nainstaluje se při zavření správce.",
-    "err_manager_update": "Aktualizace selhala. Předchozí verze byla zachována."
+    "err_manager_update": "Aktualizace selhala. Předchozí verze byla zachována.",
+    "show_older_mods": "Zobrazit mody pro starší verze",
+    "compatibility_warning": "Určeno pro {0}. Ve verzi {1} neověřeno. Pokud se hra chová neobvykle, nejprve vypněte tento mod.",
+    "legacy_layout_incompatible": "Mody pro 1.2.3 používají jiný způsob načítání a ve verzi 1.3.x nefungují."
   },
   "pl": {
     "title": "Menedżer modów Sobosuba",
@@ -837,7 +864,10 @@
     "check_updates": "Sprawdź aktualizacje",
     "update_restart": "Aktualizuj i uruchom ponownie",
     "manager_update_ready": "Wersja {0} jest gotowa. Zostanie zainstalowana po zamknięciu.",
-    "err_manager_update": "Aktualizacja nie powiodła się. Poprzednia wersja została zachowana."
+    "err_manager_update": "Aktualizacja nie powiodła się. Poprzednia wersja została zachowana.",
+    "show_older_mods": "Pokaż mody do starszych wersji",
+    "compatibility_warning": "Mod przeznaczony dla wersji {0}. Nie został sprawdzony w wersji {1}. Jeśli gra działa nieprawidłowo, najpierw wyłącz ten mod.",
+    "legacy_layout_incompatible": "Mody do wersji 1.2.3 są ładowane inaczej i nie działają w wersji 1.3.x."
   },
   "ru": {
     "title": "Менеджер модов Sobosuba",
@@ -921,7 +951,10 @@
     "check_updates": "Проверить обновления",
     "update_restart": "Обновить и перезапустить",
     "manager_update_ready": "Версия {0} готова. Она будет установлена при закрытии.",
-    "err_manager_update": "Не удалось обновить менеджер. Предыдущая версия сохранена."
+    "err_manager_update": "Не удалось обновить менеджер. Предыдущая версия сохранена.",
+    "show_older_mods": "Показывать моды для старых версий",
+    "compatibility_warning": "Мод рассчитан на {0}. На версии {1} не проверен. Если игра работает неправильно, сначала отключите этот мод.",
+    "legacy_layout_incompatible": "Моды для 1.2.3 загружаются иначе и не работают в 1.3.x."
   },
   "sr": {
     "title": "Управљање Sobosuba модовима",
@@ -1005,7 +1038,10 @@
     "check_updates": "Провери ажурирања",
     "update_restart": "Ажурирај и поново покрени",
     "manager_update_ready": "Верзија {0} је спремна. Биће инсталирана при затварању.",
-    "err_manager_update": "Ажурирање није успело. Претходна верзија је сачувана."
+    "err_manager_update": "Ажурирање није успело. Претходна верзија је сачувана.",
+    "show_older_mods": "Прикажи модове за старије верзије",
+    "compatibility_warning": "Мод је намењен за {0}. Није проверен на верзији {1}. Ако игра не ради како треба, прво искључите овај мод.",
+    "legacy_layout_incompatible": "Модови за 1.2.3 се учитавају другачије и не раде у верзији 1.3.x."
   },
   "zh_CN": {
     "title": "Sobosuba 模组管理器",
@@ -1089,7 +1125,10 @@
     "check_updates": "检查更新",
     "update_restart": "更新并重启",
     "manager_update_ready": "版本 {0} 已就绪。关闭管理器时将安装更新。",
-    "err_manager_update": "管理器更新失败。已保留之前的版本。"
+    "err_manager_update": "管理器更新失败。已保留之前的版本。",
+    "show_older_mods": "显示适用于旧版本的 MOD",
+    "compatibility_warning": "此 MOD 面向 {0}，尚未在 {1} 上验证。如果游戏出现异常，请先禁用此 MOD。",
+    "legacy_layout_incompatible": "1.2.3 的 MOD 使用不同的加载方式，无法在 1.3.x 上运行。"
   },
   "zh_TW": {
     "title": "Sobosuba 模組管理員",
@@ -1173,7 +1212,10 @@
     "check_updates": "檢查更新",
     "update_restart": "更新並重新啟動",
     "manager_update_ready": "版本 {0} 已就緒。關閉管理員時將安裝更新。",
-    "err_manager_update": "管理員更新失敗。已保留先前的版本。"
+    "err_manager_update": "管理員更新失敗。已保留先前的版本。",
+    "show_older_mods": "顯示適用於舊版本的 MOD",
+    "compatibility_warning": "此 MOD 適用於 {0}，尚未在 {1} 上驗證。如果遊戲出現異常，請先停用此 MOD。",
+    "legacy_layout_incompatible": "1.2.3 的 MOD 使用不同的載入方式，無法在 1.3.x 上執行。"
   },
   "ko": {
     "title": "Sobosuba 모드 관리자",
@@ -1257,7 +1299,10 @@
     "check_updates": "업데이트 확인",
     "update_restart": "업데이트 후 다시 시작",
     "manager_update_ready": "버전 {0}이 준비되었습니다. 관리 앱을 닫으면 설치됩니다.",
-    "err_manager_update": "관리 앱을 업데이트하지 못했습니다. 이전 버전이 유지됩니다."
+    "err_manager_update": "관리 앱을 업데이트하지 못했습니다. 이전 버전이 유지됩니다.",
+    "show_older_mods": "이전 버전용 MOD도 표시",
+    "compatibility_warning": "이 MOD는 {0}용이며 {1}에서는 확인되지 않았습니다. 게임이 이상하게 작동하면 먼저 이 MOD를 비활성화하세요.",
+    "legacy_layout_incompatible": "1.2.3용 MOD는 불러오는 방식이 달라서 1.3.x에서 작동하지 않습니다."
   },
   "tr": {
     "title": "Sobosuba Mod Yöneticisi",
@@ -1341,7 +1386,10 @@
     "check_updates": "Güncellemeleri denetle",
     "update_restart": "Güncelle ve yeniden başlat",
     "manager_update_ready": "{0} sürümü hazır. Yönetici kapatıldığında yüklenecek.",
-    "err_manager_update": "Yönetici güncellenemedi. Önceki sürüm korundu."
+    "err_manager_update": "Yönetici güncellenemedi. Önceki sürüm korundu.",
+    "show_older_mods": "Eski sürümler için modları da göster",
+    "compatibility_warning": "Bu mod {0} için hazırlanmıştır. {1} sürümünde test edilmemiştir. Oyun beklenmedik şekilde davranırsa önce bu modu devre dışı bırakın.",
+    "legacy_layout_incompatible": "1.2.3 modları farklı bir yükleme yöntemi kullanır ve 1.3.x sürümlerinde çalışmaz."
   },
   "uk": {
     "title": "Менеджер модів Sobosuba",
@@ -1425,7 +1473,10 @@
     "check_updates": "Перевірити оновлення",
     "update_restart": "Оновити й перезапустити",
     "manager_update_ready": "Версія {0} готова. Її буде встановлено під час закриття.",
-    "err_manager_update": "Не вдалося оновити менеджер. Попередню версію збережено."
+    "err_manager_update": "Не вдалося оновити менеджер. Попередню версію збережено.",
+    "show_older_mods": "Показувати моди для старіших версій",
+    "compatibility_warning": "Мод призначений для {0}. У версії {1} не перевірений. Якщо гра працює неправильно, спершу вимкніть цей мод.",
+    "legacy_layout_incompatible": "Моди для 1.2.3 завантажуються інакше та не працюють у версії 1.3.x."
   },
   "id": {
     "title": "Pengelola Mod Sobosuba",
@@ -1509,7 +1560,10 @@
     "check_updates": "Periksa pembaruan",
     "update_restart": "Perbarui dan mulai ulang",
     "manager_update_ready": "Versi {0} siap. Pembaruan dipasang saat pengelola ditutup.",
-    "err_manager_update": "Pembaruan gagal. Versi sebelumnya tetap disimpan."
+    "err_manager_update": "Pembaruan gagal. Versi sebelumnya tetap disimpan.",
+    "show_older_mods": "Tampilkan mod untuk versi lama",
+    "compatibility_warning": "Dibuat untuk {0}. Belum diuji pada {1}. Jika permainan berperilaku tidak normal, nonaktifkan mod ini terlebih dahulu.",
+    "legacy_layout_incompatible": "Mod untuk 1.2.3 memakai metode pemuatan berbeda dan tidak berfungsi pada 1.3.x."
   },
   "vi": {
     "title": "Trình quản lý mod Sobosuba",
@@ -1593,7 +1647,10 @@
     "check_updates": "Kiểm tra cập nhật",
     "update_restart": "Cập nhật và khởi động lại",
     "manager_update_ready": "Phiên bản {0} đã sẵn sàng. Bản cập nhật sẽ được cài khi đóng.",
-    "err_manager_update": "Cập nhật thất bại. Phiên bản trước đã được giữ lại."
+    "err_manager_update": "Cập nhật thất bại. Phiên bản trước đã được giữ lại.",
+    "show_older_mods": "Hiện MOD cho các phiên bản cũ",
+    "compatibility_warning": "MOD này dành cho {0}, chưa được kiểm tra trên {1}. Nếu trò chơi hoạt động bất thường, hãy tắt MOD này trước.",
+    "legacy_layout_incompatible": "MOD cho 1.2.3 dùng cách tải khác và không hoạt động trên 1.3.x."
   },
   "nl": {
     "title": "Sobosuba-modbeheer",
@@ -1677,7 +1734,10 @@
     "check_updates": "Controleren op updates",
     "update_restart": "Bijwerken en herstarten",
     "manager_update_ready": "Versie {0} staat klaar en wordt bij het afsluiten geïnstalleerd.",
-    "err_manager_update": "Bijwerken is mislukt. De vorige versie is behouden."
+    "err_manager_update": "Bijwerken is mislukt. De vorige versie is behouden.",
+    "show_older_mods": "Mods voor oudere versies tonen",
+    "compatibility_warning": "Gemaakt voor {0}. Niet getest op {1}. Als het spel zich vreemd gedraagt, schakel dan eerst deze mod uit.",
+    "legacy_layout_incompatible": "Mods voor 1.2.3 worden anders geladen en werken niet op 1.3.x."
   },
   "hu": {
     "title": "Sobosuba modkezelő",
@@ -1761,7 +1821,10 @@
     "check_updates": "Frissítések keresése",
     "update_restart": "Frissítés és újraindítás",
     "manager_update_ready": "A(z) {0} verzió készen áll. Bezáráskor települ.",
-    "err_manager_update": "A frissítés sikertelen. Az előző verzió megmaradt."
+    "err_manager_update": "A frissítés sikertelen. Az előző verzió megmaradt.",
+    "show_older_mods": "Régebbi verziókhoz készült modok megjelenítése",
+    "compatibility_warning": "A mod a(z) {0} verzióhoz készült. A(z) {1} verzión nincs ellenőrizve. Ha a játék rendellenesen működik, először ezt a modot kapcsold ki.",
+    "legacy_layout_incompatible": "Az 1.2.3-hoz készült modok más betöltési módot használnak, és nem működnek az 1.3.x verziókon."
   },
   "ro": {
     "title": "Manager de moduri Sobosuba",
@@ -1845,6 +1908,9 @@
     "check_updates": "Caută actualizări",
     "update_restart": "Actualizează și repornește",
     "manager_update_ready": "Versiunea {0} este pregătită. Se va instala la închidere.",
-    "err_manager_update": "Actualizarea a eșuat. Versiunea anterioară a fost păstrată."
+    "err_manager_update": "Actualizarea a eșuat. Versiunea anterioară a fost păstrată.",
+    "show_older_mods": "Arată moduri pentru versiuni mai vechi",
+    "compatibility_warning": "Creat pentru {0}. Nu a fost testat pe {1}. Dacă jocul se comportă neobișnuit, dezactivează mai întâi acest mod.",
+    "legacy_layout_incompatible": "Modurile pentru 1.2.3 folosesc o altă metodă de încărcare și nu funcționează în 1.3.x."
   }
 }

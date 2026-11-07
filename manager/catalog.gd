@@ -53,6 +53,8 @@ func refresh(source: String = DEFAULT_URL) -> int:
 			return invalid_catalog(source)
 		if mod.has("sha256") and (not mod.sha256 is String or not valid_hash(mod.sha256)):
 			return invalid_catalog(source)
+		if mod.has("game_versions") and (not mod.game_versions is Array or mod.game_versions.any(func(value): return not value is String)):
+			return invalid_catalog(source)
 		ids.append(mod.id)
 	mods = parsed.mods
 	error_message = ""

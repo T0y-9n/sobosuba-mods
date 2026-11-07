@@ -7,7 +7,7 @@
 | Current 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) | [0.5.1 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1) |
 | Older 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) | — |
 
-[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.5)
+[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.6)
 manages mods for 1.2.3, 1.3.10 and 1.3.11. Choose the mod package matching your game.
 For 1.3.11 installation, see [the package guide](beta-1.3.8/PRIME-SOBOS-en.md).
 

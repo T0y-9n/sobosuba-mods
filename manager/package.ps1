@@ -17,6 +17,18 @@ function Read-Map([string]$Text) {
     }
     try {return Convert-Map (ConvertFrom-Json -InputObject $Text)} catch {Stop-Manager 'invalid_metadata'}
 }
+function Test-GameCompatibility([string]$SelectedVersion,[object[]]$DeclaredVersions) {
+    if($SelectedVersion -in $DeclaredVersions){return $true}
+    if($SelectedVersion -cnotmatch '^1\.3\.(0|[1-9][0-9]*)$'){return $false}
+    $selectedPatch=0
+    if(-not [int]::TryParse($Matches[1],[ref]$selectedPatch)){return $false}
+    foreach($declared in $DeclaredVersions){
+        if($declared -isnot [string] -or $declared -cnotmatch '^1\.3\.(0|[1-9][0-9]*)$'){continue}
+        $declaredPatch=0
+        if([int]::TryParse($Matches[1],[ref]$declaredPatch) -and $declaredPatch -le $selectedPatch){return $true}
+    }
+    return $false
+}
 function Bytes-Hash([byte[]]$Bytes) {
     $hash=[Security.Cryptography.SHA256]::Create()
     try {return ([BitConverter]::ToString($hash.ComputeHash($Bytes))).Replace('-','').ToLowerInvariant()} finally {$hash.Dispose()}
@@ -133,7 +145,7 @@ function Read-Package([string]$Path) {
             $meta.layout='user-data-styles'
             foreach($name in @($meta.files)) {
                 if($name -isnot [string] -or -not (Safe-Relative $name) -or -not $files.ContainsKey($name) -or ($name -ne $meta.bootstrap -and -not $name.StartsWith($meta.payload_root+'/')) -or $payload.ContainsKey($name)) {Stop-Manager 'invalid_metadata'}
-                if($name -notmatch '\.(gd|tres|cfg|json)$') {Stop-Manager 'invalid_metadata'}
+                if($name -notmatch '\.(gd|tscn|tres|cfg|json)$') {Stop-Manager 'invalid_metadata'}
                 $payload[$name]=$files[$name]
             }
             if(-not $payload.ContainsKey($meta.bootstrap) -or -not $payload.ContainsKey($meta.payload_root+'/'+$meta.entry)) {Stop-Manager 'invalid_metadata'}
@@ -160,7 +172,11 @@ function Read-Package([string]$Path) {
             }
         }
         if($meta.name -isnot [string] -or $meta.name.Length -lt 1 -or $meta.name.Length -gt 120 -or $meta.version -isnot [string] -or [string]::IsNullOrWhiteSpace($meta.version) -or $meta.version.Length -gt 80 -or $meta.autoload -cnotmatch '^[A-Za-z_][A-Za-z0-9_]{0,63}$' -or @($meta.game_versions).Count -eq 0) {Stop-Manager 'invalid_metadata'}
-        foreach($v in @($meta.game_versions)) {if($v -notin @('1.2.3','1.3.10','1.3.11')) {Stop-Manager 'unknown_version'};if(($v -eq '1.2.3') -ne ($meta.layout -eq 'game-autoload')) {Stop-Manager 'invalid_metadata'}}
+        $meta.game_versions=@($meta.game_versions)
+        foreach($v in @($meta.game_versions)) {
+            if($v -isnot [string] -or [string]::IsNullOrWhiteSpace($v)){Stop-Manager 'invalid_metadata'}
+            if(($v -eq '1.2.3') -ne ($meta.layout -eq 'game-autoload')){Stop-Manager 'invalid_metadata'}
+        }
         if(-not $meta.ContainsKey('dependencies')){$meta.dependencies=@()}
         if($meta.dependencies -isnot [array] -or $meta.dependencies.Count -gt 32){Stop-Manager 'invalid_metadata'}
         $dependencyIds=@{}

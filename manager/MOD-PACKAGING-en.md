@@ -17,7 +17,7 @@ Special Sobos 1.3.11-0.5.0. Replace its details and file list with your own.
 | `format_version` | Use `1` for this package format. |
 | `id` | A permanent lowercase ID, such as `my_mod`. Keep it for updates. |
 | `name`, `version` | The mod's display name and release version. |
-| `game_versions` | Game versions you have checked, such as `["1.3.11"]`. |
+| `game_versions` | Game versions you have checked, such as `["1.3.11"]`. An earlier 1.3 version also allows installation on a newer 1.3 version, with a compatibility warning. |
 | `install_layout` | `user-data-styles` for these versions. |
 | `payload_root` | Your code folder, such as `my_mod`. |
 | `entry` | Your main Node script relative to that folder, such as `main.gd`. |
@@ -94,6 +94,8 @@ styles/
   my_mod_bootstrap.tres
 ```
 
+For 1.3.10 and 1.3.11, `files` can also include Godot scene files (`.tscn`).
+
 List `my_mod/main.gd`, its required files and `styles/my_mod_bootstrap.tres` in
 `files`. Keep the README and license at the ZIP root. For 1.2.3, use
 `mods/<id>/mod.json` and `mods/<id>/<entry>` instead. Include your changelog when
@@ -123,7 +125,7 @@ package ID, version and SHA256.
 [New issue](https://github.com/T0y-9n/sobosuba-mods/issues/new)
 
 The file contains a `mods` array. This entry uses the published Prime Sobos ZIP
-for the older game version 1.2.3. Replace all six fields with your mod's details.
+for the older game version 1.2.3. Replace the fields with your mod's details.
 
 ```json
 {
@@ -132,6 +134,7 @@ for the older game version 1.2.3. Replace all six fields with your mod's details
       "id": "prime_sobo",
       "name": "Prime sobos",
       "version": "1.2.3-1.0.2",
+      "game_versions": ["1.2.3"],
       "summary": "Prime-numbered sobos that only merge when the sum is a power of two.",
       "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.2.3-1.0.2/sobosuba-prime-balls-1.2.3-1.0.2.zip",
       "sha256": "7a7130cf61b2e494d6208446c149cf96b1379e85f0cc6b84dfb2eaacc3115df0"
@@ -142,8 +145,9 @@ for the older game version 1.2.3. Replace all six fields with your mod's details
 
 Add your entry to the existing array. For a later release, update your entry's
 version, URL and hash in another pull request. The catalog accepts one entry per
-ID. The package's ID and version must match the entry, and its declared game
-version must match the player's selection. After the maintainer merges the
+ID. The package's ID and version must match the entry. Copy its declared
+`game_versions` into the entry so the manager can filter the list by game version.
+After the maintainer merges the
 change, the manager reads it from the repository's `main` branch. Players who
 select **Auto-update this mod** receive newer compatible releases when the game
 is closed. The manager checks on startup, every 30 minutes, or when the player

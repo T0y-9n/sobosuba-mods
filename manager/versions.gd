@@ -42,3 +42,19 @@ static func compare(candidate: String, current: String) -> int:
 
 static func newer(candidate: String, current: String) -> bool:
 	return compare(candidate, current) == 1
+
+static func supports_game(game_versions: Array, selected: String) -> bool:
+	if game_versions.has(selected):
+		return true
+	var target := parse(selected)
+	if target.is_empty() or target.core[0] != 1 or target.core[1] != 3 or selected != "1.3." + str(target.core[2]):
+		return false
+	for value: Variant in game_versions:
+		if not value is String:
+			continue
+		var declared := parse(value)
+		if declared.is_empty() or declared.core[0] != 1 or declared.core[1] != 3 or value != "1.3." + str(declared.core[2]):
+			continue
+		if declared.core[2] <= target.core[2]:
+			return true
+	return false

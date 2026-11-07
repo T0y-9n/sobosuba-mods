@@ -101,8 +101,8 @@ static func create() -> Theme:
 	result.set_icon("unchecked", "CheckBox", icon('<rect x="2" y="2" width="16" height="16" rx="3" fill="#' + SURFACE.to_html(false) + '" stroke="#' + MUTED.to_html(false) + '" stroke-width="1.5"/>'))
 	result.set_icon("checked", "CheckBox", icon('<rect x="2" y="2" width="16" height="16" rx="3" fill="#' + ACCENT.to_html(false) + '"/><path d="m5 10 3 3 7-7" fill="none" stroke="#' + SURFACE.to_html(false) + '" stroke-width="2"/>'))
 	result.set_icon("checked", "PopupMenu", result.get_icon("checked", "CheckBox"))
-	result.set_icon("radio_checked", "PopupMenu", result.get_icon("checked", "CheckBox"))
-	result.set_icon("radio_unchecked", "PopupMenu", result.get_icon("unchecked", "CheckBox"))
+	result.set_icon("radio_checked", "PopupMenu", icon('<circle cx="10" cy="10" r="8" fill="#' + SURFACE.to_html(false) + '" stroke="#' + ACCENT.to_html(false) + '" stroke-width="1.5"/><circle cx="10" cy="10" r="4" fill="#' + ACCENT.to_html(false) + '"/>'))
+	result.set_icon("radio_unchecked", "PopupMenu", icon('<circle cx="10" cy="10" r="8" fill="#' + SURFACE.to_html(false) + '" stroke="#' + MUTED.to_html(false) + '" stroke-width="1.5"/>'))
 	return result
 
 static func style_button(button: Button, variant: String) -> void:

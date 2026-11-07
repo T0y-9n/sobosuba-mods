@@ -2,7 +2,10 @@
 
 Manage mods for sobosuba **1.2.3**, **1.3.10** and **1.3.11**. The game is required.
 
-1. Extract the common setup ZIP. On Windows, download and open the Windows setup EXE. On Linux x86_64, download the Linux setup file and open a terminal in its folder and run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.5.run`. Then open **Sobosuba Mod Manager** from the Start menu or application menu. See `INSTALL-en.md` for locations and removal. Portable downloads can still run their manager executable directly.
+Supported mods include [Prime Sobos](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0)
+and [Special Sobos 0.5.1 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1).
+
+1. Extract the common setup ZIP. On Windows, open the setup EXE in `Windows`. On Linux x86_64, open a terminal in `Linux` and run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.6.run`. Then open **Sobosuba Mod Manager** from the Start menu or application menu. See `INSTALL-en.md` for locations and removal. Portable downloads can still run their manager executable directly.
 
 2. Check the game folder. Use **Choose folder** if it is wrong or missing.
 
@@ -14,7 +17,9 @@ Manage mods for sobosuba **1.2.3**, **1.3.10** and **1.3.11**. The game is requi
 
 6. Select a mod in the list. Use **Enable**, **Disable** or **Uninstall** at the bottom of its details. Close the game before making changes.
 
-Search by name or ID, or filter the list by **Enabled**, **Disabled** or **Manually installed**. **Clear filters** brings the full list back. The count next to **Installed mods** is the total installed, including mods hidden by your filters. Mod details and actions always refer to the selected row. The result of each operation stays at the bottom of the window.
+Search by name or ID, or filter the list by **Enabled**, **Disabled** or **Manually installed**. **Clear filters** resets the search and status filters. The count next to **Installed mods** is the total installed, including mods hidden by your filters. Mod details and actions always refer to the selected row. The result of each operation stays at the bottom of the window.
+
+The catalog initially shows mods that list your selected game version. Use the checkbox beside **Game version** to include mods made for earlier versions. Earlier 1.3 mods can be installed on a newer 1.3 game, with a warning in the row and after installation. For a 1.3 game, 1.2.3 mods appear with a disabled install button and a tooltip explaining their different loading method. Select game version 1.2.3 to install those mods.
 
 Select a mod to read its overview, author and included README in the details pane. JSON descriptions can be supplied in several languages. The manager chooses the interface language when available and shows which language is being displayed. The manager keeps this text with its installation record. Older installations show the information they already contain. Installing or updating from a ZIP with a README adds it to the record.
 
@@ -48,7 +53,7 @@ The catalog is also checked when a prerequisite cannot be found locally. Install
 
 - The Prime Sobos and Special Sobos native UI ZIPs for 1.3.10, with `mod-package.json`.
 
-A package's declared game version must match the selected version. Unknown game versions are rejected rather than guessed. Public builds use `mods` and the game's `override.cfg`; 1.3.10 uses the user's `prime_mod` or `special_mod` and its own `styles/*_bootstrap.tres`. The manager will not enable a mod for another game version. Turn off mods for an earlier version before switching installation layouts.
+A package for an earlier 1.3 game version can be installed on a newer 1.3 game. If your selected version is absent from the package's list, the manager warns that it has not been checked on that version. If the game behaves incorrectly, disable that mod first. Version 1.2.3 uses `mods` and the game's `override.cfg`. Versions 1.3.10 and 1.3.11 use the user's data directory and `styles/*_bootstrap.tres`. Keep mods for these two loading methods separate when switching game versions.
 
 Windows uses the built-in PowerShell 5.1 and tar utility. Linux x86_64 includes the official PowerShell 7.4 LTS runtime inside the app and requires the system Python 3 and tar commands. The runtime is checked against its pinned SHA256 and extracted into the manager's application data on first use. Linux ZIP checks use Python's standard library in isolated mode. Ubuntu 22.04 or later is supported by the bundled runtime. Ubuntu 24.04 under WSL is used for checks. It does not require a separately installed Godot engine. The helper scripts are embedded in the executable and unpacked into the manager's own application data. A ZIP is checked for CRC errors before installation. Windows 10 version 1803 or later, or Windows 11, is required for the Windows tar utility. If Windows policy blocks PowerShell, the operation stops; do not weaken your system policy to use this app.
 
