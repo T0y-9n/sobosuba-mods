@@ -6,7 +6,7 @@ extends Node
 ## and the friends' rows, each within its own five seconds.
 signal updated(text: String)
 
-const MOD_VERSION:= "1.3.11-1.0.0"
+const MOD_VERSION:= "1.3.11-1.0.1"
 const TIMEOUT_MS:= 5000
 const BOARD_ROWS:= 5
 const PAGE_ROWS:= 10

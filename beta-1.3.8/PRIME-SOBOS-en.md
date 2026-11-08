@@ -1,8 +1,8 @@
 # Prime Sobos for sobosuba 1.3.11
 
-Mod version 1.3.11-1.0.0. Requires sobosuba 1.3.11, the current regular release.
-For the older game version 1.2.3, download mod version 1.2.3-1.0.2:
-https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2
+Mod version 1.3.11-1.0.1. Requires sobosuba 1.3.11, the current regular release.
+For the older game version 1.2.3, download mod version 1.2.3-1.0.3:
+https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.3
 
 ## Install
 
@@ -35,7 +35,17 @@ covering settings switches, spawning, 3 + 5 = 8, two 3s staying separate,
 achievement and official leaderboard suppression, and rendered screens.
 The spawn check used a forced rate. Normal spawn probabilities were not measured.
 
-At 1280 x 900, the prime-level text on the right extends beyond the window.
+Smartphone layout support in 1.3.11-1.0.1: settings use the native mobile page,
+the level label follows the visible layout, and the initial guide fits the
+available screen. Mod ranking controls follow the native mobile visibility.
+The old 1280 x 900 level-label clipping is also addressed.
+
+The final Windows phone-size rendered check reported 41 checks, no failures;
+seven images at 375 x 667, 393 x 852, 360 x 780 and landscape were inspected.
+Related static checks reported 13 checks, no failures. This was a PC test,
+not a real mobile-device test. Real-device touch, safe areas and software
+keyboards remain unverified. Windows orientation and shutdown texture-release
+warnings remain.
 Long play sessions and the native Linux game have not been checked for this
 release. Loading a PCK was not part of the verification.
 

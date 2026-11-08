@@ -1,0 +1,36 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="1"]
+script/source = "extends Resource
+
+func _init() -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var node: Node = tree.root.get_node_or_null(\"SpecialSobo\")
+	if node == null and Engine.has_meta(\"special_sobo_runtime\"):
+		var reference: Variant = Engine.get_meta(\"special_sobo_runtime\")
+		if reference is WeakRef:
+			node = reference.get_ref()
+	if is_instance_valid(node):
+		if not node.has_method(\"register_base_traits\"):
+			push_error(\"Special Sobos: use the current separated packages together.\")
+			return
+		if node.is_node_ready():
+			node.register_base_traits()
+		else:
+			node.ready.connect(node.register_base_traits, CONNECT_ONE_SHOT)
+		return
+	var path := \"user://special_mod/special_sobo.gd\"
+	var script := GDScript.new()
+	script.source_code = FileAccess.get_file_as_string(path)
+	script.take_over_path(path)
+	if script.reload() != OK:
+		return
+	node = script.new()
+	Engine.set_meta(\"special_sobo_runtime\", weakref(node))
+	tree.root.add_child.call_deferred(node)
+"
+
+[resource]
+script = SubResource("1")

@@ -2,17 +2,14 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
-### Manager 0.3.0-alpha.5, 2026-11-07
+### 1.3.11-1.0.1 and 1.2.3-1.0.3, 2026-11-09
 
-- Added Windows and Linux setup downloads with the same version number.
-- Added a lighter interface, mod descriptions, prerequisites and automatic updates.
-- Added the toolbox icon and all 22 game languages.
-- Detects Steam beta 1.3.11 and keeps incompatible disabled mods disabled.
+- Smartphone layout support: native mobile settings switches, screen-fitting guide and level labels, and mobile ranking controls.
+- Checked with Windows phone-size layouts. Real mobile input and safe areas, and the 1.2.3 native display, remain unverified.
 
-### Prime Sobos 1.3.11-1.0.0, 2026-11-07
+### Special Sobos 1.3.11-0.5.2, 2026-11-09
 
-- Added a separate beta 1.3.11 package for the mod manager and manual installation.
-- The stable 1.2.3 package remains available.
+- Smartphone layout support: mobile settings entry and Back destination, plus portrait and landscape titles that fit. Real-device touch and keyboard checks remain open.
 
 ### 1.2.3-1.0.2, 2026-11-02
 
@@ -48,6 +45,14 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### 1.3.11-1.0.1 と 1.2.3-1.0.3、2026-11-09
+
+- スマートフォン向けに設定入口、案内、レベル表示、ランキング画面の配置を修正しました。Windows上の携帯寸法で確認し、実携帯の入力・安全領域と1.2.3本体の実画面は未確認です。
+
+### Special Sobos 1.3.11-0.5.2、2026-11-09
+
+- 携帯設定への入口と戻り先、縦横の見出しを修正しました。実端末のタッチとキーボード表示時は未確認です。
 
 ### 1.2.3-1.0.2、2026-11-02
 

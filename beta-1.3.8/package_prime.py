@@ -16,7 +16,7 @@ bootstrap = 'styles/prime_bootstrap.tres'
 payload[bootstrap] = (source / bootstrap).read_bytes()
 metadata = {
     'format_version': 1, 'id': 'prime_sobo', 'name': 'Prime Sobos',
-    'version': '1.3.11-1.0.0', 'game_versions': ['1.3.11'],
+    'version': '1.3.11-1.0.1', 'game_versions': ['1.3.11'],
     'install_layout': 'user-data-styles', 'payload_root': 'prime_mod',
     'entry': 'prime_sobo.gd', 'autoload': 'PrimeSobo',
     'bootstrap': bootstrap, 'dependencies': [], 'files': sorted(payload),
@@ -24,7 +24,7 @@ metadata = {
     'author': 'T0y-9n', 'readme': 'README-en.md',
 }
 args.output.mkdir(parents=True, exist_ok=True)
-path = args.output / 'sobosuba-prime-balls-1.3.11-1.0.0.zip'
+path = args.output / 'sobosuba-prime-balls-1.3.11-1.0.1.zip'
 with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
     for name, data in payload.items():
         archive.writestr(name, data)
