@@ -31,6 +31,16 @@
       "author": "Typhe681",
       "zip": "https://github.com/Typhe681/SoboSandbox/releases/download/v1.3.0/SoboSandbox1.3.0.zip",
       "sha256": "9cac7816ae47c0236d4477468a7a4d72acd5214399eb9a4f668c6f5644c66c60"
+    },
+    {
+      "id": "greenscreensobos",
+      "name": "GreenScreenSobos",
+      "version": "1.0.0",
+      "game_versions": ["1.3.11"],
+      "summary": "Replaces sobo background colors with your own PNG, JPG or OGV media files.",
+      "author": "Typhe681",
+      "zip": "https://github.com/Typhe681/GreenScreenSobos/releases/download/v1.0.0/GreenScreenSobos1.0.0.zip",
+      "sha256": "493140f1ebc50cba868563b8c7ec8d94dbd6d71a5d888579a64918e1673fca13"
     }
   ]
 }

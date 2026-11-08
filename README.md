@@ -2,12 +2,17 @@
 
 ## Downloads by game version
 
-| Game | Prime Sobos download | Special Sobos download | SoboSandbox download |
-| --- | --- | --- | --- |
-| Current 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) | [0.5.1 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1) | [1.3.0 by Typhe681](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) |
-| Older 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) | — | — |
+| Game | Prime Sobos download | Special Sobos download | SoboSandbox download | GreenScreenSobos |
+| --- | --- | --- | --- | --- |
+| Current 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) | [0.5.1 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1) | [1.3.0 by Typhe681](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
+| Older 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) | — | — | — |
 
 SoboSandbox mod version 1.3.0 lists game versions 1.3.9, 1.3.10 and 1.3.11.
+
+GreenScreenSobos 1.0.0 by Typhe681 targets game version 1.3.11 and is available in the manager catalog.
+After installing it, add your own `.png`, `.jpg` or `.ogv` files to the `greenscreensobos` folder in the game's user data directory.
+If several files are present, the mod picks one at random. See the [author's instructions](https://github.com/Typhe681/GreenScreenSobos/tree/v1.0.0) for the Windows and Linux paths.
+The catalog downloads the original ZIP directly from the author.
 
 [Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.6)
 manages mods for 1.2.3, 1.3.10 and 1.3.11. Choose the mod package matching your game.
@@ -139,10 +144,10 @@ MIT, see [LICENSE](LICENSE). The license covers only the code written for this m
 
 ### ゲームの版ごとのダウンロード
 
-| ゲーム | 素数MOD | 特別なソボ | SoboSandbox |
-| --- | --- | --- | --- |
-| 現在の通常版 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) | [0.5.1（beta）](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1) | [1.3.0（作者 Typhe681）](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) |
-| 前の版 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) | — | — |
+| ゲーム | 素数MOD | 特別なソボ | SoboSandbox | GreenScreenSobos |
+| --- | --- | --- | --- | --- |
+| 現在の通常版 1.3.11 | [1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0) | [0.5.1（beta）](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1) | [1.3.0（作者 Typhe681）](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
+| 前の版 1.2.3 | [1.2.3-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.2) | — | — | — |
 
 SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.3.11が挙げられています。
 
