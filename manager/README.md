@@ -5,7 +5,7 @@ Manage mods for sobosuba **1.2.3**, **1.3.10** and **1.3.11**. The game is requi
 Supported mods include [Prime Sobos](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0)
 and [Special Sobos 0.5.1 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1).
 
-1. Extract the common setup ZIP. On Windows, open the setup EXE in `Windows`. On Linux x86_64, open a terminal in `Linux` and run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.6.run`. Then open **Sobosuba Mod Manager** from the Start menu or application menu. See `INSTALL-en.md` for locations and removal. Portable downloads can still run their manager executable directly.
+1. Extract the common setup ZIP. On Windows, open the setup EXE in `Windows`. On Linux x86_64, open a terminal in `Linux` and run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.7.run`. Then open **Sobosuba Mod Manager** from the Start menu or application menu. See `INSTALL-en.md` for locations and removal. Portable downloads can still run their manager executable directly.
 
 2. Check the game folder. Use **Choose folder** if it is wrong or missing.
 
@@ -20,6 +20,8 @@ and [Special Sobos 0.5.1 (beta)](https://github.com/T0y-9n/sobosuba-mods/release
 Search by name or ID, or filter the list by **Enabled**, **Disabled** or **Manually installed**. **Clear filters** resets the search and status filters. The count next to **Installed mods** is the total installed, including mods hidden by your filters. Mod details and actions always refer to the selected row. The result of each operation stays at the bottom of the window.
 
 The catalog initially shows mods that list your selected game version. Use the checkbox beside **Game version** to include mods made for earlier versions. Earlier 1.3 mods can be installed on a newer 1.3 game, with a warning in the row and after installation. For a 1.3 game, 1.2.3 mods appear with a disabled install button and a tooltip explaining their different loading method. Select game version 1.2.3 to install those mods.
+
+From alpha.7, one catalog ID can offer separate releases for different game versions. Prime Sobos offers its original 1.2.3 and 1.3.11 ZIPs. Selecting the game version chooses the matching ZIP and SHA256. The 1.2.3 package stays in the game folder; the 1.3.11 package stays in the game's user data folder. Their receipts and automatic update settings remain separate. Disable mods for the other game family before installing or enabling mods for the selected game.
 
 Select a mod to read its overview, author and included README in the details pane. JSON descriptions can be supplied in several languages. The manager chooses the interface language when available and shows which language is being displayed. The manager keeps this text with its installation record. Older installations show the information they already contain. Installing or updating from a ZIP with a README adds it to the record.
 

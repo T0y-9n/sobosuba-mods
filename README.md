@@ -14,8 +14,11 @@ After installing it, add your own `.png`, `.jpg` or `.ogv` files to the `greensc
 If several files are present, the mod picks one at random. See the [author's instructions](https://github.com/Typhe681/GreenScreenSobos/tree/v1.0.0) for the Windows and Linux paths.
 The catalog downloads the original ZIP directly from the author.
 
-[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.6)
+[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.7)
 manages mods for 1.2.3, 1.3.10 and 1.3.11. Choose the mod package matching your game.
+Manager alpha.7 selects the matching Prime Sobos release from the catalog for 1.2.3 or 1.3.11.
+These two releases keep separate installation locations and update settings; neither replaces the other.
+Earlier managers still read the original 1.2.3 catalog entry. Update the manager to select the 1.3.11 catalog release.
 For 1.3.11 installation, see [the package guide](beta-1.3.8/PRIME-SOBOS-en.md).
 
 [English](#english) | [日本語](#日本語)

@@ -153,6 +153,26 @@ select **Auto-update this mod** receive newer compatible releases when the game
 is closed. The manager checks on startup, every 30 minutes, or when the player
 presses **Check for updates**.
 
+From manager alpha.7, an entry may also contain a `variants` array for separate
+releases of the same ID. Each variant must provide its own `version`,
+`game_versions`, HTTPS `zip` and `sha256`; the ID, name, author and summary are
+inherited from the parent. Keep the original top-level release for earlier
+managers. For example, the existing Prime Sobos entry for 1.2.3 now contains:
+
+```json
+"variants": [{
+  "version": "1.3.11-1.0.0",
+  "game_versions": ["1.3.11"],
+  "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.3.11-1.0.0/sobosuba-prime-balls-1.3.11-1.0.0.zip",
+  "sha256": "8c1a9925472d8a1c9c089f7af65b1fe6848c9227bafc98d0a7361e0dce12d35e"
+}]
+```
+
+The selected game chooses one complete release, preferring an explicit game
+match over same-family forward compatibility. Ambiguous choices are unavailable.
+Do not combine game versions from different ZIPs. Updates remain within the
+installed package's layout; a 1.3 release never updates a 1.2.3 installation.
+
 ## Required mods
 
 Both package definitions accept exact-version prerequisites.

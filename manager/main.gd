@@ -496,8 +496,8 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 		name_label.add_theme_color_override("font_color", UiTheme.DISABLED_INK)
 	text.add_child(name_label)
 	var version_label := label("MOD " + str(mod.get("version", "")), 14)
-	var latest := catalog.find(mod.id)
-	if not is_catalog and catalog.has_update(mod) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
+	var latest := catalog.find(mod.id, store.game_version)
+	if not is_catalog and catalog.has_update(mod, store.game_version) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
 		version_label.text += " → " + str(latest.version)
 	version_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	version_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -531,7 +531,7 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 func select_mod(key: String) -> void:
 	if busy:
 		return
-	for mod in mods + catalog.mods:
+	for mod in mods + catalog.for_game(store.game_version):
 		if mod_key(mod) == key:
 			selected_mod_key = key
 			selected_mod = mod
@@ -581,8 +581,8 @@ func render_rows() -> void:
 	detected_label.text = words.word("detected", [target.detected]) if not str(target.get("detected", "")).is_empty() else words.word("selected")
 	library_count.text = words.word("mod_count", [mods.size()])
 	var installed: Array = mods.filter(matches_filters)
-	var installed_ids: Array = mods.map(func(mod: Dictionary) -> String: return str(mod.id))
-	var available: Array = catalog.mods.filter(func(mod: Dictionary) -> bool: return mod.id not in installed_ids and matches_filters(mod))
+	var installed_keys: Array = mods.map(mod_key)
+	var available: Array = catalog.for_game(store.game_version).filter(func(mod: Dictionary) -> bool: return str(mod.id) + "|" + catalog.entry_layout(mod) not in installed_keys and matches_filters(mod))
 	var visible_mods := installed + available
 	var keys: Array = visible_mods.map(mod_key)
 	if selected_mod_key not in keys:
@@ -645,8 +645,8 @@ func render_details() -> void:
 		caption(details, "err_adopt", 14)
 		action(detail_actions, "install_zip", choose_zip, "primary")
 		return
-	var latest := catalog.find(mod.id)
-	if catalog.has_update(mod) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
+	var latest := catalog.find(mod.id, store.game_version)
+	if catalog.has_update(mod, store.game_version) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
 		details.add_child(label(words.word("plan_update") + " " + str(latest.version), 14))
 		action(details, "plan_update", download_mod.bind(latest), "primary")
 	mod_update_check = update_checkbox(details, "mod_auto_update", settings.mod_updates_enabled(mod_key(mod)), set_mod_updates.bind(mod_key(mod)))
@@ -791,11 +791,11 @@ func prepare_plan(request: Dictionary, allow_adopt: bool = true) -> Dictionary:
 		if not found.ok:
 			return found
 		if str(found.data.zip).is_empty():
-			var entry := catalog.find(id)
+			var entry := catalog.find(id, store.game_version, version)
 			if (entry.is_empty() or entry.version != version) and not refreshed:
 				await catalog.refresh(settings.catalog_url)
 				refreshed = true
-				entry = catalog.find(id)
+				entry = catalog.find(id, store.game_version, version)
 			if entry.is_empty() or entry.version != version:
 				return result
 			var catalog_pin := str(entry.get("sha256", ""))
@@ -943,9 +943,9 @@ func check_updates() -> void:
 		await read_state()
 		var selected := mods.duplicate(true)
 		for mod in selected:
-			if mod.manual or not mod.compatible or not settings.mod_updates_enabled(mod_key(mod)) or not catalog.has_update(mod):
+			if mod.manual or not mod.compatible or not settings.mod_updates_enabled(mod_key(mod)) or not catalog.has_update(mod, store.game_version):
 				continue
-			var latest := catalog.find(mod.id)
+			var latest := catalog.find(mod.id, store.game_version)
 			if not Versions.supports_game(latest.get("game_versions", []), store.game_version):
 				continue
 			var result := await auto_update_mod(mod, latest)
