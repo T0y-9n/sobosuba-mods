@@ -40,6 +40,10 @@ func _ready() -> void:
 	board_btn.disabled = true
 	board_btn.set_value("prime")
 	side_title_text = TITLE
+	if OS.has_feature("mobile"):
+		board_btn.hide()
+		source_btn.hide()
+		friends_only_btn.hide()
 	if OS.has_feature("steam"):
 		if SteamManager.steam_ready:
 			_connect_steam()

@@ -147,6 +147,7 @@ func install_scores_screen() -> void:
 	apply_scores_screen()
 	# The small game-over board (CanvasLayer 100) would cover the screen's source row.
 	menu.on_change_screen.connect(on_menu_screen_changed)
+	menu.on_open.connect(on_menu_opened)
 	menu.on_close.connect(on_menu_closed)
 	print("%s scores screen installed: %s" % [MOD_TAG, copy.get_path()])
 	install_prime_toggle(menu)
@@ -164,8 +165,8 @@ func apply_scores_screen() -> void:
 ## "prime balls" on the game's settings -> game screen, right under show instructions: a copy of
 ## that switch with this mod's handler. The game's screen script and scene files are not changed.
 func install_prime_toggle(menu: Menu) -> void:
-	var game_screen: GameSettingsScreen = menu.game_settings_screen
-	var model: SoboMenuButtonBool = game_screen.show_instructions_control if game_screen != null else null
+	var game_screen: MenuScreen = menu.settings_mobile_screen if OS.has_feature("mobile") else menu.game_settings_screen
+	var model: SoboMenuButtonBool = game_screen.get("show_instructions_control") if game_screen != null else null
 	if model == null:
 		push_warning("%s prime balls switch not installed: the game's show instructions switch was not found" % MOD_TAG)
 		return
@@ -248,6 +249,7 @@ func install_send_toggle(_menu: Menu) -> void:
 	prime_toggle.add_sibling(button)
 	send_toggle = button
 	refresh_send_toggle()
+	compact_mobile_settings()
 	print("%s send scores switch installed: %s" % [MOD_TAG, button.get_path()])
 
 
@@ -327,13 +329,30 @@ func place_guide_toggle() -> void:
 	var guide: Instructions = mode.instructions if mode != null && is_instance_valid(mode.instructions) else null
 	var shown: Control = guide.current_control if guide != null && is_instance_valid(guide.current_control) else null
 	var showing: bool = shown != null && shown != guide.demo_explanation && shown.is_visible_in_tree() && Menu._0 != null && Menu._0.visible == false
-	if guide_toggle.visible != showing:
-		guide_toggle.visible = showing
-	if showing == false:
+	guide_toggle.visible = showing
+	if not showing:
 		return
+	var viewport: Rect2 = get_viewport().get_visible_rect()
+	if OS.has_feature("mobile"):
+		viewport = viewport.intersection(MobileManager.get_usable_rect())
+	var available: Rect2 = (Ui._0.get_final_transform().affine_inverse() * viewport).grow(-8.0)
+	if not available.has_area():
+		guide_toggle.hide()
+		return
+	guide_toggle.size.x = maxf(guide_toggle.get_combined_minimum_size().x, minf(prime_toggle.size.x, available.size.x))
+	guide_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	guide_label.custom_minimum_size.x = guide_toggle.size.x
+	guide_label.size.x = guide_toggle.size.x
+	guide_label.size.y = guide_label.get_combined_minimum_size().y
+	guide_label.position = Vector2(0.0, guide_toggle.size.y + 4.0)
+	var content_size := Vector2(guide_toggle.size.x, guide_label.position.y + guide_label.size.y)
+	var fit: float = minf(1.0, minf(available.size.x / content_size.x, available.size.y / content_size.y))
+	guide_toggle.scale = Vector2.ONE * fit
+	var extent: Vector2 = content_size * fit
 	var box: Rect2 = guide_screen_box(shown)
-	guide_toggle.position = Vector2(box.get_center().x - guide_toggle.size.x / 2.0, box.end.y + 8.0)
-	guide_label.position = Vector2((guide_toggle.size.x - guide_label.size.x) / 2.0, guide_toggle.size.y + 4.0)
+	guide_toggle.position = Vector2(
+		clampf(box.get_center().x - extent.x / 2.0, available.position.x, available.end.x - extent.x),
+		clampf(box.end.y + 8.0, available.position.y, available.end.y - extent.y))
 
 
 ## A control's box on the screen, in Ui's coordinates.
@@ -387,10 +406,27 @@ func apply_run(prime: bool) -> void:
 		unblock_online_scoring()
 
 
+## Make room for the two added rows without scaling the native slider controls.
+func compact_mobile_settings() -> void:
+	if Menu._0 == null || prime_toggle == null || not Menu._0.settings_mobile_screen.is_ancestor_of(prime_toggle):
+		return
+	for child: Node in prime_toggle.get_parent().get_children():
+		if child is HSeparator:
+			(child as HSeparator).add_theme_constant_override("separation", 4)
+
+
 func on_menu_screen_changed(new_screen: MenuScreen) -> void:
 	scores.set_board_suppressed(new_screen != null && new_screen == scores_screen)
-	if new_screen != null && new_screen == Menu._0.game_settings_screen:
+	if new_screen != null && prime_toggle != null && new_screen.is_ancestor_of(prime_toggle):
 		refresh_prime_toggle()
+
+
+## The game pauses processing when opening a menu, so hide the run overlays on its signal.
+func on_menu_opened() -> void:
+	if guide_toggle != null:
+		guide_toggle.hide()
+	if level_label != null:
+		level_label.hide()
 
 
 func on_menu_closed() -> void:
@@ -546,28 +582,65 @@ func current_level() -> int:
 ## (LiveScoreDisplay's SDFLabel there): a new Label of its own, never a copy of the game's (copies
 ## crashed in spec §9).
 func install_level_label() -> void:
-	for node: Node in get_tree().root.find_children("*", "Control", true, false):
-		if node is RightSidePanel && (node as Control).is_visible_in_tree():
-			level_label = Label.new()
-			level_label.name = "PrimeLevel"
-			level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			level_label.add_theme_font_size_override("font_size", LEVEL_FONT_SIZE)
-			node.add_child(level_label)
-			return
+	var target: Control = level_label_parent()
+	if target == null:
+		return
+	level_label = Label.new()
+	level_label.name = "PrimeLevel"
+	level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	level_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	target.add_child(level_label)
+
+
+## Use the game's visible score panel; portrait play has its score above the play area.
+func level_label_parent() -> Control:
+	if Ui._0 == null:
+		return null
+	var viewport: Rect2 = get_viewport().get_visible_rect()
+	if OS.has_feature("mobile"):
+		viewport = viewport.intersection(MobileManager.get_usable_rect())
+	var available: Rect2 = Ui._0.get_final_transform().affine_inverse() * viewport
+	for panel: SidePanel in Ui._0.side_panels:
+		if panel is RightSidePanel && panel.is_visible_in_tree() && panel.size.x > 16.0 && panel.size.y > 16.0 && available.encloses(guide_screen_box(panel)):
+			return panel
+	return Ui._0.ui_play_area
 
 
 func refresh_level_label() -> void:
-	if is_instance_valid(level_label) == false:
+	if not is_instance_valid(level_label):
 		level_label = null
 		if Engine.get_process_frames() % 60 == 0:
 			install_level_label()
 		if level_label == null:
 			return
-	level_label.visible = run_prime && GameModeManager.current_scene is SceneClassic
-	if level_label.visible:
-		var level: int = current_level()
-		level_label.text = word("level") % [level, roundi(prime_level.chance_of(level) * 100.0)]
-		level_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, LEVEL_MARGIN)
+	level_label.visible = run_prime && Menu._0 != null && not Menu._0.visible && GameModeManager.current_scene is SceneClassic
+	if not level_label.visible:
+		return
+	var target: Control = level_label_parent()
+	if target == null:
+		return
+	if level_label.get_parent() != target:
+		level_label.reparent(target, false)
+	var level: int = current_level()
+	level_label.text = word("level") % [level, roundi(prime_level.chance_of(level) * 100.0)]
+	var side_panel: bool = target is RightSidePanel
+	level_label.add_theme_font_size_override("font_size", LEVEL_FONT_SIZE if side_panel else 20)
+	var viewport: Rect2 = get_viewport().get_visible_rect()
+	if OS.has_feature("mobile"):
+		viewport = viewport.intersection(MobileManager.get_usable_rect())
+	var local: Rect2 = target.get_global_transform_with_canvas().affine_inverse() * viewport
+	var available: Rect2 = Rect2(Vector2.ZERO, target.size).intersection(local).grow(-8.0)
+	if not available.has_area():
+		level_label.hide()
+		return
+	level_label.custom_minimum_size.x = available.size.x
+	level_label.size.x = available.size.x
+	level_label.size.y = level_label.get_combined_minimum_size().y
+	var bottom: float = target.size.y - LEVEL_MARGIN - level_label.size.y
+	level_label.position = Vector2(available.position.x,
+		clampf(bottom if side_panel else available.position.y, available.position.y,
+			maxf(available.position.y, available.end.y - level_label.size.y)))
 
 
 func replace_with_prime(sobo: Sobo, p: int) -> void:
@@ -804,8 +877,8 @@ func run_selftest() -> void:
 	check(lines, "prime decision rate follows the prime level", absf(roll_ratio - chance_now) <= 0.012 && is_equal_approx(run_chance(), chance_now), "level=%d rolls=%d hits=%d ratio=%.4f chance=%.2f" % [level_now, rolls, hits, roll_ratio, chance_now])
 	check(lines, "default mix: regular sobos with some primes", mix_spawns >= 60 && mix_primes > 0 && mix_ratio >= 0.03 && mix_ratio <= 0.45, "spawns=%d primes=%d ratio=%.3f chance=%.2f mode_state=%d" % [mix_spawns, mix_primes, mix_ratio, chance_now, mode.state])
 	check(lines, "prime level: a new run starts at 1 (11%) and follows the game's spawn stages", level_at_start == 1 && level_now >= level_at_start && level_now == prime_level.level_of(mode.spawn_pool.current_spawn_pool), "start=%d now=%d open_tiers=%s" % [level_at_start, level_now, mode.spawn_pool.current_spawn_pool])
-	var level_shown: bool = is_instance_valid(level_label) && level_label.visible && level_label.get_parent() is RightSidePanel && level_label.text == word("level") % [level_now, roundi(chance_now * 100.0)]
-	check(lines, "prime level: the line on the game's right panel shows the level and its chance", level_shown, "text=%s" % (level_label.text if is_instance_valid(level_label) else "<none>"))
+	var level_shown: bool = is_instance_valid(level_label) && level_label.is_visible_in_tree() && level_label.get_parent() == level_label_parent() && level_label.text == word("level") % [level_now, roundi(chance_now * 100.0)]
+	check(lines, "prime level: the line follows the visible layout and shows the level and its chance", level_shown, "text=%s" % (level_label.text if is_instance_valid(level_label) else "<none>"))
 
 	# Game over: local board, rich presence "prime_best", Steam screenshot.
 	# Exactly one game over per run. Fire it only while the run is still being played and the
@@ -1150,12 +1223,13 @@ func selftest_prime_toggle(lines: PackedStringArray) -> void:
 	var menu: Menu = Menu._0
 	var real_settings_before: String = board_fingerprint(prime_settings.PATH)
 	check(lines, "prime toggle: self-test settings file", prime_settings.path == prime_settings.SELFTEST_PATH, "path=%s" % prime_settings.path)
-	var model: SoboMenuButtonBool = menu.game_settings_screen.show_instructions_control
+	var game_screen: MenuScreen = menu.settings_mobile_screen if OS.has_feature("mobile") else menu.game_settings_screen
+	var model: SoboMenuButtonBool = game_screen.get("show_instructions_control")
 	var toggle_ok: bool = prime_toggle != null && prime_toggle.get_parent() == model.get_parent() && prime_toggle.get_index() == model.get_index() + 1 && prime_toggle.label != model.label && prime_toggle.label.text == word(TOGGLE_TEXT) && model.label.text != word(TOGGLE_TEXT) && prime_toggle.bool_circles != model.bool_circles && prime_toggle.is_ancestor_of(prime_toggle.bool_circles)
 	var copied_game_handler:= false
 	if prime_toggle != null:
 		for c: Dictionary in prime_toggle.release_press.get_connections():
-			copied_game_handler = copied_game_handler || (c.callable as Callable).get_object() == menu.game_settings_screen
+			copied_game_handler = copied_game_handler || (c.callable as Callable).get_object() == game_screen
 	check(lines, "prime toggle: prime balls under show instructions on the game settings screen, own nodes, not the game's handler", toggle_ok && copied_game_handler == false && prime_toggle.tooltip_text == toggle_description(), "toggle=%s copied_handler=%s" % [prime_toggle, copied_game_handler])
 	check(lines, "prime toggle: on at the start", prime_settings.enabled && run_prime && prime_toggle.bool_circles.visible && menu.scores_screen == scores_screen, "enabled=%s run_prime=%s" % [prime_settings.enabled, run_prime])
 

@@ -45,6 +45,9 @@ func _ready() -> void:
 	# Buttons connected their own apply_style first, so this runs after it on every style change.
 	recolor()
 	StyleManager.style_changed.connect(recolor)
+	if OS.has_feature("mobile"):
+		source_btn.hide()
+		friends_only_btn.hide()
 	if OS.has_feature("steam"):
 		if SteamManager.steam_ready:
 			_connect_steam()

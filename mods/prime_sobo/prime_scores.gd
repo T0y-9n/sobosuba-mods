@@ -212,7 +212,7 @@ func on_game_over() -> void:
 	label.text = board_text(score, last_rank)
 	_board_wanted = true
 	refresh_board_visibility()
-	if online != null && online.enabled:
+	if online != null && online.enabled && not Engine.get_meta("special_sobo_run", false):
 		var duration_s: int = int((Time.get_ticks_msec() - _round_started_ms) / 1000)
 		online.submit_score.call_deferred(score, duration_s, get_parent().run_chance())
 	print("[prime_sobo] game over: score=%d local_rank=%d best=%d friends=%d" % [score, last_rank, best_local(), friends.size()])
