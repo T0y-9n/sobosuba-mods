@@ -2,6 +2,17 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Special Sobos 1.3.11-0.5.3, 2026-11-09
+
+- Fixed: Special Sobos now only works in classic (radix 2). Other modes, including Radix 3, play like the base game again.
+
+### Unreleased
+
+- Preserved Prime best-score sharing and friend updates in menus and classic runs with prime balls disabled.
+- Limited Prime Sobos and Special Sobos to the default classic modes. Other modes, including Radix 3, keep their normal colors, merging, guides and scores with prime balls enabled or disabled.
+- Fixed the prime level label switching between panels during play. It follows the native score panel in portrait and landscape layouts and stays in place while the layout is unchanged.
+- Increased the weight of 5 in both Prime Sobos versions. Weights for 3, 5, 11, 13 and 19 are now 4:6:2:2:1, so 5 accounts for 40% of prime selections. The overall prime spawn chance is unchanged.
+
 ### 1.2.3-1.0.4 and 1.3.11-1.0.2, 2026-11-09
 
 - Added save screenshots directly below send scores in desktop and mobile settings, with labels and descriptions in all 11 game languages.

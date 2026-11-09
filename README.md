@@ -4,7 +4,7 @@
 
 | Game | Prime Sobos download | Special Sobos download | SoboSandbox download | GreenScreenSobos |
 | --- | --- | --- | --- | --- |
-| Current 1.3.11 | [1.3.11-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.2) | [0.5.2 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.2) | [1.3.0 by Typhe681](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
+| Current 1.3.11 | [1.3.11-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.2) | [0.5.3 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.3) | [1.3.0 by Typhe681](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
 | Older 1.2.3 | [1.2.3-1.0.4](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.4) | - | - | - |
 
 Smartphone layout support: Prime Sobos and Special Sobos now adapt their settings and labels to portrait screens. Checked on Windows with phone-size layouts; real-device touch, safe areas and software keyboards still need verification.
@@ -151,7 +151,7 @@ MIT, see [LICENSE](LICENSE). The license covers only the code written for this m
 
 | ゲーム | 素数MOD | 特別なソボ | SoboSandbox | GreenScreenSobos |
 | --- | --- | --- | --- | --- |
-| 現在の通常版 1.3.11 | [1.3.11-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.2) | [0.5.2（beta）](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.2) | [1.3.0（作者 Typhe681）](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
+| 現在の通常版 1.3.11 | [1.3.11-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.2) | [0.5.3（beta）](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.3) | [1.3.0（作者 Typhe681）](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
 | 前の版 1.2.3 | [1.2.3-1.0.4](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.4) | - | - | - |
 
 SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.3.11が挙げられています。
