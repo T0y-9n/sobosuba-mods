@@ -2,6 +2,12 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### 1.3.11-1.0.3, 2026-11-09
+
+Fixed: Prime Balls now only works in classic (radix 2). Other modes, including Radix 3 and classic threes, play like the base game again, whether prime mode is on or off.
+Fixed: The prime level text no longer jumps between the top and the bottom right.
+Changed: 5s now appear more often.
+
 ### Special Sobos 1.3.11-0.5.3, 2026-11-09
 
 - Fixed: Special Sobos now only works in classic (radix 2). Other modes, including Radix 3, play like the base game again.

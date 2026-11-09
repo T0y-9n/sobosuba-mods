@@ -8,7 +8,7 @@ extends ScoresScreen
 ##   and friends only (the player's and their Steam friends' IDs). The answers are kept here the way
 ##   ScoreManager keeps the Steam leaderboard, in the same row shape, and drawn with setup_steam.
 ## - Source.LOCAL is prime_sobo_scores.json (top 10); clear local scores clears only that board.
-## Never connects to ScoreManager.steam_leaderboard_* (the author's Steam leaderboard).
+## Native initialization supplies the widgets; prime-server reads supply the records.
 
 const TITLE:= "scores"
 ## Steam's name for a user whose name has not arrived yet.
@@ -26,24 +26,21 @@ var friends_rows: Array = []
 var friends_downloaded:= false
 ## Server requests in flight (the self test waits until this is 0).
 var pending:= 0
+## A jump within downloaded friends must keep using that same snapshot.
+var using_cached_friend_rows:= false
 
 
 func _ready() -> void:
-	# Not super(): ScoresScreen._ready connects the author's Steam leaderboard signals.
-	for i in PAGE_SIZE:
-		var entry: LeaderboardEntry = leaderboard_entry_ps.instantiate()
-		leaderboard_container.add_child(entry)
-		entries.append(entry)
-		entry.clear()
+	super()
+	if OS.has_feature("steam"):
+		ScoreManager.steam_leaderboard_updated.disconnect(_on_steam_leaderboard_updated)
+		ScoreManager.steam_leaderboard_failed.disconnect(_on_steam_leaderboard_failed)
+		ScoreManager.steam_user_rank_updated.disconnect(_on_steam_user_rank_updated)
 	# The game's board switch cycles the author's Steam boards (ScoreManager.select_board); the prime
 	# ranking is a single board. Keep the native row, with no cycling action.
 	board_btn.disabled = true
 	board_btn.set_value("prime")
 	side_title_text = TITLE
-	if OS.has_feature("mobile"):
-		board_btn.hide()
-		source_btn.hide()
-		friends_only_btn.hide()
 	if OS.has_feature("steam"):
 		if SteamManager.steam_ready:
 			_connect_steam()
@@ -52,7 +49,6 @@ func _ready() -> void:
 
 
 func _connect_steam() -> void:
-	_connect_steam_avatar()
 	SteamManager.steam.connect("persona_state_change", _on_persona_state_change)
 
 
@@ -90,7 +86,7 @@ func open():
 	source = Source.STEAM if world_usable() else Source.LOCAL
 	# Same as ScoresScreen.open: the list panel is as high as one page of entries.
 	(leaderboard_container.get_parent() as Control).custom_minimum_size.y = get_page_height(entries, PAGE_SIZE, leaderboard_container)
-	refresh_buttons()
+	refresh_translated_text()
 	refresh_leaderboard()
 	# MenuScreen.open() without ScoresScreen.open(), which picks the author's Steam board.
 	SoboButton.currently_hovered = get_first_button_to_hover()
@@ -119,7 +115,7 @@ func refresh_leaderboard(request_remote: bool = true):
 		refresh_nav_buttons()
 		return
 	if friends_only:
-		refresh_friends_leaderboard(request_remote)
+		refresh_friends_leaderboard(request_remote and not using_cached_friend_rows)
 		return
 	apply_page_ranks(world_count)
 	if request_remote:
@@ -127,24 +123,19 @@ func refresh_leaderboard(request_remote: bool = true):
 
 
 func refresh_friends_leaderboard(request_remote: bool) -> void:
+	var known_count: int = friends_rows.size() if friends_downloaded else 0
+	apply_page_ranks(known_count, not friends_downloaded)
 	if friends_downloaded:
-		apply_page_ranks(friends_rows.size(), false)
 		generate_friends_leaderboard()
-	else:
-		apply_page_ranks(0)
 	if request_remote:
 		request_world_friends()
 
 
 func _on_my_score_release_press() -> void:
-	if friends_only:
-		go_to_own_friends_entry()
-		return
-	if steam_user_rank > 0:
-		go_to_steam_rank(steam_user_rank)
-		return
-	request_world_user_rank()
-
+	if friends_only or steam_user_rank > 0:
+		super._on_my_score_release_press()
+	else:
+		request_world_user_rank()
 
 ## The native mode row is read-only; there is only the prime board.
 func _on_board_release_press() -> void:
@@ -161,27 +152,18 @@ func _on_clear_local_scores_confirm_release_press() -> void:
 	scores.clear_local_scores()
 	page = 0
 	refresh_leaderboard()
-	clear_local_scores_confirm_btn.hide()
-	clear_local_scores_btn.show()
+	refresh_buttons()
 
 
 func go_to_own_friends_entry() -> void:
 	var own_index: int = get_own_friends_index()
-	if own_index < 0:
-		if friends_downloaded:
-			return
+	if own_index >= 0:
+		using_cached_friend_rows = true
+		super.go_to_steam_rank(own_index + 1)
+		using_cached_friend_rows = false
+	elif not friends_downloaded:
 		_hover_self_on_next_generate = true
 		request_world_friends()
-		return
-	var my_page: int = floori(float(own_index) / float(PAGE_SIZE))
-	if page == my_page:
-		hover_own_entry()
-		refresh_nav_buttons()
-		return
-	_hover_self_on_next_generate = true
-	page = my_page
-	refresh_leaderboard(false)
-
 
 ## A Steam row drawn by the game's setup_steam; the server name stands in until Steam knows the name.
 func show_steam_row(entry: LeaderboardEntry, row: Dictionary, rank: int) -> void:
@@ -200,77 +182,59 @@ func _on_persona_state_change(steam_id: int, _flags: int) -> void:
 			entry.name_label.text = steam_name
 
 
-## ScoresScreen._on_steam_leaderboard_updated, with the prime friends rows instead of
-## ScoreManager.steam_friends_downloaded (the author's Steam flag, never set here).
-func _on_steam_leaderboard_updated() -> void:
-	if visible == false || source != Source.STEAM:
-		return
-	if friends_only:
-		if friends_downloaded:
+## Called only after a prime-server read has filled this screen's records.
+func on_prime_rows_updated() -> void:
+	if visible and source == Source.STEAM:
+		if friends_only and friends_downloaded:
 			generate_friends_leaderboard()
-		return
-	generate_steam_leaderboard()
+		elif not friends_only:
+			generate_steam_leaderboard()
 
 
 func generate_steam_leaderboard():
-	var local_id: int = SteamManager.steam.getSteamID()
-	if world_rows.size() > 0 && world_rows[0].global_rank != page * PAGE_SIZE + 1:
-		return
-	for i in PAGE_SIZE:
-		if i < world_rows.size():
-			show_steam_row(entries[i], world_rows[i], world_rows[i].global_rank)
-			if world_rows[i].steam_id == local_id:
-				steam_user_rank = world_rows[i].global_rank
-		else:
-			entries[i].clear()
-	refresh_nav_buttons()
-	if _hover_self_on_next_generate:
-		_hover_self_on_next_generate = false
-		hover_own_entry()
+	if world_rows.is_empty() or int(world_rows[0].global_rank) == page * PAGE_SIZE + 1:
+		draw_prime_rows(world_rows, 0)
 
 
 func generate_friends_leaderboard():
-	var local_id: int = SteamManager.steam.getSteamID()
-	var start: int = page * PAGE_SIZE
-	for i in PAGE_SIZE:
-		var index: int = start + i
-		if index < friends_rows.size():
-			show_steam_row(entries[i], friends_rows[index], index + 1)
-			if friends_rows[index].steam_id == local_id:
-				steam_user_rank = friends_rows[index].global_rank
-		else:
-			entries[i].clear()
-	refresh_nav_buttons()
-	if _hover_self_on_next_generate:
-		_hover_self_on_next_generate = false
-		hover_own_entry()
+	var first: int = page * PAGE_SIZE
+	draw_prime_rows(friends_rows.slice(first, first + PAGE_SIZE), first)
 
 
 func generate_local_leaderboard():
-	var rows: Array = scores.local_scores
-	var start: int = page * PAGE_SIZE
-	for i in PAGE_SIZE:
-		var index: int = start + i
-		if index < rows.size():
-			entries[i].setup_local(index + 1, format_value(int(rows[index].score)))
-		else:
-			entries[i].clear()
-	refresh_nav_buttons()
+	var first: int = page * PAGE_SIZE
+	draw_prime_rows(scores.local_scores.slice(first, first + PAGE_SIZE), first)
 
+
+## Supply only mod records to the game's existing row widgets.
+func draw_prime_rows(rows: Array, first: int) -> void:
+	clear_entries()
+	var own_id: int = int(SteamManager.steam.getSteamID()) if source == Source.STEAM else 0
+	for slot in mini(rows.size(), PAGE_SIZE):
+		var row: Dictionary = rows[slot]
+		var rank: int = first + slot + 1
+		if source == Source.LOCAL:
+			entries[slot].setup_local(rank, format_value(int(row.score)))
+		else:
+			if not friends_only:
+				rank = int(row.global_rank)
+			show_steam_row(entries[slot], row, rank)
+			if int(row.steam_id) == own_id:
+				steam_user_rank = int(row.global_rank)
+	var focus_own_row: bool = _hover_self_on_next_generate and source == Source.STEAM
+	_hover_self_on_next_generate = false
+	refresh_nav_buttons()
+	if focus_own_row:
+		hover_own_entry()
 
 func is_my_score_disabled() -> bool:
 	if source != Source.STEAM or not world_usable():
 		return true
-	if friends_only:
-		var own_index: int = get_own_friends_index()
-		if own_index < 0:
-			return friends_downloaded
-		return page == floori(float(own_index) / float(PAGE_SIZE))
-	if steam_user_rank == STEAM_USER_RANK_NONE:
-		return true
-	if steam_user_rank > 0:
-		return page == floori(float(steam_user_rank - 1) / float(PAGE_SIZE))
-	return false
+	var own_rank: int = get_own_friends_index() + 1 if friends_only else steam_user_rank
+	if own_rank > 0:
+		return page == floori(float(own_rank - 1) / float(PAGE_SIZE))
+	return friends_downloaded if friends_only else own_rank == STEAM_USER_RANK_NONE
+
 
 
 func get_page_count() -> int:
@@ -309,7 +273,7 @@ func request_world_page(for_page: int) -> void:
 		return
 	world_rows = online.steam_rows(result.entries)
 	world_count = int(result.players)
-	_on_steam_leaderboard_updated()
+	on_prime_rows_updated()
 
 
 ## ScoreManager.request_steam_user_rank: the fresh own rank (around), 0 when the server has none.
@@ -343,7 +307,7 @@ func request_world_friends() -> void:
 		return
 	friends_rows = online.steam_rows(result.entries)
 	friends_downloaded = true
-	_on_steam_leaderboard_updated()
+	on_prime_rows_updated()
 
 
 ## ScoreManager.steam_leaderboard_failed, with the prime text in the game's "steam failed" label.

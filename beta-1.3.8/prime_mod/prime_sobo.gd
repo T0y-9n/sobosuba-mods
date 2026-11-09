@@ -10,7 +10,7 @@ const MOD_TAG:= "[prime_sobo]"
 ## SoboManager builds the data for the sizes 2^0 .. 2^19 itself: twenty powers of two.
 const EXPECTED_POWER_OF_TWO_SIZES:= 20
 const PRIMES: Array[int] = [3, 5, 11, 13, 19]
-const PRIME_WEIGHTS: Array[float] = [4.0, 4.0, 2.0, 2.0, 1.0]
+const PRIME_WEIGHTS: Array[float] = [4.0, 6.0, 2.0, 2.0, 1.0]
 const PRIME_COLOR:= Color(0.62, 0.62, 0.68)
 
 var replaced: Dictionary[int, bool] = { }
@@ -26,6 +26,7 @@ var forced_chance:= -1.0
 ## The prime level of a run (prime_level.gd) and its line under the game's score.
 var prime_level: Script = null
 var level_label: Label = null
+var level_layout: Array = []
 ## The prime scores screen (a second instance of the game's scores_screen.tscn) and the game's own.
 ## Untyped: the prime script adds members (scores, heading, select_source...) that ScoresScreen lacks.
 var scores_screen = null
@@ -43,7 +44,8 @@ var screenshot_toggle: SoboMenuButtonBool = null
 var guide_toggle: SoboMenuButtonBool = null
 var guide_label: Label = null
 ## The mode of the run being played: prime balls, no Steam upload / live score / achievements.
-var run_prime:= true
+var run_prime:= false
+var game_mode_scope: Script = null
 
 const SCORES_SCREEN_SCENE:= "res://ui/menu/screens/scores_screen/scores_screen.tscn"
 const TOGGLE_TEXT:= "prime balls"
@@ -71,6 +73,7 @@ func _ready() -> void:
 		# A sobo's value is its size. The game builds the data from the size alone (n = log2(size)),
 		# so a prime sits between its neighbouring powers of two. Built now so the first spawn is not slow.
 		SoboManager.get_sobo_data(p)
+	game_mode_scope = load(mod_dir().path_join("game_mode_scope.gd"))
 	prime_settings = load(mod_dir().path_join("prime_settings.gd")).new()
 	prime_text = load(mod_dir().path_join("prime_text.gd"))
 	prime_level = load(mod_dir().path_join("prime_level.gd"))
@@ -81,7 +84,6 @@ func _ready() -> void:
 		prime_settings.set_send_scores(false)
 		prime_settings.set_save_screenshots(false)
 	prime_settings.load_file()
-	apply_run(prime_settings.enabled)
 	# Before prime_scores.gd connects its own: the run's mode is set first.
 	SignalBus.on_game_mode_start.connect(on_game_mode_start)
 	SignalBus.on_sobo_join_bar.connect(on_sobo_join_bar)
@@ -121,6 +123,19 @@ func apply_steam_identity() -> void:
 
 func mod_dir() -> String:
 	return (get_script() as Script).resource_path.get_base_dir()
+
+
+## Keep every run-time side effect on the same game's default classic modes.
+func is_classic_run() -> bool:
+	return game_mode_scope != null && game_mode_scope.is_classic_run(GameModeManager)
+
+
+func is_prime_run() -> bool:
+	return run_prime && is_classic_run()
+
+
+func can_share_prime_best() -> bool:
+	return game_mode_scope != null && game_mode_scope.can_share_prime_best(GameModeManager)
 
 
 ## Autoloads are ready before the main scene, so wait for the game's Menu, then add a second
@@ -163,7 +178,7 @@ func install_scores_screen() -> void:
 func apply_scores_screen() -> void:
 	if Menu._0 == null || scores_screen == null:
 		return
-	Menu._0.scores_screen = scores_screen if prime_settings.enabled else original_scores_screen
+	Menu._0.scores_screen = scores_screen if prime_settings.enabled && is_classic_run() else original_scores_screen
 
 
 ## "prime balls" on the game's settings -> game screen, right under show instructions: a copy of
@@ -370,7 +385,7 @@ func place_guide_toggle() -> void:
 	var mode: GameScene = GameModeManager.current_scene if is_instance_valid(GameModeManager.current_scene) else null
 	var guide: Instructions = mode.instructions if mode != null && is_instance_valid(mode.instructions) else null
 	var shown: Control = guide.current_control if guide != null && is_instance_valid(guide.current_control) else null
-	var showing: bool = shown != null && shown != guide.demo_explanation && shown.is_visible_in_tree() && Menu._0 != null && Menu._0.visible == false
+	var showing: bool = is_classic_run() && shown != null && shown != guide.demo_explanation && shown.is_visible_in_tree() && Menu._0 != null && Menu._0.visible == false
 	guide_toggle.visible = showing
 	if not showing:
 		return
@@ -410,6 +425,8 @@ func guide_screen_box(control: Control) -> Rect2:
 ## "new game" does, so the new run takes the switch (on_game_mode_start). start_game_mode never
 ## loads the game's save (only the menu's resume does).
 func on_guide_toggle_pressed() -> void:
+	if not is_classic_run():
+		return
 	set_prime_enabled(prime_settings.enabled == false)
 	if is_instance_valid(GameModeManager.current_scene) && GameModeManager.current_game_mode != null:
 		GameModeManager.start_game_mode(GameModeManager.current_game_mode)
@@ -418,6 +435,9 @@ func on_guide_toggle_pressed() -> void:
 ## A run starts (a new one, or one continued from the game's save). SaveLoadManager.load() keeps
 ## the loaded game_state until the run is applied, so it is set here only for a continued run.
 func on_game_mode_start(_scene: GameScene) -> void:
+	if not is_classic_run():
+		apply_run(false)
+		return
 	var state: GameState = SaveLoadManager.game_state
 	var has_save: bool = SaveLoadManager.has_save()
 	var continued: bool = state != null && has_save
@@ -441,8 +461,9 @@ func state_holds_primes(state: GameState) -> bool:
 
 
 func apply_run(prime: bool) -> void:
-	run_prime = prime
-	if prime:
+	run_prime = prime && is_classic_run()
+	apply_scores_screen()
+	if run_prime:
 		block_online_scoring()
 	else:
 		unblock_online_scoring()
@@ -586,7 +607,7 @@ func pick_prime() -> int:
 ## A freshly spawned sobo joins the bar inside SceneClassic.spawn_sobo_on_side, before its
 ## collision bits and velocity are set; swap it for a prime once that call has finished.
 func on_sobo_join_bar(sobo: Sobo) -> void:
-	if enabled == false || is_prime_sobo(sobo) || sobo.merged:
+	if enabled == false || not is_prime_run() || is_prime_sobo(sobo) || sobo.merged:
 		return
 	var mode:= GameModeManager.current_scene as SceneClassic
 	if mode == null || mode.sobos_emerging.has(sobo) == false:
@@ -602,7 +623,7 @@ func on_sobo_join_bar(sobo: Sobo) -> void:
 ## The one place that decides whether a regular spawn becomes a prime.
 ## Never while the run was started with prime mode off.
 func roll_prime() -> bool:
-	return run_prime && randf() < run_chance()
+	return is_prime_run() && randf() < run_chance()
 
 
 ## The chance of a prime spawn now: the prime level's (spec §10), or the self test's fixed one.
@@ -633,18 +654,20 @@ func install_level_label() -> void:
 	level_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	target.add_child(level_label)
+	level_layout = []
 
 
 ## Use the game's visible score panel; portrait play has its score above the play area.
 func level_label_parent() -> Control:
 	if Ui._0 == null:
 		return null
-	var viewport: Rect2 = get_viewport().get_visible_rect()
-	if OS.has_feature("mobile"):
-		viewport = viewport.intersection(MobileManager.get_usable_rect())
-	var available: Rect2 = Ui._0.get_final_transform().affine_inverse() * viewport
+	var top: SidePanel = Ui._0.mobile_top_panel
+	if is_instance_valid(top) && top.is_visible_in_tree():
+		return top
 	for panel: SidePanel in Ui._0.side_panels:
-		if panel is RightSidePanel && panel.is_visible_in_tree() && panel.size.x > 16.0 && panel.size.y > 16.0 && available.encloses(guide_screen_box(panel)):
+		if not is_instance_valid(panel):
+			continue
+		if panel is RightSidePanel && panel.is_visible_in_tree() && panel.size.x > 16.0 && panel.size.y > 16.0:
 			return panel
 	return Ui._0.ui_play_area
 
@@ -656,7 +679,7 @@ func refresh_level_label() -> void:
 			install_level_label()
 		if level_label == null:
 			return
-	level_label.visible = run_prime && Menu._0 != null && not Menu._0.visible && GameModeManager.current_scene is SceneClassic
+	level_label.visible = is_prime_run() && Menu._0 != null && not Menu._0.visible
 	if not level_label.visible:
 		return
 	var target: Control = level_label_parent()
@@ -671,21 +694,34 @@ func refresh_level_label() -> void:
 	var viewport: Rect2 = get_viewport().get_visible_rect()
 	if OS.has_feature("mobile"):
 		viewport = viewport.intersection(MobileManager.get_usable_rect())
-	var local: Rect2 = target.get_global_transform_with_canvas().affine_inverse() * viewport
-	var available: Rect2 = Rect2(Vector2.ZERO, target.size).intersection(local).grow(-8.0)
+	# Label reshaping can update its wrapped minimum size on the next frame.
+	var layout: Array = [
+		target.get_instance_id(), target.size, viewport,
+		level_label.text, level_label.get_combined_minimum_size(),
+	]
+	if layout == level_layout:
+		return
+	var available: Rect2 = Rect2(Vector2.ZERO, target.size)
+	if target == Ui._0.ui_play_area:
+		var local: Rect2 = target.get_global_transform_with_canvas().affine_inverse() * viewport
+		available = available.intersection(local)
+	available = available.grow(-8.0)
 	if not available.has_area():
 		level_label.hide()
 		return
+	level_layout = layout
 	level_label.custom_minimum_size.x = available.size.x
 	level_label.size.x = available.size.x
 	level_label.size.y = level_label.get_combined_minimum_size().y
 	var bottom: float = target.size.y - LEVEL_MARGIN - level_label.size.y
 	level_label.position = Vector2(available.position.x,
-		clampf(bottom if side_panel else available.position.y, available.position.y,
+		clampf(bottom if side_panel else available.end.y - level_label.size.y, available.position.y,
 			maxf(available.position.y, available.end.y - level_label.size.y)))
 
 
 func replace_with_prime(sobo: Sobo, p: int) -> void:
+	if not is_prime_run():
+		return
 	var mode:= GameModeManager.current_scene as SceneClassic
 	if mode == null || is_instance_valid(sobo) == false || sobo.is_queued_for_deletion():
 		return
@@ -705,7 +741,7 @@ func replace_with_prime(sobo: Sobo, p: int) -> void:
 
 
 func _physics_process(_dt: float) -> void:
-	if enabled == false:
+	if enabled == false || not is_prime_run():
 		return
 	var primes: Array[Sobo] = []
 	for sobo: Sobo in SoboManager.all_sobos:
@@ -766,6 +802,8 @@ func _process(_dt: float) -> void:
 		return
 	place_guide_toggle()
 	refresh_level_label()
+	if not is_prime_run():
+		return
 	for sobo: Sobo in SoboManager.all_sobos:
 		if is_prime_sobo(sobo) && sobo.flashing <= 0.0:
 			sobo.color = PRIME_COLOR

@@ -14,18 +14,20 @@ payload = {f'prime_mod/{path.name}': path.read_bytes()
            if path.suffix in {'.gd', '.cfg'}}
 bootstrap = 'styles/prime_bootstrap.tres'
 payload[bootstrap] = (source / bootstrap).read_bytes()
+payload['prime_mod/game_mode_scope.gd'] = (source.parent / 'mods/prime_sobo/game_mode_scope.gd').read_bytes()
 metadata = {
     'format_version': 1, 'id': 'prime_sobo', 'name': 'Prime Sobos',
-    'version': '1.3.11-1.0.2', 'game_versions': ['1.3.11'],
+    'version': '1.3.11-1.0.3', 'game_versions': ['1.3.11'],
     'install_layout': 'user-data-styles', 'payload_root': 'prime_mod',
     'entry': 'prime_sobo.gd', 'autoload': 'PrimeSobo',
     'bootstrap': bootstrap, 'dependencies': [], 'files': sorted(payload),
     'description': {'en': 'Adds prime-numbered sobos. Pairs merge when their sum is a power of two.'},
     'author': 'T0y-9n', 'readme': 'README-en.md',
+    'game_credit': {'text': 'sobosuba by keepee', 'store_url': 'https://store.steampowered.com/app/1946560/sobosuba'},
 }
 args.output.mkdir(parents=True, exist_ok=True)
-path = args.output / 'sobosuba-prime-balls-1.3.11-1.0.2.zip'
-with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+path = args.output / 'sobosuba-prime-balls-1.3.11-1.0.3.zip'
+with zipfile.ZipFile(path, 'x', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
     for name, data in payload.items():
         archive.writestr(name, data)
     archive.writestr('mod-package.json', json.dumps(metadata, indent=2))
