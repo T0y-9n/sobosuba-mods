@@ -38,6 +38,7 @@ var prime_text: Script = null
 var prime_toggle: SoboMenuButtonBool = null
 ## The "send scores" switch (spec §8), right under prime balls: whether a run's score goes to the world.
 var send_toggle: SoboMenuButtonBool = null
+var screenshot_toggle: SoboMenuButtonBool = null
 ## prime balls again on the game's how-to-play guide (spec §9), with a line under it saying what it is.
 var guide_toggle: SoboMenuButtonBool = null
 var guide_label: Label = null
@@ -47,6 +48,7 @@ var run_prime:= true
 const SCORES_SCREEN_SCENE:= "res://ui/menu/screens/scores_screen/scores_screen.tscn"
 const TOGGLE_TEXT:= "prime balls"
 const SEND_TEXT:= "send scores"
+const SCREENSHOT_TEXT:= "save screenshots"
 const MENU_WAIT_FRAMES:= 600
 ## ScoresScreen members that the screen fills in while it runs (rows made in _ready, paging state).
 ## They are not copied from the game's live screen: the copy builds its own rows and starts at its
@@ -77,6 +79,7 @@ func _ready() -> void:
 		prime_settings.path = prime_settings.SELFTEST_PATH
 		prime_settings.set_enabled(true)
 		prime_settings.set_send_scores(false)
+		prime_settings.set_save_screenshots(false)
 	prime_settings.load_file()
 	apply_run(prime_settings.enabled)
 	# Before prime_scores.gd connects its own: the run's mode is set first.
@@ -152,6 +155,7 @@ func install_scores_screen() -> void:
 	print("%s scores screen installed: %s" % [MOD_TAG, copy.get_path()])
 	install_prime_toggle(menu)
 	install_send_toggle(menu)
+	install_screenshot_toggle(menu)
 	install_guide_toggle()
 
 
@@ -203,6 +207,9 @@ func refresh_texts() -> void:
 	if send_toggle != null:
 		send_toggle.label.text = word(SEND_TEXT)
 		send_toggle.tooltip_text = send_description()
+	if screenshot_toggle != null:
+		screenshot_toggle.label.text = word(SCREENSHOT_TEXT)
+		screenshot_toggle.tooltip_text = word("save screenshots description")
 	if guide_toggle != null:
 		guide_toggle.label.text = word(TOGGLE_TEXT)
 		guide_label.text = guide_description()
@@ -251,6 +258,41 @@ func install_send_toggle(_menu: Menu) -> void:
 	refresh_send_toggle()
 	compact_mobile_settings()
 	print("%s send scores switch installed: %s" % [MOD_TAG, button.get_path()])
+
+
+## A copy with its own nodes and signal, immediately after send scores on either platform.
+func install_screenshot_toggle(_menu: Menu) -> void:
+	var model: SoboMenuButtonBool = send_toggle
+	if model == null:
+		push_warning("%s screenshot switch not installed: send scores is not there" % MOD_TAG)
+		return
+	var button: SoboMenuButtonBool = model.duplicate(Node.DUPLICATE_GROUPS | Node.DUPLICATE_SCRIPTS | Node.DUPLICATE_USE_INSTANTIATION)
+	for prop: Dictionary in model.get_property_list():
+		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE && prop.usage & PROPERTY_USAGE_STORAGE:
+			button.set(prop.name, value_for_copy(model.get(prop.name), model, button))
+	button.name = "SaveScreenshots"
+	button.label.text = word(SCREENSHOT_TEXT)
+	button.release_press.connect(on_screenshot_toggle_pressed)
+	send_toggle.add_sibling(button)
+	screenshot_toggle = button
+	refresh_screenshot_toggle()
+	compact_mobile_settings()
+
+
+func refresh_screenshot_toggle() -> void:
+	if screenshot_toggle == null:
+		return
+	screenshot_toggle.set_value(prime_settings.save_screenshots)
+	screenshot_toggle.tooltip_text = word("save screenshots description")
+
+
+func on_screenshot_toggle_pressed() -> void:
+	set_save_screenshots(prime_settings.save_screenshots == false)
+
+
+func set_save_screenshots(value: bool) -> void:
+	prime_settings.set_save_screenshots(value)
+	refresh_screenshot_toggle()
 
 
 func send_description() -> String:
@@ -406,7 +448,7 @@ func apply_run(prime: bool) -> void:
 		unblock_online_scoring()
 
 
-## Make room for the two added rows without scaling the native slider controls.
+## Make room for the added rows without scaling the native slider controls.
 func compact_mobile_settings() -> void:
 	if Menu._0 == null || prime_toggle == null || not Menu._0.settings_mobile_screen.is_ancestor_of(prime_toggle):
 		return
@@ -747,6 +789,8 @@ func run_selftest() -> void:
 	# "send scores" starts off (spec §8). The world checks below need it on: the self-test file only.
 	var send_started_off: bool = prime_settings.send_scores == false && online.send_scores == false
 	set_send_scores(true)
+	var screenshots_started_off: bool = prime_settings.save_screenshots == false
+	set_save_screenshots(true)
 	# Keep natural spawns regular while the fixed pairs run, so a stray prime cannot pair with them.
 	forced_chance = 0.0
 	await start_default_run()
@@ -937,6 +981,7 @@ func run_selftest() -> void:
 		get_viewport().get_texture().get_image().save_png(mod_dir().path_join("selftest_shot3.png"))
 	await selftest_scores_screen(lines)
 	selftest_send_toggle(lines, send_started_off)
+	await selftest_screenshot_toggle(lines, screenshots_started_off)
 	selftest_prime_toggle(lines)
 	await selftest_guide_toggle(lines)
 	finish_selftest(lines)
@@ -1201,6 +1246,28 @@ func selftest_scores_world(lines: PackedStringArray, screen) -> void:
 
 
 ## Self test 10: prime mode on/off (spec §7), in prime_sobo_settings_selftest.json only.
+## Exercise the screenshot choice only in the self-test's settings and local board.
+func selftest_screenshot_toggle(lines: PackedStringArray, started_off: bool) -> void:
+	var real_settings_before: String = board_fingerprint(prime_settings.PATH)
+	check(lines, "screenshot toggle: starts off in the self-test file", started_off && prime_settings.path == prime_settings.SELFTEST_PATH, "")
+	var placed: bool = screenshot_toggle != null && send_toggle != null && screenshot_toggle.get_parent() == send_toggle.get_parent() && screenshot_toggle.get_index() == send_toggle.get_index() + 1 && screenshot_toggle.label != send_toggle.label && screenshot_toggle.bool_circles != send_toggle.bool_circles && screenshot_toggle.is_ancestor_of(screenshot_toggle.bool_circles) && screenshot_toggle.label.text == word(SCREENSHOT_TEXT) && screenshot_toggle.tooltip_text == word("save screenshots description")
+	check(lines, "screenshot toggle: under send scores with its own nodes", placed, "")
+	if screenshot_toggle == null:
+		return
+	screenshot_toggle.release_press.emit()
+	var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(prime_settings.SELFTEST_PATH))
+	check(lines, "screenshot toggle: off is saved", not prime_settings.save_screenshots && not screenshot_toggle.bool_circles.visible && saved is Dictionary && saved.get("save_screenshots") == false, "")
+	var handle_before: int = scores.last_screenshot_handle
+	var sending_before: bool = prime_settings.send_scores
+	set_send_scores(false)
+	await scores.on_game_over()
+	check(lines, "screenshot toggle: off leaves the Steam handle unchanged", scores.last_screenshot_handle == handle_before, "")
+	set_send_scores(sending_before)
+	screenshot_toggle.release_press.emit()
+	check(lines, "screenshot toggle: on is saved", prime_settings.save_screenshots && screenshot_toggle.bool_circles.visible && JSON.parse_string(FileAccess.get_file_as_string(prime_settings.SELFTEST_PATH)).get("save_screenshots") == true, "")
+	check(lines, "screenshot toggle: real settings untouched", board_fingerprint(prime_settings.PATH) == real_settings_before, "")
+
+
 ## The off part runs without a single frame in between (no await): with the switch off the game's
 ## Steam upload, live score and achievements are connected again, so no play may happen meanwhile.
 ## The next run is started the way the game starts one (its on_game_mode_start), without play.

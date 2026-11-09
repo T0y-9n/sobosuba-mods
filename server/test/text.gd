@@ -2,7 +2,7 @@ extends SceneTree
 ## Standalone Godot only; no sobosuba assets, autoloads, or game launch.
 ## The mod's own words (prime_text.gd) in each language the game offers, through the real TranslationServer.
 const LOCALES:= ["en", "ja", "de", "es", "it", "cs", "pl", "ru", "sr", "zh_CN", "zh_TW"]
-const KEYS:= ["prime balls", "send scores", "prime balls description", "send scores description", "guide description",
+const KEYS:= ["prime balls", "send scores", "save screenshots", "save screenshots description", "prime balls description", "send scores description", "guide description",
 	"board line", "local rank", "unranked", "friends", "world loading", "world rank", "you", "world failed",
 	"no steam", "not sent", "scores heading", "world disabled", "world", "screenshot location", "level"]
 var failures:= 0
@@ -24,6 +24,8 @@ func run() -> void:
 		check(false, "prime_text.gd compiles")
 		quit(1)
 		return
+	TranslationServer.set_locale("en")
+	check(words.get_text("save screenshots description") == "Saves the game-over screen to your Steam screenshots.", "screenshot description keeps the specified English wording")
 	for key: String in KEYS:
 		TranslationServer.set_locale("en")
 		var english: String = words.get_text(key)

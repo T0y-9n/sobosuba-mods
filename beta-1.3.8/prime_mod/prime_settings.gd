@@ -24,6 +24,8 @@ var run_prime:= true
 ## null while unknown (no file, or a file from before this was kept).
 var older_save: Variant = null
 var send_scores:= false
+## The screenshot switch (spec §12). Missing and invalid values stay off.
+var save_screenshots:= false
 ## Rises on every successful save. The marker records it, so a later save retires the marker even when
 ## the file's contents are otherwise unchanged (a normal run writing the same run_prime = false).
 var save_count:= 0
@@ -34,6 +36,7 @@ func load_file() -> void:
 	run_prime = true
 	older_save = null
 	send_scores = false
+	save_screenshots = false
 	if not FileAccess.file_exists(path):
 		return
 	# JSON.new().parse reports a broken file by its return value, without an engine error.
@@ -49,6 +52,8 @@ func load_file() -> void:
 		older_save = data.older_save
 	if data.get("send_scores") is bool:
 		send_scores = data.send_scores
+	if data.get("save_screenshots") is bool:
+		save_screenshots = data.save_screenshots
 	if data.get("save_count") is float:
 		save_count = int(data.save_count)
 	# The marker (see save_run_state) outranks a stale run_prime = false, but only while its save_count
@@ -70,7 +75,7 @@ func save_file() -> bool:
 		push_warning("[prime_sobo] settings not saved: %s (%s)" % [path, error_string(FileAccess.get_open_error())])
 		return false
 	var next_count:= save_count + 1
-	var data:= {"enabled": enabled, "run_prime": run_prime, "send_scores": send_scores, "save_count": next_count}
+	var data:= {"enabled": enabled, "run_prime": run_prime, "send_scores": send_scores, "save_screenshots": save_screenshots, "save_count": next_count}
 	if older_save is String:
 		data.older_save = older_save
 	file.store_string(JSON.stringify(data))
@@ -96,6 +101,16 @@ func set_send_scores(value: bool) -> bool:
 	if save_file():
 		return true
 	send_scores = before
+	return false
+
+
+## Screenshot saving uses the same file and keeps the last saved choice on write failure.
+func set_save_screenshots(value: bool) -> bool:
+	var before:= save_screenshots
+	save_screenshots = value
+	if save_file():
+		return true
+	save_screenshots = before
 	return false
 
 

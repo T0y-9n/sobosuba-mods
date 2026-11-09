@@ -216,13 +216,16 @@ func on_game_over() -> void:
 		var duration_s: int = int((Time.get_ticks_msec() - _round_started_ms) / 1000)
 		online.submit_score.call_deferred(score, duration_s, get_parent().run_chance())
 	print("[prime_sobo] game over: score=%d local_rank=%d best=%d friends=%d" % [score, last_rank, best_local(), friends.size()])
+	if not get_parent().prime_settings.save_screenshots:
+		return
 	await get_tree().create_timer(SCREENSHOT_DELAY, true).timeout
 	await RenderingServer.frame_post_draw
 	# A next run (or another game over) in the meantime: the screen is no longer this score's.
 	if serial != _over_serial or _round_finished == false:
 		print("[prime_sobo] screenshot skipped: the game over it was for is over")
 		return
-	save_steam_screenshot(score)
+	if get_parent().prime_settings.save_screenshots:
+		save_steam_screenshot(score)
 
 
 ## Writes into the player's local Steam screenshot library; uploading stays the player's choice.

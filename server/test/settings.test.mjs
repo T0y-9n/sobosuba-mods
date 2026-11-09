@@ -157,7 +157,7 @@ test("prime_sobo.gd puts prime balls on the guide while it shows, and pressing s
     const next = source.indexOf("\nfunc ", start + 1);
     return source.slice(start, next < 0 ? undefined : next);
   };
-  assert.match(source, /\n\tinstall_send_toggle\(menu\)\n\tinstall_guide_toggle\(\)\n/, "the guide switch is made after the settings switches");
+  assert.match(source, /\n\tinstall_send_toggle\(menu\)\n\tinstall_screenshot_toggle\(menu\)\n\tinstall_guide_toggle\(\)\n/, "the guide switch is made after the settings switches");
   assert.match(body("install_guide_toggle"), /Ui\._0\.add_child\(/, "it sits on the screen layer the game's side panels use");
   // A copy of the button's own Label, shown under the guide, crashed the game when a new run began
   // (2026-10-31 on the real game: the copy without that line did not crash). The line is a new Label.

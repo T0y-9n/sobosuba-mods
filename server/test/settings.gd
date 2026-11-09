@@ -149,6 +149,27 @@ func run() -> void:
 	unwritable.path = dir.path_join("no such folder").path_join("send.json")
 	check(unwritable.set_send_scores(true) == false and unwritable.send_scores == false, "send scores that could not be written stays as it was")
 
+	# Screenshot saving (spec §12) is a separate choice in the same settings file.
+	var shot_path: String = dir.path_join("screenshots.json")
+	var shot: RefCounted = fresh(script, shot_path)
+	check(shot.save_screenshots == false, "screenshots are off with no file")
+	for text: String in ["{", "{\"send_scores\": true}", "{\"save_screenshots\": \"yes\"}", "{\"save_screenshots\": 1}", "{\"save_screenshots\": null}"]:
+		var shot_file:= FileAccess.open(shot_path, FileAccess.WRITE)
+		shot_file.store_string(text)
+		shot_file.close()
+		shot.save_screenshots = true
+		shot.load_file()
+		check(shot.save_screenshots == false, "missing or invalid screenshot choice resets to off: %s" % text)
+	shot.set_send_scores(true)
+	check(shot.set_save_screenshots(true) and written(shot_path).get("save_screenshots") == true, "screenshots on is written")
+	var shot_again: RefCounted = fresh(script, shot_path)
+	check(shot_again.save_screenshots and shot_again.send_scores, "screenshots on is read back independently of sending")
+	check(shot_again.set_save_screenshots(false) and fresh(script, shot_path).save_screenshots == false and fresh(script, shot_path).send_scores, "screenshots off is read back and keeps sending choice")
+	shot_again.path = dir.path_join("no such folder").path_join("screenshots.json")
+	check(not shot_again.set_save_screenshots(true) and not shot_again.save_screenshots, "failed screenshot enable keeps off")
+	shot_again.save_screenshots = true
+	check(not shot_again.set_save_screenshots(false) and shot_again.save_screenshots, "failed screenshot disable keeps on")
+
 	# The self-test writes only its own file.
 	var real_path: String = dir.path_join("real.json")
 	var real_file:= FileAccess.open(real_path, FileAccess.WRITE)

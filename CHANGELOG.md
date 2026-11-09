@@ -2,6 +2,11 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### 1.2.3-1.0.4 and 1.3.11-1.0.2, 2026-11-09
+
+- Added save screenshots directly below send scores in desktop and mobile settings, with labels and descriptions in all 11 game languages.
+- Automatic Steam screenshots are now off by default, including for existing settings. Enable the switch to save future game-over screens.
+
 ### 1.3.11-1.0.1 and 1.2.3-1.0.3, 2026-11-09
 
 - Smartphone layout support: native mobile settings switches, screen-fitting guide and level labels, and mobile ranking controls.
@@ -45,6 +50,11 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### 1.2.3-1.0.4 と 1.3.11-1.0.2、2026-11-09
+
+- PCと携帯の設定画面で、send scoresの直下にsave screenshotsを追加しました。ラベルと説明は11言語に対応しています。
+- Steamへの自動撮影は既定でオフです。既存の設定にも適用されます。オンにすると、それからの試合終了画面を保存します。
 
 ### 1.3.11-1.0.1 と 1.2.3-1.0.3、2026-11-09
 

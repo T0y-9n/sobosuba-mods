@@ -4,8 +4,8 @@
 
 | Game | Prime Sobos download | Special Sobos download | SoboSandbox download | GreenScreenSobos |
 | --- | --- | --- | --- | --- |
-| Current 1.3.11 | [1.3.11-1.0.1](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.1) | [0.5.2 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.2) | [1.3.0 by Typhe681](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
-| Older 1.2.3 | [1.2.3-1.0.3](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.3) | — | — | — |
+| Current 1.3.11 | [1.3.11-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.2) | [0.5.2 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.2) | [1.3.0 by Typhe681](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
+| Older 1.2.3 | [1.2.3-1.0.4](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.4) | - | - | - |
 
 Smartphone layout support: Prime Sobos and Special Sobos now adapt their settings and labels to portrait screens. Checked on Windows with phone-size layouts; real-device touch, safe areas and software keyboards still need verification.
 
@@ -32,7 +32,7 @@ A mod that mixes prime numbers into [sobosuba](https://store.steampowered.com/ap
 You need the game. No game files are included here.
 keepee, the developer, said mods are fine as long as they need the game, that GitHub and streaming are fine, and that mod scores should go to our own server. Thanks, keepee!
 
-The current download is mod version `1.3.11-1.0.1`, made for sobosuba 1.3.11.
+The current download is mod version `1.3.11-1.0.2`, made for sobosuba 1.3.11.
 The manual installation steps below cover the older game version 1.2.3.
 Use the linked package guide for 1.3.11. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
@@ -97,7 +97,7 @@ While prime balls are on, the scores menu opens a prime version of the scores sc
 
 To see the official Steam leaderboard, turn `prime balls` off.
 
-When a run ends, a small board at the top shows this run, your best, and your friends' and world ranks. A screenshot of it is saved to your Steam screenshots, tagged with your prime score. Uploading it is up to you.
+When a run ends, a small board at the top shows this run, your best, and your friends' and world ranks. Enable save screenshots below send scores in settings to save future game-over screens to your Steam screenshots, tagged with your prime score. The switch is off by default, including for existing settings. Uploading a saved screenshot is up to you.
 
 ### World ranking
 
@@ -151,8 +151,8 @@ MIT, see [LICENSE](LICENSE). The license covers only the code written for this m
 
 | ゲーム | 素数MOD | 特別なソボ | SoboSandbox | GreenScreenSobos |
 | --- | --- | --- | --- | --- |
-| 現在の通常版 1.3.11 | [1.3.11-1.0.1](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.1) | [0.5.2（beta）](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.2) | [1.3.0（作者 Typhe681）](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
-| 前の版 1.2.3 | [1.2.3-1.0.3](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.3) | — | — | — |
+| 現在の通常版 1.3.11 | [1.3.11-1.0.2](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.2) | [0.5.2（beta）](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.2) | [1.3.0（作者 Typhe681）](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
+| 前の版 1.2.3 | [1.2.3-1.0.4](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.4) | - | - | - |
 
 SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.3.11が挙げられています。
 
@@ -163,7 +163,7 @@ SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.
 ゲーム本体が必要です。このリポジトリにゲームのファイルは入っていません。
 作者の keepee さんから「ゲーム本体が要る作りならよい、GitHub と配信もよい、MOD の点数は自前のサーバで」と了承をもらっています。
 
-現在の配布版 `1.3.11-1.0.1` は、sobosuba 1.3.11向けのMOD 1.0.1です。以下の手動導入手順は前の版1.2.3を対象としています。1.3.11は上の導入案内を使ってください。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
+現在の配布版 `1.3.11-1.0.2` は、sobosuba 1.3.11向けのMOD 1.0.2です。以下の手動導入手順は前の版1.2.3を対象としています。1.3.11は上の導入案内を使ってください。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
 
 ### 素数の玉
 
@@ -226,7 +226,7 @@ MOD の文字はゲームの言語の設定に合わせて変わります。英�
 
 本家の Steam のランキングを見たいときは `prime balls` を切ってください。
 
-試合が終わると、画面の上に今回の点と自己ベスト、フレンドと世界の順位が出ます。そのときの盤面は素数モードの点の印 (日本語なら「素数モード N点」) を付けて Steam のスクリーンショットに保存されます。アップロードするかどうかは自分で決められます。
+試合が終わると、画面の上に今回の点と自己ベスト、フレンドと世界の順位が出ます。設定のsend scores直下にあるsave screenshotsをオンにすると、それからの試合終了画面を素数モードの点の印付きでSteamのスクリーンショットに保存します。既存の設定も含め、既定はオフです。保存した画像をアップロードするかどうかは自分で決められます。
 
 ### 世界ランキング
 
