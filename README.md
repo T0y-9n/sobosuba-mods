@@ -145,6 +145,8 @@ One catch: if you have a saved run with prime balls on the board, the game crash
 
 MIT, see [LICENSE](LICENSE). The license covers only the code written for this mod. sobosuba and its code, art, sounds and text belong to keepee. Parts of this mod follow and adapt the game's own code (such as the scores screen); those parts stay keepee's and are not licensed here. This is an unofficial mod and not part of sobosuba. If keepee asks us to change or take down anything, we will.
 
+To keepee: all ideas, code and assets in my sobosuba mods and in the Sobo Mod Manager are yours to use, change or build into sobosuba or any of your work. Free, no credit needed, and I will never take this back or claim anything for it. If you ever want the rights formally transferred to you, just tell me and I'll do it. And if you take them over, I'll remove my mods and the manager from GitHub, so there is only your version.
+
 ## 日本語
 
 ### ゲームの版ごとのダウンロード
@@ -273,3 +275,5 @@ MOD の文字はゲームの言語の設定に合わせて変わります。英�
 ### ライセンス
 
 MIT。詳しくは [LICENSE](LICENSE)。このライセンスが及ぶのは、この MOD のために書いたコードだけです。sobosuba 本体と、そのコード・絵・音・文字は作者の keepee さんのものです。この MOD の一部 (スコア画面など) は本家のコードをなぞって手を加えたもので、その部分は keepee さんのものとし、ここでは許していません。非公式の MOD で、sobosuba の一部ではありません。keepee さんから直しや取り下げを求められたら従います。
+
+keepee さんへ: 私の sobosuba の MOD と Sobo Mod Manager にあるアイデア・コード・素材は、すべて自由に使い、変え、sobosuba やあなたのどの作品にも組み込んでください。無料で、名前を出す必要もありません。この約束は取り消さず、見返りも求めません。もし権利を正式に移してほしいときは、言ってもらえればそうします。そして、あなたが受け取ってくれるなら、私の MOD とマネージャーは GitHub から消します。あなたの版だけが残るようにします。
