@@ -12,12 +12,16 @@
       "sha256": "73502eb27230ec260bbff4e5c7ddb92dbaa1ffbed3b2b708d6bf990bd0cfd5f2",
       "variants": [
         {
-          "version": "1.3.11-1.0.2",
+          "version": "1.3.11-1.0.3",
           "game_versions": [
             "1.3.11"
           ],
-          "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.3.11-1.0.2/sobosuba-prime-balls-1.3.11-1.0.2.zip",
-          "sha256": "330b84b1ad83bead95e5e5c212e5365854c024a5446eb93e2f827596b446ac66"
+          "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.3.11-1.0.3/sobosuba-prime-balls-1.3.11-1.0.3.zip",
+          "sha256": "c4e2e7c2cdd11c5253fd7975efbc1431b60867274af54019eda502b5ee857ec0",
+          "game_credit": {
+            "text": "sobosuba by keepee",
+            "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
+          }
         }
       ]
     },
