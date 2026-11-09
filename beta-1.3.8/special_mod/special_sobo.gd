@@ -51,6 +51,10 @@ func mod_dir() -> String:
 	return (get_script() as Script).resource_path.get_base_dir()
 
 
+func is_classic_run() -> bool:
+	return load(mod_dir().path_join("game_mode_scope.gd")).is_classic_run(GameModeManager)
+
+
 func _ready() -> void:
 	tuning = load(mod_dir().path_join("special_tuning.gd"))
 	settings = load(mod_dir().path_join("special_settings.gd")).new()
@@ -109,6 +113,8 @@ func capture_extra_state(sobo: Sobo) -> Dictionary:
 
 
 func restore_extra_state(sobo: Sobo, saved: Variant) -> void:
+	if not is_classic_run():
+		return
 	var data: Dictionary = saved.duplicate(true) if saved is Dictionary else {}
 	if is_instance_valid(extra_effects):
 		extra_effects.restore(sobo, data)
@@ -153,18 +159,18 @@ func on_game_mode_start(mode: GameScene) -> void:
 	var saved: GameState = SaveLoadManager.game_state
 	var continued: bool = saved != null and SaveLoadManager.get("special_load_session") == GameModeManager.start_session
 	apply_run(false if GameModeManager.run.replay else (bool(saved.get_meta("special_sobo_run", true)) if continued else settings.enabled))
-	if mode is SceneClassic:
+	if is_classic_run() and mode is SceneClassic:
 		mode.ready.connect(patch_mode.bind(weakref(mode)), CONNECT_ONE_SHOT)
 
 
 func patch_mode(reference: WeakRef) -> void:
 	var mode: SceneClassic = reference.get_ref()
-	if mode != null and not mode.is_queued_for_deletion():
+	if is_classic_run() and mode != null and GameModeManager.current_scene == mode and not mode.is_queued_for_deletion():
 		patch_script(mode, mod_dir().path_join("special_classic.gd"))
 
 
 func apply_run(value: bool) -> void:
-	run_special = value
+	run_special = value and is_classic_run()
 	Engine.set_meta("special_sobo_run", run_special)
 	var prime: Node = get_prime()
 	var prime_run: bool = prime != null and prime.run_prime
@@ -211,11 +217,13 @@ func trait_of(sobo: Sobo) -> String:
 
 
 func on_safety_spawn(sobo: Sobo) -> void:
+	if not is_classic_run():
+		return
 	sobo.set_meta(SAFETY_META, true)
 
 
 func on_sobo_join_bar(sobo: Sobo) -> void:
-	if not run_special or sobo.merged or not SoboManager.power_of_two_sizes.has(sobo.data.size) or trait_of(sobo) != "":
+	if not is_classic_run() or not run_special or sobo.merged or not SoboManager.power_of_two_sizes.has(sobo.data.size) or trait_of(sobo) != "":
 		return
 	var mode:= GameModeManager.current_scene as SceneClassic
 	if mode == null or not mode.sobos_emerging.has(sobo):
@@ -226,7 +234,7 @@ func on_sobo_join_bar(sobo: Sobo) -> void:
 func consider_spawn(reference: WeakRef, mode: SceneClassic, serial: int) -> void:
 	await get_tree().process_frame
 	var sobo: Sobo = reference.get_ref()
-	if serial != run_serial or not is_instance_valid(mode) or GameModeManager.current_scene != mode:
+	if not is_classic_run() or serial != run_serial or not is_instance_valid(mode) or GameModeManager.current_scene != mode:
 		return
 	if sobo == null or sobo.is_queued_for_deletion() or sobo.get_meta(REPLACED_META, false) or sobo.get_meta(SAFETY_META, false):
 		return
@@ -240,7 +248,7 @@ func consider_spawn(reference: WeakRef, mode: SceneClassic, serial: int) -> void
 
 
 func apply_trait(sobo: Sobo, kind: String) -> Sobo:
-	if kind == "" or not SoboManager.power_of_two_sizes.has(sobo.data.size) or (kind == "small" and sobo.data.size == 1):
+	if not is_classic_run() or kind == "" or not SoboManager.power_of_two_sizes.has(sobo.data.size) or (kind == "small" and sobo.data.size == 1):
 		return sobo
 	if kind == "small":
 		sobo = replace_small(sobo)
@@ -324,6 +332,8 @@ func replace_shape(sobo: Sobo, data: SoboManager.SoboData, kind: String) -> Sobo
 
 
 func on_sobo_merge(old0: Sobo, old1: Sobo, result: Sobo) -> void:
+	if not is_classic_run():
+		return
 	forget_sticky(old0)
 	forget_sticky(old1)
 	var trait0: String = trait_of(old0)
@@ -362,7 +372,7 @@ func settle_smalls(mode: SceneClassic) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if not run_special or SpaceGravity._0 == null:
+	if not is_classic_run() or not run_special or SpaceGravity._0 == null:
 		return
 	var mode:= GameModeManager.current_scene as SceneClassic
 	if mode == null:

@@ -6,7 +6,7 @@ var special_load_session:= 0
 
 
 func save() -> void:
-	if not can_save():
+	if not get_node("/root/SpecialSobo").is_classic_run() or not can_save():
 		super.save()
 		return
 	super.save()
