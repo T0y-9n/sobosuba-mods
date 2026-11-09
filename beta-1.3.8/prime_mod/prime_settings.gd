@@ -1,4 +1,6 @@
 extends RefCounted
+
+const MOD_TAG:= preload("prime_diagnostics.gd").MOD_TAG
 ## Prime mode on/off (spec §7), kept in this mod's own file, never in the game's settings.tres.
 ## {"enabled": bool, "run_prime": bool, "older_save": String, "send_scores": bool}
 ## - enabled: the "prime balls" switch in settings -> game. No file or an unreadable value: on.
@@ -72,7 +74,7 @@ func load_file() -> void:
 func save_file() -> bool:
 	var file:= FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
-		push_warning("[prime_sobo] settings not saved: %s (%s)" % [path, error_string(FileAccess.get_open_error())])
+		push_warning(MOD_TAG + " settings not saved: %s (%s)" % [path, error_string(FileAccess.get_open_error())])
 		return false
 	var next_count:= save_count + 1
 	var data:= {"enabled": enabled, "run_prime": run_prime, "send_scores": send_scores, "save_screenshots": save_screenshots, "save_count": next_count}
@@ -152,18 +154,18 @@ func save_run_state() -> bool:
 		if FileAccess.file_exists(prime_marker_path()):
 			DirAccess.remove_absolute(prime_marker_path())
 		return true
-	push_warning("[prime_sobo] run mode not saved (run_prime=%s); a restart may not know it" % run_prime)
+	push_warning(MOD_TAG + " run mode not saved (run_prime=%s); a restart may not know it" % run_prime)
 	if run_prime and file_says_not_prime():
 		var error: Error = DirAccess.remove_absolute(path)
 		if error != OK:
-			push_warning("[prime_sobo] stale run mode could not be removed: %s (%s)" % [path, error_string(error)])
+			push_warning(MOD_TAG + " stale run mode could not be removed: %s (%s)" % [path, error_string(error)])
 			# The stale file stays and would read back as the game's own run. A second file, which
 			# load_file reads as "the latest run was prime", keeps the restart on the prime side.
 			if not write_prime_marker():
 				# TODO-138: nothing could be written. This run stays prime in memory (start_run returns
 				# run_prime), but a restart reads the stale file; start_run's save_holds_primes check
 				# is then the only thing left that treats a continued save as prime.
-				push_warning("[prime_sobo] prime run could not be remembered on disk: a restart may read the older mode")
+				push_warning(MOD_TAG + " prime run could not be remembered on disk: a restart may read the older mode")
 	return false
 
 

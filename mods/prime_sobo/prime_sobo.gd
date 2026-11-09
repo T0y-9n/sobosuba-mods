@@ -6,15 +6,19 @@ extends Node
 ## In a prime run, Steam leaderboard uploads, live friend scores and achievements are off.
 ## "prime balls" in settings -> game turns prime mode off (the game as it is) from the next run.
 
-const MOD_TAG:= "[prime_sobo]"
+const MOD_VERSION:= preload("prime_diagnostics.gd").MOD_VERSION
+const MOD_TAG:= preload("prime_diagnostics.gd").MOD_TAG
 const EXPECTED_BASE_TIERS:= 20
 const PRIMES: Array[int] = [3, 5, 11, 13, 19]
-const PRIME_WEIGHTS: Array[float] = [4.0, 4.0, 2.0, 2.0, 1.0]
+const PRIME_WEIGHTS: Array[float] = [4.0, 6.0, 2.0, 2.0, 1.0]
 const PRIME_COLOR:= Color(0.62, 0.62, 0.68)
 
 var prime_tier_by_value: Dictionary[int, int] = { }
 var replaced: Dictionary[int, bool] = { }
 var enabled:= false
+var diagnostics: RefCounted = null
+var diagnostics_suspended := false
+var diagnostic_merge_parents: Dictionary[String, Array] = {}
 var selftest:= false
 ## Self-test only: noguard.flag turns off the same-tier guard to prove the 3+3 check can fail.
 var guard_disabled_for_test:= false
@@ -26,6 +30,7 @@ var forced_chance:= -1.0
 ## The prime level of a run (prime_level.gd) and its line under the game's score.
 var prime_level: Script = null
 var level_label: Label = null
+var level_layout: Array = []
 ## The prime scores screen (a second instance of the game's scores_screen.tscn) and the game's own.
 ## Untyped: the prime script adds members (scores, heading, select_source...) that ScoresScreen lacks.
 var scores_screen = null
@@ -43,7 +48,8 @@ var screenshot_toggle: SoboMenuButtonBool = null
 var guide_toggle: SoboMenuButtonBool = null
 var guide_label: Label = null
 ## The mode of the run being played: prime balls, no Steam upload / live score / achievements.
-var run_prime:= true
+var run_prime:= false
+var game_mode_scope: Script = null
 ## AchievementTracker.disable_achievements before this mod changed it, given back when off.
 var achievements_before:= false
 
@@ -69,11 +75,16 @@ func _ready() -> void:
 	if base != EXPECTED_BASE_TIERS:
 		push_warning("%s disabled: expected %d sobo tiers, found %d" % [MOD_TAG, EXPECTED_BASE_TIERS, base])
 		return
+	diagnostics = load(mod_dir().path_join("prime_diagnostics.gd")).new()
+	var diagnostic_error: Error = diagnostics.start()
+	if diagnostic_error != OK:
+		push_warning("%s diagnostic thread could not start: %s" % [MOD_TAG, error_string(diagnostic_error)])
 	for i: int in PRIMES.size():
 		var sd: SoboManager.SoboData = make_prime_data(PRIMES[i], base + i)
 		SoboManager.precomputed_sobo_datas.append(sd)
 		SoboManager.size_tier_to_doubling_tier_cache.append(sd.doubling_tier)
 		prime_tier_by_value[PRIMES[i]] = sd.size_tier
+	game_mode_scope = load(mod_dir().path_join("game_mode_scope.gd"))
 	prime_settings = load(mod_dir().path_join("prime_settings.gd")).new()
 	prime_text = load(mod_dir().path_join("prime_text.gd"))
 	prime_level = load(mod_dir().path_join("prime_level.gd"))
@@ -85,10 +96,10 @@ func _ready() -> void:
 		prime_settings.set_save_screenshots(false)
 	prime_settings.load_file()
 	achievements_before = AchievementTracker.disable_achievements
-	apply_run(prime_settings.enabled)
 	# Before prime_scores.gd connects its own: the run's mode is set first.
 	SignalBus.on_game_mode_start.connect(on_game_mode_start)
 	SignalBus.on_sobo_join_bar.connect(on_sobo_join_bar)
+	SignalBus.on_sobo_merge.connect(on_native_sobo_merge)
 	online = load(mod_dir().path_join("prime_online.gd")).new()
 	online.send_scores = prime_settings.send_scores
 	add_child(online)
@@ -125,6 +136,19 @@ func apply_steam_identity() -> void:
 
 func mod_dir() -> String:
 	return (get_script() as Script).resource_path.get_base_dir()
+
+
+## Keep every run-time side effect on the same game's default classic modes.
+func is_classic_run() -> bool:
+	return game_mode_scope != null && game_mode_scope.is_classic_run(GameModeManager)
+
+
+func is_prime_run() -> bool:
+	return run_prime && is_classic_run()
+
+
+func can_share_prime_best() -> bool:
+	return game_mode_scope != null && game_mode_scope.can_share_prime_best(GameModeManager)
 
 
 ## Autoloads are ready before the main scene, so wait for the game's Menu, then add a second
@@ -167,7 +191,7 @@ func install_scores_screen() -> void:
 func apply_scores_screen() -> void:
 	if Menu._0 == null || scores_screen == null:
 		return
-	Menu._0.scores_screen = scores_screen if prime_settings.enabled else original_scores_screen
+	Menu._0.scores_screen = scores_screen if prime_settings.enabled && is_classic_run() else original_scores_screen
 
 
 ## "prime balls" on the game's settings -> game screen, right under show instructions: a copy of
@@ -199,6 +223,16 @@ func word(key: String) -> String:
 
 
 func _notification(what: int) -> void:
+	if diagnostics != null:
+		if what == NOTIFICATION_WM_CLOSE_REQUEST:
+			diagnostics.stop()
+		elif what == NOTIFICATION_PAUSED:
+			diagnostics.set_armed(false)
+		elif what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+			diagnostics_suspended = true
+			diagnostics.set_armed(false)
+		elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+			diagnostics_suspended = false
 	if what == NOTIFICATION_TRANSLATION_CHANGED:
 		refresh_texts()
 
@@ -374,7 +408,7 @@ func place_guide_toggle() -> void:
 	var mode: GameMode = GameModeManager.current_mode if is_instance_valid(GameModeManager.current_mode) else null
 	var guide: Instructions = mode.instructions if mode != null && is_instance_valid(mode.instructions) else null
 	var shown: Control = guide.current_control if guide != null && is_instance_valid(guide.current_control) else null
-	var showing: bool = shown != null && shown != guide.demo_explanation && shown.is_visible_in_tree() && Menu._0 != null && Menu._0.visible == false
+	var showing: bool = is_classic_run() && shown != null && shown != guide.demo_explanation && shown.is_visible_in_tree() && Menu._0 != null && Menu._0.visible == false
 	guide_toggle.visible = showing
 	if not showing:
 		return
@@ -414,6 +448,8 @@ func guide_screen_box(control: Control) -> Rect2:
 ## "new game" does, so the new run takes the switch (on_game_mode_start). start_game_mode never
 ## loads the game's save (only the menu's resume does).
 func on_guide_toggle_pressed() -> void:
+	if not is_classic_run():
+		return
 	set_prime_enabled(prime_settings.enabled == false)
 	if is_instance_valid(GameModeManager.current_mode):
 		GameModeManager.start_game_mode(GameModeManager.current_mode.scene_file_path)
@@ -422,14 +458,34 @@ func on_guide_toggle_pressed() -> void:
 ## A run starts (a new one, or one continued from the game's save). SaveLoadManager.load() keeps
 ## the loaded game_state until the run is applied, so it is set here only for a continued run.
 func on_game_mode_start(_mode: GameMode) -> void:
+	if not is_classic_run():
+		apply_run(false)
+		return
 	var state: GameState = SaveLoadManager.game_state
 	var has_save: bool = SaveLoadManager.has_save()
 	var continued: bool = state != null && has_save
+	if continued:
+		resize_saved_primes(state)
 	# The save on disk now: for a new run the older run's (kept until this run saves), for a continued
 	# run the one being loaded (the game deletes it only after applying it). A save whose MD5 cannot
 	# be read is marked unreadable, never passed as no save.
 	var save_id: String = prime_settings.save_id_of(has_save, FileAccess.get_md5(SaveLoadManager.SAVE_PATH) if has_save else "")
 	apply_run(prime_settings.start_run(continued, continued && state_holds_primes(state), save_id))
+
+
+## Adjust only saved prime rings whose old point count no longer fits the borrowed size.
+func resize_saved_primes(state: GameState) -> void:
+	var prime_tiers: Array = prime_tier_by_value.values()
+	for list_name: String in ["sobos_emerging", "sobos_selectable", "sobos_in_stack"]:
+		for saved: SoboState in state.get(list_name):
+			if not prime_tiers.has(saved.size_tier):
+				continue
+			var data: SoboManager.SoboData = SoboManager.precomputed_sobo_datas[saved.size_tier]
+			if saved.suba_positions.size() == data.suba_count && saved.suba_linear_velocities.size() == data.suba_count:
+				continue
+			saved.suba_positions = Transform2D(0.0, saved.get_center()) * PackedVector2Array(data.circular_positions)
+			saved.suba_linear_velocities.resize(data.suba_count)
+			saved.suba_linear_velocities.fill(saved.extra_mass_ball_linear_velocity)
 
 
 ## Whether a saved run has prime balls on the board. A run started off never rolls a prime, so a save
@@ -445,8 +501,9 @@ func state_holds_primes(state: GameState) -> bool:
 
 
 func apply_run(prime: bool) -> void:
-	run_prime = prime
-	if prime:
+	run_prime = prime && is_classic_run()
+	apply_scores_screen()
+	if run_prime:
 		block_online_scoring()
 	else:
 		unblock_online_scoring()
@@ -473,6 +530,8 @@ func on_menu_opened() -> void:
 		guide_toggle.hide()
 	if level_label != null:
 		level_label.hide()
+	if diagnostics != null:
+		diagnostics.set_armed(false)
 
 
 func on_menu_closed() -> void:
@@ -515,38 +574,12 @@ func value_for_copy(value: Variant, original: Node, copy: Node) -> Variant:
 	return value
 
 
-## Same construction as SoboManager.precompute_sobo_datas, with n = log2(p) so a prime
-## sits between its neighbouring powers of two in size.
+## Borrow the nearest existing size while keeping a separate prime value and tier.
 func make_prime_data(p: int, tier: int) -> SoboManager.SoboData:
-	var sd:= SoboManager.SoboData.new()
-	sd.size_tier = tier
+	var base_tier: int = roundi(log(float(p)) / log(2.0))
+	var sd: SoboManager.SoboData = copy_with_size_tier(SoboManager.precomputed_sobo_datas[base_tier], tier)
 	sd.doubling_tier = p
-	var n: float = log(float(p)) / log(2.0)
-	var suba_r: float = SoboManager.suba_circle_shape.radius
-	var target_outer_radius: float = Kf.circle_radius_from_area(pow(1.26, n) * 3700.0)
-	var target_inner_circumference: float = Kf.circle_circumference_from_radius(target_outer_radius - suba_r)
-	sd.inner_circle.circumference = snappedf(target_inner_circumference, SoboManager.dist_between_subas)
-	sd.inner_circle.radius = Kf.circle_radius_from_circumference(sd.inner_circle.circumference)
-	sd.inner_circle.area = Kf.circle_area_from_radius(sd.inner_circle.radius)
-	sd.outer_circle.radius = sd.inner_circle.radius + suba_r
-	sd.outer_circle.area = Kf.circle_area_from_radius(sd.outer_circle.radius)
-	sd.outer_circle.circumference = Kf.circle_circumference_from_radius(sd.outer_circle.radius)
-	sd.suba_count = roundi(sd.inner_circle.circumference / SoboManager.dist_between_subas)
-	sd.extra_mass_ball_mass = sd.outer_circle.area / 350.0 - sd.suba_count
-	sd.total_mass = sd.suba_count + sd.extra_mass_ball_mass
-	var offset:= Vector2.RIGHT * sd.inner_circle.radius
-	var ang_increment:= TAU / float(sd.suba_count)
-	for si in sd.suba_count:
-		sd.circular_positions.append(offset)
-		offset = offset.rotated(ang_increment)
 	sd.total_merged_score = 0
-	sd.flash_duration = log(100.0) * sd.outer_circle.area / SoboManager.flash_decay_rate
-	var dark_well_inner: float = sd.outer_circle.radius * Sobo.DARK_WELL_INNER_RATIO
-	var dark_well_outer: float = dark_well_inner + Sobo.DARK_WELL_FALLOFF
-	sd.dark_well_scale = (dark_well_outer * 2.0) / float(SoboManager.DARK_WELL_TEXTURE.get_width())
-	sd.dark_well_material = ShaderMaterial.new()
-	sd.dark_well_material.shader = SoboManager.DARK_WELL_SHADER
-	sd.dark_well_material.set_shader_parameter("inner_uv", 0.5 * dark_well_inner / dark_well_outer)
 	return sd
 
 
@@ -571,7 +604,11 @@ func unblock_online_scoring() -> void:
 		for c: Dictionary in others:
 			SignalBus.on_game_over.connect(c.callable, c.flags)
 	swap_listener(SignalBus.on_gain_score, gain_score_offline, Callable(ScoreManager, "gain_score"))
-	AchievementTracker.disable_achievements = achievements_before
+	AchievementTracker.disable_achievements = (
+		achievements_before
+		|| ScoreManager.disable_scoring
+		|| (is_classic_run() && Engine.get_meta("special_sobo_run", false))
+	)
 
 
 ## Puts `to` in the place of `from` among the signal's listeners, keeping the order of the others.
@@ -621,7 +658,7 @@ func pick_prime() -> int:
 ## A freshly spawned sobo joins the bar inside ModeClassic.spawn_sobo_on_side, before its
 ## collision bits and velocity are set; swap it for a prime once that call has finished.
 func on_sobo_join_bar(sobo: Sobo) -> void:
-	if enabled == false || is_prime_sobo(sobo) || sobo.merged:
+	if enabled == false || not is_prime_run() || is_prime_sobo(sobo) || sobo.merged:
 		return
 	var mode:= GameModeManager.current_mode as ModeClassic
 	if mode == null || mode.sobos_emerging.has(sobo) == false:
@@ -637,7 +674,7 @@ func on_sobo_join_bar(sobo: Sobo) -> void:
 ## The one place that decides whether a regular spawn becomes a prime.
 ## Never while the run was started with prime mode off.
 func roll_prime() -> bool:
-	return run_prime && randf() < run_chance()
+	return is_prime_run() && randf() < run_chance()
 
 
 ## The chance of a prime spawn now: the prime level's (spec §10), or the self test's fixed one.
@@ -668,18 +705,17 @@ func install_level_label() -> void:
 	level_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	target.add_child(level_label)
+	level_layout = []
 
 
 ## Use the game's visible score panel; portrait play has its score above the play area.
 func level_label_parent() -> Control:
 	if Ui._0 == null:
 		return null
-	var viewport: Rect2 = get_viewport().get_visible_rect()
-	if OS.has_feature("mobile"):
-		viewport = viewport.intersection(MobileManager.get_usable_rect())
-	var available: Rect2 = Ui._0.get_final_transform().affine_inverse() * viewport
 	for panel: SidePanel in Ui._0.side_panels:
-		if panel is RightSidePanel && panel.is_visible_in_tree() && panel.size.x > 16.0 && panel.size.y > 16.0 && available.encloses(guide_screen_box(panel)):
+		if not is_instance_valid(panel):
+			continue
+		if (panel is RightSidePanel || panel is MobileTopPanel) && panel.is_visible_in_tree() && panel.size.x > 16.0 && panel.size.y > 16.0:
 			return panel
 	return Ui._0.ui_play_area
 
@@ -691,7 +727,7 @@ func refresh_level_label() -> void:
 			install_level_label()
 		if level_label == null:
 			return
-	level_label.visible = run_prime && Menu._0 != null && not Menu._0.visible && GameModeManager.current_mode is ModeClassic
+	level_label.visible = is_prime_run() && Menu._0 != null && not Menu._0.visible
 	if not level_label.visible:
 		return
 	var target: Control = level_label_parent()
@@ -706,26 +742,45 @@ func refresh_level_label() -> void:
 	var viewport: Rect2 = get_viewport().get_visible_rect()
 	if OS.has_feature("mobile"):
 		viewport = viewport.intersection(MobileManager.get_usable_rect())
-	var local: Rect2 = target.get_global_transform_with_canvas().affine_inverse() * viewport
-	var available: Rect2 = Rect2(Vector2.ZERO, target.size).intersection(local).grow(-8.0)
+	# Label reshaping can update its wrapped minimum size on the next frame.
+	var layout: Array = [
+		target.get_instance_id(), target.size, viewport,
+		level_label.text, level_label.get_combined_minimum_size(),
+	]
+	if layout == level_layout:
+		return
+	var available: Rect2 = Rect2(Vector2.ZERO, target.size)
+	if target == Ui._0.ui_play_area:
+		var local: Rect2 = target.get_global_transform_with_canvas().affine_inverse() * viewport
+		available = available.intersection(local)
+	available = available.grow(-8.0)
 	if not available.has_area():
 		level_label.hide()
 		return
+	level_layout = layout
 	level_label.custom_minimum_size.x = available.size.x
 	level_label.size.x = available.size.x
 	level_label.size.y = level_label.get_combined_minimum_size().y
-	var bottom: float = target.size.y - LEVEL_MARGIN - level_label.size.y
+	var y: float = available.position.y
+	if side_panel:
+		y = target.size.y - LEVEL_MARGIN - level_label.size.y
+	elif target is MobileTopPanel:
+		y = available.end.y - level_label.size.y
 	level_label.position = Vector2(available.position.x,
-		clampf(bottom if side_panel else available.position.y, available.position.y,
+		clampf(y, available.position.y,
 			maxf(available.position.y, available.end.y - level_label.size.y)))
 
 
 func replace_with_prime(sobo: Sobo, p: int) -> void:
+	diagnostic_tick("replace_with_prime")
+	if not is_prime_run():
+		return
 	var mode:= GameModeManager.current_mode as ModeClassic
 	if mode == null || is_instance_valid(sobo) == false || sobo.is_queued_for_deletion():
 		return
 	if mode.sobos_emerging.has(sobo) == false:
 		return
+	var source := JSON.stringify(diagnostic_sobo(sobo))
 	var prime: Sobo = create_prime(p, sobo.center)
 	var src: Suba = sobo.subas[0]
 	for s: Suba in prime.subas:
@@ -737,10 +792,12 @@ func replace_with_prime(sobo: Sobo, p: int) -> void:
 	mode.enter_emerging(prime)
 	prime.allow_merges = false
 	natural_replacements += 1
+	print("%s event=prime_granted source=%s result=%s prime=%d" % [MOD_TAG, source, JSON.stringify(diagnostic_sobo(prime)), p])
 
 
 func _physics_process(_dt: float) -> void:
-	if enabled == false:
+	diagnostic_tick("_physics_process")
+	if enabled == false || not is_prime_run():
 		return
 	var primes: Array[Sobo] = []
 	for sobo: Sobo in SoboManager.all_sobos:
@@ -774,6 +831,9 @@ func try_prime_merge(primes: Array[Sobo]) -> void:
 ## Reuse SoboManager.merge (shape blending, sound, shockwave, SignalBus.on_sobo_merge) by handing it
 ## the regular tier just below the target, since merge() builds size_tier + 1.
 func merge_primes(a: Sobo, b: Sobo, sa: Suba, sb: Suba, sum: int) -> void:
+	diagnostic_tick("merge_primes sum=%d" % sum)
+	var diagnostic_key := "%d:%d" % [a.get_instance_id(), b.get_instance_id()]
+	diagnostic_merge_parents[diagnostic_key] = [diagnostic_sobo(a), diagnostic_sobo(b)]
 	var p0: int = a.data.doubling_tier
 	var p1: int = b.data.doubling_tier
 	var target_tier: int = SoboManager.doubling_tier_to_size_tier(sum)
@@ -784,9 +844,9 @@ func merge_primes(a: Sobo, b: Sobo, sa: Suba, sb: Suba, sum: int) -> void:
 	var before: int = SoboManager.all_sobos.size()
 	SoboManager.merge(a, b, sa, sb)
 	a.data = own_data
+	diagnostic_merge_parents.erase(diagnostic_key)
 	if SoboManager.all_sobos.size() > before:
 		var new_sobo: Sobo = SoboManager.all_sobos[-1]
-		print("%s merged %d + %d -> %d" % [MOD_TAG, p0, p1, new_sobo.data.doubling_tier])
 		prime_merged.emit(p0, p1, new_sobo)
 
 
@@ -801,15 +861,51 @@ func copy_with_size_tier(src: SoboManager.SoboData, tier: int) -> SoboManager.So
 
 
 func _process(_dt: float) -> void:
+	diagnostic_tick("_process")
 	if enabled == false:
 		return
 	place_guide_toggle()
 	refresh_level_label()
+	if not is_prime_run():
+		return
 	for sobo: Sobo in SoboManager.all_sobos:
 		if is_prime_sobo(sobo) && sobo.flashing <= 0.0:
 			sobo.color = PRIME_COLOR
 			if Dev.debug_draw_sobos == false:
 				sobo.line.default_color = PRIME_COLOR
+
+
+func on_native_sobo_merge(a: Sobo, b: Sobo, result: Sobo) -> void:
+	var diagnostic_key := "%d:%d" % [a.get_instance_id(), b.get_instance_id()]
+	var parents: Array = diagnostic_merge_parents.get(diagnostic_key, [diagnostic_sobo(a), diagnostic_sobo(b)])
+	print("%s event=merge parents=%s result=%s" % [MOD_TAG,
+		JSON.stringify(parents), JSON.stringify(diagnostic_sobo(result))])
+
+
+## Read native fields only on the main thread. The worker receives their JSON string.
+func diagnostic_sobo(sobo: Sobo) -> Dictionary:
+	if not is_instance_valid(sobo) or sobo.data == null:
+		return {"valid": false}
+	return {"id": sobo.get_instance_id(), "size": sobo.data.size_tier, "value": sobo.data.doubling_tier,
+		"prime": PRIMES.has(sobo.data.doubling_tier), "radius": snappedf(sobo.data.outer_circle.radius, 0.1),
+		"position": [snappedf(sobo.center.x, 0.1), snappedf(sobo.center.y, 0.1)],
+		"velocity": [snappedf(sobo.avg_velocity.x, 0.1), snappedf(sobo.avg_velocity.y, 0.1)]}
+
+
+func diagnostic_tick(entry: String) -> void:
+	if diagnostics == null:
+		return
+	var rows: Array[Dictionary] = []
+	for sobo: Sobo in SoboManager.all_sobos:
+		rows.append(diagnostic_sobo(sobo))
+	var active := enabled and is_prime_run() and not diagnostics_suspended and not get_tree().paused
+	active = active and Menu._0 != null and not Menu._0.visible
+	diagnostics.pulse(entry, JSON.stringify(rows), active)
+
+
+func _exit_tree() -> void:
+	if diagnostics != null:
+		diagnostics.stop()
 
 
 # ---------------------------------------------------------------- self test

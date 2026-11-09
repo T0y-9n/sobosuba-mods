@@ -14,7 +14,8 @@ func _init() -> void:
 			node = reference.get_ref()
 	if is_instance_valid(node):
 		if not node.has_method(\"register_base_traits\"):
-			push_error(\"Special Sobos: use the current separated packages together.\")
+			var diagnostics: Script = load(\"user://special_mod/special_diagnostics.gd\")
+			diagnostics.write_line(diagnostics.MOD_VERSION, \"warning use the current separated packages together\")
 			return
 		if node.is_node_ready():
 			node.register_base_traits()

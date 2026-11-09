@@ -2,6 +2,19 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Special Sobos 1.3.11-0.5.4, 2026-11-09
+
+Added: If the game freezes, the log now shows what Special Sobos was doing.
+
+### 1.3.11-1.0.4, 2026-11-09
+
+Added: If the game freezes, the log now shows what Prime Sobos was doing.
+
+### 1.2.3-1.0.5, 2026-11-09
+
+Added: If the game freezes, the log now shows what Prime Sobos was doing.
+Changed: On game 1.2.3, prime sobos use nearby native sizes. Existing saved prime sobos are adjusted when loaded.
+
 ### 1.3.11-1.0.3, 2026-11-09
 
 Fixed: Prime Balls now only works in classic (radix 2). Other modes, including Radix 3 and classic threes, play like the base game again, whether prime mode is on or off.
@@ -67,6 +80,19 @@ Changed: 5s now appear more often.
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### Special Sobos 1.3.11-0.5.4、2026-11-09
+
+- 固まったとき、特別なソボがどこを処理していたかと盤面をログへ出す機能を追加しました。
+
+### 1.3.11-1.0.4、2026-11-09
+
+- 固まったとき、素数ソボがどこを処理していたかと盤面をログへ出す機能を追加しました。
+
+### 1.2.3-1.0.5、2026-11-09
+
+- 固まったとき、素数ソボがどこを処理していたかと盤面をログへ出す機能を追加しました。
+- 素数の玉を近い本家の大きさへ変更し、保存済みの素数玉も読込み時に合わせます。
 
 ### 1.2.3-1.0.4 と 1.3.11-1.0.2、2026-11-09
 

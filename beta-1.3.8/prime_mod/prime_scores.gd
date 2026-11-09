@@ -1,4 +1,6 @@
 extends CanvasLayer
+
+const MOD_TAG:= preload("prime_diagnostics.gd").MOD_TAG
 ## Prime-mode scores, kept apart from the game's own (Steam) leaderboard.
 ## - Local top 10 in user://prime_sobo_scores.json.
 ## - Shared only between Steam friends who run this mod: each player's best is published as the
@@ -215,14 +217,14 @@ func on_game_over() -> void:
 	if online != null && online.enabled && not Engine.get_meta("special_sobo_run", false):
 		var duration_s: int = int((Time.get_ticks_msec() - _round_started_ms) / 1000)
 		submit_run_score.call_deferred(serial, score, duration_s, get_parent().run_chance())
-	print("[prime_sobo] game over: score=%d local_rank=%d best=%d friends=%d" % [score, last_rank, best_local(), friends.size()])
+	print(MOD_TAG + " game over: score=%d local_rank=%d best=%d friends=%d" % [score, last_rank, best_local(), friends.size()])
 	if not get_parent().prime_settings.save_screenshots:
 		return
 	await get_tree().create_timer(SCREENSHOT_DELAY, true).timeout
 	await RenderingServer.frame_post_draw
 	# A next run (or another game over) in the meantime: the screen is no longer this score's.
 	if serial != _over_serial or _round_finished == false or not get_parent().is_prime_run():
-		print("[prime_sobo] screenshot skipped: the game over it was for is over")
+		print(MOD_TAG + " screenshot skipped: the game over it was for is over")
 		return
 	if get_parent().prime_settings.save_screenshots:
 		save_steam_screenshot(score)
@@ -237,7 +239,7 @@ func submit_run_score(serial: int, score: int, duration_s: int, chance: float) -
 ## Writes into the player's local Steam screenshot library; uploading stays the player's choice.
 func save_steam_screenshot(score: int) -> void:
 	if SteamManager.steam_ready == false:
-		print("[prime_sobo] screenshot skipped: steam not ready")
+		print(MOD_TAG + " screenshot skipped: steam not ready")
 		return
 	var img: Image = get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGB8)
@@ -245,8 +247,8 @@ func save_steam_screenshot(score: int) -> void:
 	var handle: int = SteamManager.steam.writeScreenshot(img.get_data(), img.get_width(), img.get_height())
 	last_screenshot_handle = handle
 	if handle == INVALID_SCREENSHOT_HANDLE:
-		push_warning("[prime_sobo] steam screenshot failed: writeScreenshot returned an invalid handle")
+		push_warning(MOD_TAG + " steam screenshot failed: writeScreenshot returned an invalid handle")
 		return
 	var tagged: bool = SteamManager.steam.setLocation(handle, panel.word("screenshot location") % score)
 	last_screenshot_tagged = tagged
-	print("[prime_sobo] steam screenshot handle=%d tagged=%s size=%dx%d" % [handle, tagged, img.get_width(), img.get_height()])
+	print(MOD_TAG + " steam screenshot handle=%d tagged=%s size=%dx%d" % [handle, tagged, img.get_width(), img.get_height()])

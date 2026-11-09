@@ -1,4 +1,6 @@
 extends CanvasLayer
+
+const MOD_TAG:= preload("prime_diagnostics.gd").MOD_TAG
 ## Prime-mode scores, kept apart from the game's own (Steam) leaderboard.
 ## - Local top 10 in user://prime_sobo_scores.json.
 ## - Shared only between Steam friends who run this mod: each player's best is published as the
@@ -62,7 +64,7 @@ func connect_steam_signals() -> void:
 
 
 func on_friend_presence(steam_id: int, app_id: int) -> void:
-	if app_id != SteamManager.APP_ID || steam_id == SteamManager.steam.getSteamID():
+	if not get_parent().can_share_prime_best() || app_id != SteamManager.APP_ID || steam_id == SteamManager.steam.getSteamID():
 		return
 	if remember_friend(steam_id):
 		save_scores()
@@ -120,7 +122,7 @@ func add_local_score(score: int) -> int:
 
 
 func _process(dt: float) -> void:
-	if SteamManager.steam_ready == false:
+	if not get_parent().can_share_prime_best() || SteamManager.steam_ready == false:
 		return
 	_poll_t += dt
 	if _poll_t < FRIEND_POLL_INTERVAL:
@@ -132,12 +134,12 @@ func _process(dt: float) -> void:
 
 ## Re-published on every poll: the game's own settings toggle calls clearRichPresence().
 func publish_best() -> void:
-	if SteamManager.steam_ready && best_local() > 0:
+	if get_parent().can_share_prime_best() && SteamManager.steam_ready && best_local() > 0:
 		SteamManager.steam.setRichPresence(PRESENCE_KEY, str(best_local()))
 
 
 func refresh_friends() -> void:
-	if SteamManager.steam_ready == false:
+	if not get_parent().can_share_prime_best() || SteamManager.steam_ready == false:
 		return
 	var steam: Object = SteamManager.steam
 	var changed:= false
@@ -180,7 +182,7 @@ func set_board_suppressed(value: bool) -> void:
 
 
 func refresh_board_visibility() -> void:
-	panel.visible = _board_wanted && not _board_suppressed
+	panel.visible = get_parent().is_prime_run() && _board_wanted && not _board_suppressed
 
 
 func on_game_mode_start(_m: GameMode) -> void:
@@ -188,18 +190,18 @@ func on_game_mode_start(_m: GameMode) -> void:
 	refresh_board_visibility()
 	_round_finished = false
 	_round_started_ms = Time.get_ticks_msec()
-	if online != null:
+	if online != null && get_parent().is_prime_run():
 		online.start_run()
 
 
 func on_world_updated(_text: String) -> void:
-	if _round_finished && _board_wanted:
+	if get_parent().is_prime_run() && _round_finished && _board_wanted:
 		label.text = board_text(last_score, last_rank)
 
 
 func on_game_over() -> void:
 	# A run started with prime mode off (spec §7) is the game's own: no board, record, screenshot or send.
-	if get_parent().run_prime == false:
+	if not get_parent().is_prime_run():
 		return
 	var score: int = ScoreManager.current_score
 	_round_finished = true
@@ -214,24 +216,30 @@ func on_game_over() -> void:
 	refresh_board_visibility()
 	if online != null && online.enabled && not Engine.get_meta("special_sobo_run", false):
 		var duration_s: int = int((Time.get_ticks_msec() - _round_started_ms) / 1000)
-		online.submit_score.call_deferred(score, duration_s, get_parent().run_chance())
-	print("[prime_sobo] game over: score=%d local_rank=%d best=%d friends=%d" % [score, last_rank, best_local(), friends.size()])
+		submit_run_score.call_deferred(serial, score, duration_s, get_parent().run_chance())
+	print(MOD_TAG + " game over: score=%d local_rank=%d best=%d friends=%d" % [score, last_rank, best_local(), friends.size()])
 	if not get_parent().prime_settings.save_screenshots:
 		return
 	await get_tree().create_timer(SCREENSHOT_DELAY, true).timeout
 	await RenderingServer.frame_post_draw
 	# A next run (or another game over) in the meantime: the screen is no longer this score's.
-	if serial != _over_serial or _round_finished == false:
-		print("[prime_sobo] screenshot skipped: the game over it was for is over")
+	if serial != _over_serial or _round_finished == false or not get_parent().is_prime_run():
+		print(MOD_TAG + " screenshot skipped: the game over it was for is over")
 		return
 	if get_parent().prime_settings.save_screenshots:
 		save_steam_screenshot(score)
 
 
+## A deferred send still belongs to this prime run when it actually starts.
+func submit_run_score(serial: int, score: int, duration_s: int, chance: float) -> void:
+	if serial == _over_serial && _round_finished && get_parent().is_prime_run():
+		online.submit_score(score, duration_s, chance)
+
+
 ## Writes into the player's local Steam screenshot library; uploading stays the player's choice.
 func save_steam_screenshot(score: int) -> void:
 	if SteamManager.steam_ready == false:
-		print("[prime_sobo] screenshot skipped: steam not ready")
+		print(MOD_TAG + " screenshot skipped: steam not ready")
 		return
 	var img: Image = get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGB8)
@@ -239,8 +247,8 @@ func save_steam_screenshot(score: int) -> void:
 	var handle: int = SteamManager.steam.writeScreenshot(img.get_data(), img.get_width(), img.get_height())
 	last_screenshot_handle = handle
 	if handle == INVALID_SCREENSHOT_HANDLE:
-		push_warning("[prime_sobo] steam screenshot failed: writeScreenshot returned an invalid handle")
+		push_warning(MOD_TAG + " steam screenshot failed: writeScreenshot returned an invalid handle")
 		return
 	var tagged: bool = SteamManager.steam.setLocation(handle, panel.word("screenshot location") % score)
 	last_screenshot_tagged = tagged
-	print("[prime_sobo] steam screenshot handle=%d tagged=%s size=%dx%d" % [handle, tagged, img.get_width(), img.get_height()])
+	print(MOD_TAG + " steam screenshot handle=%d tagged=%s size=%dx%d" % [handle, tagged, img.get_width(), img.get_height()])

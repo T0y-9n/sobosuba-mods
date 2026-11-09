@@ -1,8 +1,15 @@
 extends "res://game_mode/game_modes/classic/scene_classic.gd"
 
 
+func _physics_process(dt: float) -> void:
+	var mod: Node = get_node_or_null("/root/SpecialSobo")
+	var _diagnostic: RefCounted = mod.diagnostic_scope("special_classic.physics") if mod != null else null
+	super._physics_process(dt)
+
+
 func spawn_from_states(states: Array[SoboState]) -> Array[Sobo]:
 	var mod: Node = get_node("/root/SpecialSobo")
+	var _diagnostic: RefCounted = mod.diagnostic_scope("special_classic.restore")
 	if not mod.is_classic_run():
 		return super.spawn_from_states(states)
 	var created: Array[Sobo] = []
@@ -16,6 +23,7 @@ func spawn_from_states(states: Array[SoboState]) -> Array[Sobo]:
 
 
 func capture_game_state() -> GameState:
+	var _diagnostic: RefCounted = get_node("/root/SpecialSobo").diagnostic_scope("special_classic.capture")
 	var state: GameState = super.capture_game_state()
 	if not get_node("/root/SpecialSobo").is_classic_run():
 		return state

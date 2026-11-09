@@ -150,7 +150,7 @@ func reset_numbers(keys: Array = []) -> bool:
 func write(enabled_value: bool, traits_value: Dictionary, pull_value: float, values: Dictionary = {}) -> bool:
 	var file:= FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
-		push_warning("[special_sobo] could not write settings")
+		load((get_script() as Script).resource_path.get_base_dir().path_join("special_sobo.gd")).log_warning("could not write settings")
 		return false
 	file.store_string(JSON.stringify({"enabled": enabled_value, "traits": traits_value, "magnet_pull_multiplier": pull_value, "parameters": numbers if values.is_empty() else values}))
 	file.flush()

@@ -4,8 +4,10 @@
 script/source = "extends Resource
 
 var _f: FileAccess
+var _tag: String
 
 func _init() -> void:
+	_tag = load(\"user://prime_mod/prime_diagnostics.gd\").MOD_TAG
 	_f = FileAccess.open(\"user://prime_boot_probe.txt\", FileAccess.WRITE)
 	_log(\"init ran\")
 	var tree := Engine.get_main_loop() as SceneTree
@@ -29,7 +31,7 @@ func _init() -> void:
 
 func _log(msg: String) -> void:
 	if _f:
-		_f.store_string(msg + \"\\n\")
+		_f.store_string(_tag + \" \" + msg + \"\\n\")
 		_f.flush()
 "
 

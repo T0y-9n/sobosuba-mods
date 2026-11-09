@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import zipfile
 
@@ -9,6 +10,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--output', type=Path, required=True)
 args = parser.parse_args()
 source = Path(__file__).resolve().parent
+version = re.search(r'^const MOD_VERSION\s*:?=\s*"([^"]+)"',
+                    (source / 'prime_mod/prime_diagnostics.gd').read_text(encoding='utf-8'), re.MULTILINE).group(1)
 payload = {f'prime_mod/{path.name}': path.read_bytes()
            for path in sorted((source / 'prime_mod').iterdir())
            if path.suffix in {'.gd', '.cfg'}}
@@ -17,7 +20,7 @@ payload[bootstrap] = (source / bootstrap).read_bytes()
 payload['prime_mod/game_mode_scope.gd'] = (source.parent / 'mods/prime_sobo/game_mode_scope.gd').read_bytes()
 metadata = {
     'format_version': 1, 'id': 'prime_sobo', 'name': 'Prime Sobos',
-    'version': '1.3.11-1.0.3', 'game_versions': ['1.3.11'],
+    'version': version, 'game_versions': ['1.3.11'],
     'install_layout': 'user-data-styles', 'payload_root': 'prime_mod',
     'entry': 'prime_sobo.gd', 'autoload': 'PrimeSobo',
     'bootstrap': bootstrap, 'dependencies': [], 'files': sorted(payload),
@@ -26,7 +29,7 @@ metadata = {
     'game_credit': {'text': 'sobosuba by keepee', 'store_url': 'https://store.steampowered.com/app/1946560/sobosuba'},
 }
 args.output.mkdir(parents=True, exist_ok=True)
-path = args.output / 'sobosuba-prime-balls-1.3.11-1.0.3.zip'
+path = args.output / f'sobosuba-prime-balls-{version}.zip'
 with zipfile.ZipFile(path, 'x', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
     for name, data in payload.items():
         archive.writestr(name, data)

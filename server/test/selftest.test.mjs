@@ -40,7 +40,10 @@ test("the mod's self-test runs to the end on the game's data in the standalone d
   child.stderr.on("data", read);
   const code = await new Promise((resolve, reject) => { child.on("error", reject); child.on("close", resolve); });
   assert.ok(!output.includes("SCRIPT ERROR"), output.slice(-4000));
-  assert.ok(output.includes("[prime_sobo] loaded:"), "the mod was loaded through override.cfg");
+  const diagnostics = await readFile(resolve(mod, "prime_diagnostics.gd"), "utf8");
+  const version = diagnostics.match(/^const MOD_VERSION\s*:?=\s*"([^"]+)"/m)?.[1];
+  assert.ok(version, "the installed diagnostic helper declares its version");
+  assert.ok(output.includes(`[Prime Sobos ${version}] loaded`), "the mod was loaded through override.cfg");
   assert.notEqual(code, null, "Godot quit by itself (it was not killed on the timeout)");
 
   const resultPath = resolve(mod, "selftest_result.txt");

@@ -1,8 +1,15 @@
 extends "res://game_elements/sobo/sobo.gd"
 
 
+func _physics_process(dt: float) -> void:
+	var mod: Node = get_node_or_null("/root/SpecialSobo")
+	var _diagnostic: RefCounted = mod.diagnostic_scope("special_body.physics") if mod != null else null
+	super._physics_process(dt)
+
+
 func fix_shape() -> void:
 	var mod: Node = get_node_or_null("/root/SpecialSobo")
+	var _diagnostic: RefCounted = mod.diagnostic_scope("special_body.fix_shape") if mod != null else null
 	if mod == null or not mod.is_classic_run():
 		super.fix_shape()
 		return
@@ -12,6 +19,7 @@ func fix_shape() -> void:
 
 
 func capture_sobo_state() -> SoboState:
+	var _diagnostic: RefCounted = get_node("/root/SpecialSobo").diagnostic_scope("special_body.capture")
 	var state: SoboState = super.capture_sobo_state()
 	if not get_node("/root/SpecialSobo").is_classic_run():
 		return state
@@ -23,6 +31,7 @@ func capture_sobo_state() -> SoboState:
 
 func apply_sobo_state(state: SoboState) -> void:
 	var mod: Node = get_node("/root/SpecialSobo")
+	var _diagnostic: RefCounted = mod.diagnostic_scope("special_body.restore")
 	if not mod.is_classic_run():
 		super.apply_sobo_state(state)
 		return

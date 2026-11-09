@@ -1,7 +1,7 @@
 {
   "id": "prime_sobo",
   "name": "Prime sobos",
-  "version": "1.2.3-1.0.4",
+  "version": "1.2.3-1.0.5",
   "autoload": "PrimeSobo",
   "entry": "prime_sobo.gd",
   "game_version": "1.2.3"

@@ -82,15 +82,17 @@ test("LICENSE and README say what the license covers, what the checks can't catc
 // The first release said 1.23 by misreading the game's 1.2.3 (fixed 2026-10-31 23:4x).
 // The server takes it as it is ([\w.-], so no "+"), and README says which game version it was made for.
 test("the mod's version names the game version it was made for, and README says so", async () => {
-  const online = await readFile(resolve(repo, "mods/prime_sobo/prime_online.gd"), "utf8");
-  const version = online.match(/^const MOD_VERSION:= "([^"]*)"/m)?.[1];
-  assert.equal(version, "1.2.3-1.0.0");
+  const diagnostics = await readFile(resolve(repo, "mods/prime_sobo/prime_diagnostics.gd"), "utf8");
+  const version = diagnostics.match(/^const MOD_VERSION\s*:?=\s*"([^"]*)"/m)?.[1];
+  const metadata = JSON.parse(await readFile(resolve(repo, "mods/prime_sobo/mod.json"), "utf8"));
+  assert.equal(version, metadata.version);
+  assert.match(version, /^1\.2\.3-/, "the legacy package targets game 1.2.3");
   assert.match(version, /^[\w.-]{1,32}$/, "the server's mod_version check takes it");
   const readme = await readFile(resolve(repo, "README.md"), "utf8");
-  assert.match(readme, /made for sobosuba 1\.2\.3\./, "README names the game version in English");
-  assert.match(readme, /`1\.2\.3-1\.0\.0`/, "README explains the version");
+  assert.match(readme, /\| Older 1\.2\.3 \|/, "README names the legacy game version in English");
+  assert.ok(readme.includes(`[${version}]`), "README links the current legacy version");
   assert.doesNotMatch(readme, /sobosuba 1\.23\b/, "the misread 1.23 is gone");
-  assert.equal(readme.split("sobosuba 1.2.3").length - 1 >= 2, true, "and in Japanese");
+  assert.match(readme, /\| 前の版 1\.2\.3 \|/, "README names the legacy game version in Japanese");
 });
 
 // The game part must be the game's own config/version, read from the decompiled game when it is at hand.
@@ -102,8 +104,8 @@ test("the game part of the mod's version is the game's config/version when its s
   }
   const game = (await readFile(project, "utf8")).replaceAll("\0", "").match(/config\/version\s*=\s*"([^"]+)"/)?.[1];
   assert.ok(game, "project.godot has config/version");
-  const online = await readFile(resolve(repo, "mods/prime_sobo/prime_online.gd"), "utf8");
-  const version = online.match(/^const MOD_VERSION:= "([^"]*)"/m)?.[1];
+  const diagnostics = await readFile(resolve(repo, "mods/prime_sobo/prime_diagnostics.gd"), "utf8");
+  const version = diagnostics.match(/^const MOD_VERSION\s*:?=\s*"([^"]*)"/m)?.[1];
   assert.equal(version.split("-")[0], game);
 });
 
@@ -111,8 +113,8 @@ test("the game part of the mod's version is the game's config/version when its s
 // release of the mod has its entry. Server-only changes are listed too, with no new mod version.
 test("CHANGELOG has the mod's version and the server change, in English and Japanese", async () => {
   const log = (await readFile(resolve(repo, "CHANGELOG.md"), "utf8")).replace(/\r\n/g, "\n");
-  const online = await readFile(resolve(repo, "mods/prime_sobo/prime_online.gd"), "utf8");
-  const version = online.match(/^const MOD_VERSION:= "([^"]*)"/m)[1];
+  const diagnostics = await readFile(resolve(repo, "mods/prime_sobo/prime_diagnostics.gd"), "utf8");
+  const version = diagnostics.match(/^const MOD_VERSION\s*:?=\s*"([^"]*)"/m)[1];
   const [en, ja] = log.split("## 日本語");
   assert.ok(ja, "there is a Japanese part");
   for (const [part, server] of [[en, /nothing to reinstall/], [ja, /入れ直しは要りません/]]) {

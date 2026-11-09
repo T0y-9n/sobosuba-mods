@@ -1,5 +1,7 @@
 extends Node
 
+const DiagnosticLogger = preload("special_diagnostics.gd")
+const MOD_VERSION := DiagnosticLogger.MOD_VERSION
 const TRAIT_META:= "special_sobo_trait"
 const REPLACED_META:= "special_sobo_replaced"
 const SAFETY_META:= "special_sobo_safety"
@@ -34,6 +36,9 @@ var number_inputs: Dictionary = {}
 var page_picker: SoboMenuButtonEnum
 var reset_button: SoboMenuButtonBool
 var settings_page := 0
+var diagnostics: RefCounted
+var diagnostic_frame := -1
+var diagnostic_snapshot := ""
 
 
 func _init() -> void:
@@ -56,6 +61,8 @@ func is_classic_run() -> bool:
 
 
 func _ready() -> void:
+	diagnostics = DiagnosticLogger.new()
+	diagnostics.log("loaded")
 	tuning = load(mod_dir().path_join("special_tuning.gd"))
 	settings = load(mod_dir().path_join("special_settings.gd")).new()
 	text = load(mod_dir().path_join("special_text.gd"))
@@ -75,7 +82,49 @@ func _ready() -> void:
 	SignalBus.on_sobo_join_bar.connect(on_sobo_join_bar)
 	SignalBus.on_safety_spawn.connect(on_safety_spawn)
 	SignalBus.on_sobo_merge.connect(on_sobo_merge)
+	SignalBus.on_game_over.connect(disarm_diagnostics)
 	finish_setup.call_deferred()
+
+
+static func log_warning(message: String) -> void:
+	DiagnosticLogger.write_line(MOD_VERSION, "warning " + message)
+
+
+func _exit_tree() -> void:
+	if diagnostics != null:
+		diagnostics.stop()
+
+
+func disarm_diagnostics() -> void:
+	if diagnostics != null:
+		diagnostics.set_armed(false)
+
+
+func diagnostic_sobo(sobo: Sobo) -> String:
+	if not is_instance_valid(sobo) or sobo.is_queued_for_deletion():
+		return "removed"
+	var kind: String = trait_of(sobo)
+	if kind.is_empty():
+		kind = "normal"
+	elif not ["small", "puffy", "magnet", "sticky"].has(kind):
+		kind = "other"
+	var velocity: Vector2 = sobo.extra_mass_ball.linear_velocity if is_instance_valid(sobo.extra_mass_ball) else Vector2.ZERO
+	return "%d/size=%d/trait=%s/pos=(%d,%d)/vel=(%d,%d)" % [sobo.get_instance_id(), sobo.data.size, kind, roundi(sobo.center.x), roundi(sobo.center.y), roundi(velocity.x), roundi(velocity.y)]
+
+
+func diagnostic_scope(entry: String) -> RefCounted:
+	if diagnostics == null:
+		return null
+	var frame: int = Engine.get_physics_frames()
+	if frame != diagnostic_frame:
+		diagnostic_frame = frame
+		var sobos: PackedStringArray = []
+		for sobo: Sobo in SoboManager.all_sobos:
+			sobos.append(diagnostic_sobo(sobo))
+		diagnostic_snapshot = "tick=%d sobos=[%s]" % [frame, "; ".join(sobos)]
+	var mode := GameModeManager.current_scene as SceneClassic
+	var armed: bool = is_classic_run() and mode != null and mode.state != SceneClassic.State.GAMEOVER and not get_tree().paused and (Menu._0 == null or not Menu._0.visible)
+	return diagnostics.scope(entry, diagnostic_snapshot, armed)
 
 
 func register_base_traits() -> void:
@@ -129,6 +178,8 @@ func restore_extra_state(sobo: Sobo, saved: Variant) -> void:
 func finish_setup() -> void:
 	SignalBus.on_game_mode_start.connect(on_game_mode_start)
 	apply_run(settings.enabled)
+	if Menu._0 != null:
+		Menu._0.on_open.connect(disarm_diagnostics)
 	install_toggle()
 	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")):
 		var suite: Node = load(mod_dir().path_join("special_selftest.gd")).new()
@@ -248,6 +299,7 @@ func consider_spawn(reference: WeakRef, mode: SceneClassic, serial: int) -> void
 
 
 func apply_trait(sobo: Sobo, kind: String) -> Sobo:
+	var _diagnostic: RefCounted = diagnostic_scope("special_sobo.apply_trait")
 	if not is_classic_run() or kind == "" or not SoboManager.power_of_two_sizes.has(sobo.data.size) or (kind == "small" and sobo.data.size == 1):
 		return sobo
 	if kind == "small":
@@ -255,6 +307,7 @@ func apply_trait(sobo: Sobo, kind: String) -> Sobo:
 	elif sobo.get_script().resource_path != mod_dir().path_join("special_body.gd"):
 		patch_script(sobo, mod_dir().path_join("special_body.gd"))
 	add_marker(sobo, kind)
+	diagnostics.log("trait " + diagnostic_sobo(sobo))
 	return sobo
 
 
@@ -332,8 +385,10 @@ func replace_shape(sobo: Sobo, data: SoboManager.SoboData, kind: String) -> Sobo
 
 
 func on_sobo_merge(old0: Sobo, old1: Sobo, result: Sobo) -> void:
+	var _diagnostic: RefCounted = diagnostic_scope("special_sobo.merge")
 	if not is_classic_run():
 		return
+	diagnostics.log("merge parent0=" + diagnostic_sobo(old0) + " parent1=" + diagnostic_sobo(old1) + " result=" + diagnostic_sobo(result))
 	forget_sticky(old0)
 	forget_sticky(old1)
 	var trait0: String = trait_of(old0)
@@ -372,6 +427,7 @@ func settle_smalls(mode: SceneClassic) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	var _diagnostic: RefCounted = diagnostic_scope("special_sobo.physics")
 	if not is_classic_run() or not run_special or SpaceGravity._0 == null:
 		return
 	var mode:= GameModeManager.current_scene as SceneClassic
@@ -386,11 +442,17 @@ func _physics_process(delta: float) -> void:
 	var direction: Vector2 = PhysicsServer2D.area_get_param(get_viewport().world_2d.space, PhysicsServer2D.AREA_PARAM_GRAVITY_VECTOR)
 	for sobo: Sobo in stack:
 		if trait_of(sobo) == "puffy":
+			if not sobo.get_meta("special_diagnostic_puffy_active", false):
+				sobo.set_meta("special_diagnostic_puffy_active", true)
+				diagnostics.log("effect puffy owner=" + diagnostic_sobo(sobo))
 			sobo.apply_uniform_acceleration(-direction * gravity.gravity * (1.0 - settings.number("puffy_gravity_ratio")))
 		elif trait_of(sobo) == "magnet":
 			for target: Sobo in stack:
 				var acceleration: Vector2 = magnet_acceleration(mode, sobo, target, gravity.gravity)
 				if acceleration != Vector2.ZERO:
+					if not sobo.get_meta("special_diagnostic_magnet_active", false):
+						sobo.set_meta("special_diagnostic_magnet_active", true)
+						diagnostics.log("effect magnet owner=" + diagnostic_sobo(sobo) + " target=" + diagnostic_sobo(target))
 					target.apply_uniform_acceleration(acceleration)
 
 
@@ -458,9 +520,11 @@ func update_sticky(mode: SceneClassic, delta: float, gravity: float) -> void:
 					continue
 				if kind == "sticky":
 					target.add_velocity((target.center - owner.center).normalized() * settings.number("throw_speed"))
+					diagnostics.log("effect throw owner=" + diagnostic_sobo(owner) + " target=" + diagnostic_sobo(target))
 					cooldowns[target] = settings.number("throw_cooldown")
 				elif links.size() < int(settings.number("hold_limit")):
 					links[target] = true
+					diagnostics.log("effect hold owner=" + diagnostic_sobo(owner) + " target=" + diagnostic_sobo(target))
 		for target: Sobo in links.keys():
 			var direction: Vector2 = (owner.center - target.center).normalized()
 			target.apply_uniform_acceleration(direction * gravity * settings.number("hold_strength"))
@@ -484,7 +548,7 @@ func install_toggle() -> void:
 			break
 		await get_tree().process_frame
 	if Menu._0 == null or Menu._0.game_settings_screen == null:
-		push_warning("[special_sobo] game settings screen not found")
+		log_warning("game settings screen not found")
 		return
 	var model: SoboMenuButtonBool = Menu._0.game_settings_screen.show_instructions_control
 	var original: GameSettingsScreen = Menu._0.game_settings_screen
@@ -815,6 +879,8 @@ func on_trait_toggle_pressed(kind: String) -> void:
 
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		disarm_diagnostics()
 	if what == NOTIFICATION_TRANSLATION_CHANGED:
 		refresh_toggle()
 

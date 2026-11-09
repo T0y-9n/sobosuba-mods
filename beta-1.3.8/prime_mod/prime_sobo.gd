@@ -6,7 +6,8 @@ extends Node
 ## In a prime run, Steam leaderboard uploads, live friend scores and achievements are off.
 ## "prime balls" in settings -> game turns prime mode off (the game as it is) from the next run.
 
-const MOD_TAG:= "[prime_sobo]"
+const MOD_VERSION:= preload("prime_diagnostics.gd").MOD_VERSION
+const MOD_TAG:= preload("prime_diagnostics.gd").MOD_TAG
 ## SoboManager builds the data for the sizes 2^0 .. 2^19 itself: twenty powers of two.
 const EXPECTED_POWER_OF_TWO_SIZES:= 20
 const PRIMES: Array[int] = [3, 5, 11, 13, 19]
@@ -15,6 +16,8 @@ const PRIME_COLOR:= Color(0.62, 0.62, 0.68)
 
 var replaced: Dictionary[int, bool] = { }
 var enabled:= false
+var diagnostics: RefCounted = null
+var diagnostics_suspended := false
 var selftest:= false
 ## Self-test only: noguard.flag turns off the same-size guard to prove the 3+3 check can fail.
 var guard_disabled_for_test:= false
@@ -69,6 +72,10 @@ func _ready() -> void:
 	if base != EXPECTED_POWER_OF_TWO_SIZES:
 		push_warning("%s disabled: expected %d power-of-two sobo sizes, found %d" % [MOD_TAG, EXPECTED_POWER_OF_TWO_SIZES, base])
 		return
+	diagnostics = load(mod_dir().path_join("prime_diagnostics.gd")).new()
+	var diagnostic_error: Error = diagnostics.start()
+	if diagnostic_error != OK:
+		push_warning("%s diagnostic thread could not start: %s" % [MOD_TAG, error_string(diagnostic_error)])
 	for p: int in PRIMES:
 		# A sobo's value is its size. The game builds the data from the size alone (n = log2(size)),
 		# so a prime sits between its neighbouring powers of two. Built now so the first spawn is not slow.
@@ -87,6 +94,7 @@ func _ready() -> void:
 	# Before prime_scores.gd connects its own: the run's mode is set first.
 	SignalBus.on_game_mode_start.connect(on_game_mode_start)
 	SignalBus.on_sobo_join_bar.connect(on_sobo_join_bar)
+	SignalBus.on_sobo_merge.connect(on_native_sobo_merge)
 	online = load(mod_dir().path_join("prime_online.gd")).new()
 	online.send_scores = prime_settings.send_scores
 	add_child(online)
@@ -210,6 +218,16 @@ func word(key: String) -> String:
 
 
 func _notification(what: int) -> void:
+	if diagnostics != null:
+		if what == NOTIFICATION_WM_CLOSE_REQUEST:
+			diagnostics.stop()
+		elif what == NOTIFICATION_PAUSED:
+			diagnostics.set_armed(false)
+		elif what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+			diagnostics_suspended = true
+			diagnostics.set_armed(false)
+		elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+			diagnostics_suspended = false
 	if what == NOTIFICATION_TRANSLATION_CHANGED:
 		refresh_texts()
 
@@ -490,6 +508,8 @@ func on_menu_opened() -> void:
 		guide_toggle.hide()
 	if level_label != null:
 		level_label.hide()
+	if diagnostics != null:
+		diagnostics.set_armed(false)
 
 
 func on_menu_closed() -> void:
@@ -720,6 +740,7 @@ func refresh_level_label() -> void:
 
 
 func replace_with_prime(sobo: Sobo, p: int) -> void:
+	diagnostic_tick("replace_with_prime")
 	if not is_prime_run():
 		return
 	var mode:= GameModeManager.current_scene as SceneClassic
@@ -727,6 +748,7 @@ func replace_with_prime(sobo: Sobo, p: int) -> void:
 		return
 	if mode.sobos_emerging.has(sobo) == false:
 		return
+	var source := JSON.stringify(diagnostic_sobo(sobo))
 	var prime: Sobo = create_prime(p, sobo.center)
 	var src: Suba = sobo.subas[0]
 	for s: Suba in prime.subas:
@@ -738,9 +760,11 @@ func replace_with_prime(sobo: Sobo, p: int) -> void:
 	mode.enter_emerging(prime)
 	prime.allow_merges = false
 	natural_replacements += 1
+	print("%s event=prime_granted source=%s result=%s prime=%d" % [MOD_TAG, source, JSON.stringify(diagnostic_sobo(prime)), p])
 
 
 func _physics_process(_dt: float) -> void:
+	diagnostic_tick("_physics_process")
 	if enabled == false || not is_prime_run():
 		return
 	var primes: Array[Sobo] = []
@@ -777,6 +801,7 @@ func try_prime_merge(primes: Array[Sobo]) -> void:
 ## finish_merge gives the new sobo the sum of the old sizes, which is the power of two `sum`, so the
 ## primes keep their own data and nothing has to be swapped.
 func merge_primes(a: Sobo, b: Sobo, sa: Suba, sb: Suba, sum: int) -> void:
+	diagnostic_tick("merge_primes sum=%d" % sum)
 	var p0: int = a.data.size
 	var p1: int = b.data.size
 	var group:= SoboManager.MergeGroup.new()
@@ -793,11 +818,11 @@ func merge_primes(a: Sobo, b: Sobo, sa: Suba, sb: Suba, sum: int) -> void:
 	SoboManager.merge(group)
 	if SoboManager.all_sobos.size() > before:
 		var new_sobo: Sobo = SoboManager.all_sobos[-1]
-		print("%s merged %d + %d -> %d (expected %d)" % [MOD_TAG, p0, p1, new_sobo.data.size, sum])
 		prime_merged.emit(p0, p1, new_sobo)
 
 
 func _process(_dt: float) -> void:
+	diagnostic_tick("_process")
 	if enabled == false:
 		return
 	place_guide_toggle()
@@ -810,6 +835,37 @@ func _process(_dt: float) -> void:
 			# Sobo.apply_style copies color to visual_color, which is what the game draws with.
 			# TODO-138: visual_color belongs to the native SoboCore (not in the decompiled sources); confirm in game that this tints the prime.
 			sobo.visual_color = PRIME_COLOR
+
+
+func on_native_sobo_merge(a: Sobo, b: Sobo, result: Sobo) -> void:
+	print("%s event=merge parents=%s result=%s" % [MOD_TAG,
+		JSON.stringify([diagnostic_sobo(a), diagnostic_sobo(b)]), JSON.stringify(diagnostic_sobo(result))])
+
+
+## Read native fields only on the main thread. The worker receives their JSON string.
+func diagnostic_sobo(sobo: Sobo) -> Dictionary:
+	if not is_instance_valid(sobo) or sobo.data == null:
+		return {"valid": false}
+	return {"id": sobo.get_instance_id(), "size": sobo.data.size, "value": sobo.data.size,
+		"prime": is_prime_sobo(sobo), "radius": snappedf(sobo.data.outer_circle.radius, 0.1),
+		"position": [snappedf(sobo.center.x, 0.1), snappedf(sobo.center.y, 0.1)],
+		"velocity": [snappedf(sobo.avg_velocity.x, 0.1), snappedf(sobo.avg_velocity.y, 0.1)]}
+
+
+func diagnostic_tick(entry: String) -> void:
+	if diagnostics == null:
+		return
+	var rows: Array[Dictionary] = []
+	for sobo: Sobo in SoboManager.all_sobos:
+		rows.append(diagnostic_sobo(sobo))
+	var active := enabled and is_prime_run() and not diagnostics_suspended and not get_tree().paused
+	active = active and Menu._0 != null and not Menu._0.visible
+	diagnostics.pulse(entry, JSON.stringify(rows), active)
+
+
+func _exit_tree() -> void:
+	if diagnostics != null:
+		diagnostics.stop()
 
 
 # ---------------------------------------------------------------- self test
