@@ -1,4 +1,16 @@
-# Manager alpha.7 validation
+# Manager 0.3.0-alpha.8 validation
+
+This release fixes shared-theme text visibility and separates download failure causes in the manager's 22 languages.
+
+The earlier theme reproduced unreadable checked-and-hovered text and the open-selection state. Its 140 checks had 17 failures. The same process then exercised input events, saved comparison images and checked the corrected theme in 155 further checks with no assertion failures. Normal, primary, danger and disabled states were also checked. The process exited with code 0 and no GDScript errors. Six shader-cache errors were logged, so the overall QA runner returned 1. Their rendering cause remains unresolved.
+
+The download regression exercised HTTP 504, connection and request errors, invalid SHA256 metadata, mismatched downloaded bytes, storage errors and existing error-display contracts. All 151 checks succeeded, with process exit 0 and no logged errors or warnings. Manual downloads, automatic mod updates and dependency retrieval share the corrected error display. SHA256 verification remains required for catalog downloads that carry a hash.
+
+An additional isolated run called the real manual-download entry points with and without a catalog hash, automatic mod updates and dependency retrieval. It covered 16 scenarios with 103 checks and no failures, process exit 0 and no errors. The cases checked HTTP 504, communication failures, SHA mismatches, storage failures, busy-state release and stopping before installation. A dependency definition whose SHA differs from the catalog now has a separate pre-download metadata message in all 22 languages.
+
+Both checks used dedicated application-data folders. Sealed manager inputs were unchanged. These checks do not establish Linux desktop behavior, long sessions or every mod combination. Exported alpha.8 binaries still require their separate release checks.
+
+## Earlier alpha.7 validation
 
 This release adds game-specific catalog variants without changing the original mod ZIPs or their install layouts.
 

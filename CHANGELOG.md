@@ -2,6 +2,11 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Mod Manager 0.3.0-alpha.8, 2026-11-09
+
+- Fixed labels disappearing when a checked control is hovered or a selection menu is open. The shared theme now supplies matching text and background colors for these states.
+- Download errors now distinguish connection failures, HTTP responses, invalid SHA256 metadata, conflicting dependency and catalog hashes, mismatched bytes and storage failures in all 22 manager languages.
+
 ### Special Sobos 1.3.11-0.5.4, 2026-11-09
 
 Added: If the game freezes, the log now shows what Special Sobos was doing.

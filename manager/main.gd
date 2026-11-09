@@ -802,10 +802,10 @@ func prepare_plan(request: Dictionary, allow_adopt: bool = true) -> Dictionary:
 			if pin.is_empty():
 				pin = catalog_pin
 			elif not catalog_pin.is_empty() and pin.to_lower() != catalog_pin.to_lower():
-				return {"ok":false, "error":"dependency_download", "args":[id,version]}
+				return download_error({"error":ERR_INVALID_DATA, "failure":"sha256_metadata"}, id, version)
 			var downloaded: Dictionary = await catalog.download_verified(entry, pin)
 			if downloaded.error != OK:
-				return {"ok":false, "error":"dependency_download", "args":[id,version]}
+				return download_error(downloaded, id, version)
 			found.data = {"zip":downloaded.zip, "sha256":pin}
 		if request.dependency_zips.any(func(item): return item.zip == found.data.zip):
 			return result
@@ -973,7 +973,7 @@ func auto_update_mod(mod: Dictionary, entry: Dictionary) -> Dictionary:
 		return {"ok":false, "error":"plan_changed"}
 	var downloaded: Dictionary = await catalog.download_verified(entry, str(entry.get("sha256", "")))
 	if downloaded.error != OK:
-		return {"ok":false, "error":"dependency_download", "args":[mod.id, entry.version]}
+		return download_error(downloaded, mod.id, entry.version)
 	var request := {"zip":downloaded.zip, "sha256":entry.sha256, "expected_version":mod.version, "expected_source_sha256":mod.get("source_sha256", ""), "adopt":false}
 	var result := await invoke("inspect", request)
 	if not result.ok:
@@ -1027,23 +1027,40 @@ func render_update_status() -> void:
 	if staged:
 		update_status.text = words.word("manager_update_ready", [self_update.pending.version])
 
+func download_error(result: Dictionary, mod_id: String, mod_version: String) -> Dictionary:
+	var details: Array = [mod_id, mod_version]
+	var failure := str(result.get("failure", ""))
+	match failure:
+		"request", "storage":
+			details.append(words.word("download_" + failure, [int(result.error)]))
+		"connection":
+			details.append(words.word("download_connection", [int(result.get("request_result", -1))]))
+		"http":
+			details.append(words.word("download_http", [int(result.get("http_status", 0))]))
+		"sha256", "sha256_invalid", "sha256_metadata":
+			details.append(words.word("download_" + failure))
+	return {"ok":false, "error":"dependency_download", "args":details}
+
 func download_mod(mod: Dictionary) -> void:
 	if busy:
 		return
 	set_busy(true)
 	var path := ""
+	var failure: Dictionary = {}
 	var pin := str(mod.get("sha256", ""))
 	if not pin.is_empty():
 		var verified: Dictionary = await catalog.download_verified(mod, pin)
 		if verified.error != OK:
 			set_busy(false)
-			notice_error = "dependency_download"
-			notice_args = [mod.id, mod.version]
+			var error := download_error(verified, mod.id, mod.version)
+			notice_error = error.error
+			notice_args = error.args
 			render_notice()
 			return
 		path = verified.zip
 	else:
 		var result: Dictionary = await catalog.request_bytes(mod.zip)
+		failure = result
 		var destination := ProjectSettings.globalize_path("user://catalog-mod.zip")
 		var file := FileAccess.open(destination, FileAccess.WRITE) if result.error == OK else null
 		if file != null:
@@ -1051,7 +1068,11 @@ func download_mod(mod: Dictionary) -> void:
 			file.flush()
 			if file.get_error() == OK:
 				path = destination
+			else:
+				failure = {"error":file.get_error(), "failure":"storage"}
 			file.close()
+		elif result.error == OK:
+			failure = {"error":FileAccess.get_open_error(), "failure":"storage"}
 	set_busy(false)
 	if not path.is_empty():
 		await inspect_zip(path)
@@ -1062,6 +1083,7 @@ func download_mod(mod: Dictionary) -> void:
 			notice_error = "invalid_metadata"
 			render_notice()
 	else:
-		notice_error = ""
-		notice_key = "offline"
+		var error := download_error(failure, mod.id, mod.version)
+		notice_error = error.error
+		notice_args = error.args
 		render_notice()

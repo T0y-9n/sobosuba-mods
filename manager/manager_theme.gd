@@ -53,14 +53,16 @@ static func create() -> Theme:
 		result.set_color("font_color", type, INK)
 		result.set_color("font_hover_color", type, INK)
 		result.set_color("font_pressed_color", type, INK)
+		result.set_color("font_hover_pressed_color", type, INK)
 		result.set_color("font_focus_color", type, INK)
 		result.set_color("font_disabled_color", type, DISABLED_INK)
 	result.set_stylebox("normal", "Button", box(SURFACE))
 	result.set_stylebox("hover", "Button", box(ACCENT_SOFT, ACCENT))
 	result.set_stylebox("pressed", "Button", box(ACCENT_SOFT, ACCENT))
+	result.set_stylebox("hover_pressed", "Button", box(ACCENT_SOFT, ACCENT))
 	result.set_stylebox("disabled", "Button", box(DISABLED))
 	result.set_stylebox("focus", "Button", box(Color.TRANSPARENT, FOCUS, 2))
-	for state in ["normal", "hover", "pressed", "disabled", "focus"]:
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]:
 		result.set_stylebox(state, "OptionButton", result.get_stylebox(state, "Button").duplicate())
 		result.set_stylebox(state, "CheckBox", result.get_stylebox(state, "Button").duplicate())
 	result.set_icon("arrow", "OptionButton", icon('<path d="m5 8 5 5 5-5" fill="none" stroke="#' + INK.to_html(false) + '" stroke-width="2"/>'))
@@ -69,6 +71,8 @@ static func create() -> Theme:
 	result.set_stylebox("panel", "PopupMenu", box(SURFACE))
 	result.set_stylebox("hover", "PopupMenu", box(ACCENT_SOFT, Color.TRANSPARENT, 0, 4))
 	result.set_color("font_hover_color", "PopupMenu", INK)
+	result.set_color("font_accelerator_color", "PopupMenu", MUTED)
+	result.set_color("font_separator_color", "PopupMenu", MUTED)
 	result.set_constant("v_separation", "PopupMenu", 12)
 	result.set_stylebox("panel", "AcceptDialog", box(SURFACE, RULE, 1, 10, 16))
 	result.set_stylebox("normal", "LineEdit", box(SURFACE))
@@ -110,11 +114,13 @@ static func style_button(button: Button, variant: String) -> void:
 		button.add_theme_stylebox_override("normal", box(ACCENT, ACCENT))
 		button.add_theme_stylebox_override("hover", box(ACCENT_HOVER, ACCENT_HOVER))
 		button.add_theme_stylebox_override("pressed", box(ACCENT_HOVER, ACCENT_HOVER))
-		for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		button.add_theme_stylebox_override("hover_pressed", box(ACCENT_HOVER, ACCENT_HOVER))
+		for state in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
 			button.add_theme_color_override(state, SURFACE)
 	elif variant == "danger":
 		button.add_theme_stylebox_override("normal", box(SURFACE, RULE))
 		button.add_theme_stylebox_override("hover", box(DANGER_SOFT, DANGER))
 		button.add_theme_stylebox_override("pressed", box(DANGER_SOFT, DANGER))
-		for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		button.add_theme_stylebox_override("hover_pressed", box(DANGER_SOFT, DANGER))
+		for state in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
 			button.add_theme_color_override(state, DANGER)

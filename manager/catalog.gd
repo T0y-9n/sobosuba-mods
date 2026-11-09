@@ -9,7 +9,7 @@ var error_message := ""
 
 func request_bytes(url: String, limit: int = 32 * 1024 * 1024) -> Dictionary:
 	if not url.begins_with("https://"):
-		return {"error": ERR_INVALID_PARAMETER, "body": PackedByteArray()}
+		return {"error": ERR_INVALID_PARAMETER, "body": PackedByteArray(), "failure":"request"}
 	var request := HTTPRequest.new()
 	request.timeout = 30.0
 	request.body_size_limit = limit
@@ -17,12 +17,18 @@ func request_bytes(url: String, limit: int = 32 * 1024 * 1024) -> Dictionary:
 	var error := request.request(url)
 	if error != OK:
 		request.queue_free()
-		return {"error": error, "body": PackedByteArray()}
+		return {"error": error, "body": PackedByteArray(), "failure":"request"}
 	var response: Array = await request.request_completed
 	request.queue_free()
-	if response[0] != HTTPRequest.RESULT_SUCCESS or response[1] != 200:
-		return {"error": ERR_CANT_CONNECT, "body": PackedByteArray()}
-	return {"error": OK, "body": response[3]}
+	return response_bytes(response)
+
+static func response_bytes(response: Array) -> Dictionary:
+	var result := {"error":OK, "body":response[3], "request_result":int(response[0]), "http_status":int(response[1])}
+	if result.request_result != HTTPRequest.RESULT_SUCCESS or result.http_status != 200:
+		result.error = ERR_CANT_CONNECT
+		result.body = PackedByteArray()
+		result.failure = "connection" if result.request_result != HTTPRequest.RESULT_SUCCESS else "http"
+	return result
 
 func refresh(source: String = DEFAULT_URL) -> int:
 	mods = []
@@ -181,7 +187,7 @@ static func valid_hash(value: String) -> bool:
 
 func download_verified(entry: Dictionary, sha256: String, limit: int = 32 * 1024 * 1024) -> Dictionary:
 	if not valid_hash(sha256):
-		return {"error":ERR_INVALID_DATA}
+		return {"error":ERR_INVALID_DATA, "failure":"sha256_invalid"}
 	var result: Dictionary = await request_bytes(str(entry.get("zip", "")), limit)
 	if result.error != OK:
 		return result
@@ -189,16 +195,16 @@ func download_verified(entry: Dictionary, sha256: String, limit: int = 32 * 1024
 	context.start(HashingContext.HASH_SHA256)
 	context.update(result.body)
 	if context.finish().hex_encode() != sha256.to_lower():
-		return {"error":ERR_INVALID_DATA}
+		return {"error":ERR_INVALID_DATA, "failure":"sha256"}
 	var folder := ProjectSettings.globalize_path("user://packages")
 	if DirAccess.make_dir_recursive_absolute(folder) != OK:
-		return {"error":ERR_CANT_CREATE}
+		return {"error":ERR_CANT_CREATE, "failure":"storage"}
 	var path := folder.path_join(sha256.to_lower() + ".zip")
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
-		return {"error":ERR_CANT_CREATE}
+		return {"error":ERR_CANT_CREATE, "failure":"storage"}
 	file.store_buffer(result.body)
 	file.flush()
 	var error := file.get_error()
 	file.close()
-	return {"error":error, "zip":path}
+	return {"error":error, "zip":path, "failure":"storage" if error != OK else ""}
