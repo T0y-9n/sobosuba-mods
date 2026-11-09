@@ -3,9 +3,13 @@ extends Node
 const DEFAULT_URL := "https://raw.githubusercontent.com/T0y-9n/sobosuba-mods/main/catalog.json"
 const Manifest = preload("manifest.gd")
 const Versions = preload("versions.gd")
+const ReleaseSource = preload("release_source.gd")
 
 var mods: Array = []
 var error_message := ""
+var _trusted_catalog := false
+var _base_mods: Array = []
+var _release_source := ReleaseSource.new()
 
 func request_bytes(url: String, limit: int = 32 * 1024 * 1024) -> Dictionary:
 	if not url.begins_with("https://"):
@@ -32,11 +36,14 @@ static func response_bytes(response: Array) -> Dictionary:
 
 func refresh(source: String = DEFAULT_URL) -> int:
 	mods = []
+	var previous_trust := _trusted_catalog
+	_trusted_catalog = false
 	var bytes := PackedByteArray()
 	if source.begins_with("https://"):
 		var result: Dictionary = await request_bytes(source)
 		if result.error != OK:
 			error_message = "Cannot check for updates: " + source
+			restore_minimum(source, previous_trust)
 			return result.error
 		bytes = result.body
 	else:
@@ -47,6 +54,7 @@ func refresh(source: String = DEFAULT_URL) -> int:
 	var parsed: Variant = JSON.parse_string(bytes.get_string_from_utf8())
 	if not parsed is Dictionary or not parsed.get("mods") is Array:
 		error_message = "Invalid catalog: " + source
+		restore_minimum(source, not _base_mods.is_empty())
 		return ERR_INVALID_DATA
 	var ids: Array = []
 	for mod in parsed.mods:
@@ -76,11 +84,56 @@ func refresh(source: String = DEFAULT_URL) -> int:
 					owners[game] = index
 		ids.append(mod.id)
 	mods = parsed.mods
+	_trusted_catalog = source == DEFAULT_URL
+	if _trusted_catalog:
+		add_source_defaults(mods)
+		_base_mods = mods.duplicate(true)
 	error_message = ""
 	return OK
 
+func bundled_mods() -> Array:
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://catalog.json"))
+	return parsed.mods if parsed is Dictionary and parsed.get("mods") is Array else []
+
+func add_source_defaults(entries: Array) -> void:
+	var bundled := bundled_mods()
+	for row: Dictionary in entries:
+		var defaults: Array = []
+		for original: Dictionary in bundled:
+			if original.get("id") == row.id:
+				defaults = release_candidates(original)
+		var candidates: Array = [row]
+		for variant: Dictionary in row.get("variants", []):
+			candidates.append(variant)
+		for candidate: Dictionary in candidates:
+			if candidate.has("source"):
+				continue
+			for original: Dictionary in defaults:
+				if original.has("source") and ReleaseSource.valid_source(original.source) and entry_layout(candidate) == entry_layout(original) and ReleaseSource.valid_location(candidate, original.source) and valid_hash(str(candidate.get("sha256", ""))):
+					candidate.source = original.source.duplicate(true)
+					break
+
+func restore_minimum(source: String, previous_trust: bool) -> void:
+	if source != DEFAULT_URL:
+		return
+	mods = _base_mods.duplicate(true) if previous_trust else bundled_mods().duplicate(true)
+	_trusted_catalog = not mods.is_empty()
+	if _trusted_catalog:
+		add_source_defaults(mods)
+		_base_mods = mods.duplicate(true)
+
+func refresh_latest(game_version: String, inspect: Callable) -> Dictionary:
+	var result := await _release_source.refresh(self, mods, game_version, inspect, _trusted_catalog)
+	mods = result.mods
+	return result
+
+func release_status(mod_id: String, game_version: String) -> Dictionary:
+	var family := entry_layout({"game_versions":[game_version]})
+	return _release_source.statuses.get(mod_id + "|" + family, {})
+
 func invalid_catalog(source: String) -> int:
 	error_message = "Invalid catalog: " + source
+	restore_minimum(source, not _base_mods.is_empty())
 	return ERR_INVALID_DATA
 
 static func valid_variant(value: Variant, mod_id: String) -> bool:
@@ -123,6 +176,7 @@ static func release_candidates(mod: Dictionary) -> Array:
 	var candidates: Array = [original]
 	for variant in mod.get("variants", []):
 		var candidate := original.duplicate(true)
+		candidate.erase("source")
 		candidate.merge(variant, true)
 		candidate.id = mod.id
 		candidates.append(candidate)

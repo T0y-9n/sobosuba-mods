@@ -1,0 +1,191 @@
+name: Catalog validation
+run-name: 'Catalog PR #${{ github.event.pull_request.number }} at ${{ github.event.pull_request.head.sha }}'
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - catalog.json
+      - manager/catalog.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-package-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  catalog-package-validation:
+    name: catalog-package-validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out trusted verification code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: trusted
+          persist-credentials: false
+
+      - name: Read proposed catalog at the immutable event head
+        id: catalog
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import urllib.error
+          import urllib.request
+
+          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          event_name = os.environ['GITHUB_EVENT_NAME']
+          repository = event['repository']['full_name']
+          if repository != 'T0y-9n/sobosuba-mods':
+              raise ValueError('Unexpected catalog authority')
+          if event_name != 'pull_request_target':
+              raise ValueError('Unexpected validation event')
+          pr = event['pull_request']
+          if pr['base']['ref'] != 'main':
+              raise ValueError('Unexpected PR base branch')
+          head_repository = pr['head']['repo']['full_name']
+          head_sha = pr['head']['sha']
+          base_sha = pr['base']['sha']
+          pull_request_number = pr['number']
+          if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', head_repository):
+              raise ValueError('Invalid head repository')
+          for sha in (head_sha, base_sha):
+              if not re.fullmatch(r'[0-9a-f]{40}', sha):
+                  raise ValueError('Invalid commit SHA')
+          work = Path(os.environ['RUNNER_TEMP']) / 'catalog-validation'
+          work.mkdir()
+
+          def fetch_catalog(path, optional=False):
+              url = f"https://raw.githubusercontent.com/{head_repository}/{head_sha}/{path}"
+              request = urllib.request.Request(url, headers={'User-Agent': 'Sobosuba-Catalog-Validation'})
+              try:
+                  with urllib.request.urlopen(request, timeout=30) as response:
+                      data = response.read(8 * 1024 * 1024 + 1)
+              except urllib.error.HTTPError as error:
+                  if optional and error.code == 404:
+                      return None
+                  raise
+              if len(data) > 8 * 1024 * 1024:
+                  raise ValueError('Catalog exceeds size limit')
+              return data
+
+          proposed = fetch_catalog('catalog.json')
+          json.loads(proposed)
+          (work / 'catalog.json').write_bytes(proposed)
+          mirror = fetch_catalog('manager/catalog.json', optional=True)
+          baseline_mirror = Path('trusted/manager/catalog.json')
+          baseline_bytes = baseline_mirror.read_bytes() if baseline_mirror.exists() else None
+          if mirror != baseline_bytes and mirror != proposed:
+              raise ValueError('A changed manager/catalog.json must match catalog.json byte for byte')
+          receipt = {
+              'repository': repository,
+              'event_name': event_name,
+              'pull_request_number': pull_request_number,
+              'head_repository': head_repository,
+              'head_sha': head_sha,
+              'base_sha': base_sha,
+              'run_id': int(os.environ['GITHUB_RUN_ID']),
+              'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'input_sha256': hashlib.sha256(proposed).hexdigest(),
+          }
+          (work / 'input.json').write_text(json.dumps(receipt), encoding='utf-8')
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"head_sha={head_sha}\n")
+          PY
+
+      - name: Install checksum-pinned verification runtimes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import tarfile
+          import urllib.request
+          import zipfile
+
+          runtime = Path(os.environ['RUNNER_TEMP']) / 'catalog-validation' / 'runtime'
+          runtime.mkdir()
+
+          def download(url, destination, expected):
+              request = urllib.request.Request(url, headers={'User-Agent': 'Sobosuba-Catalog-Validation'})
+              digest = hashlib.sha256()
+              with urllib.request.urlopen(request, timeout=60) as response, destination.open('wb') as output:
+                  while chunk := response.read(1024 * 1024):
+                      digest.update(chunk)
+                      output.write(chunk)
+              if digest.hexdigest() != expected:
+                  raise ValueError('Runtime checksum mismatch')
+
+          godot_archive = runtime / 'godot.zip'
+          download(
+              'https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip',
+              godot_archive,
+              'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4',
+          )
+          godot = runtime / 'godot'
+          with zipfile.ZipFile(godot_archive) as archive:
+              godot.write_bytes(archive.read('Godot_v4.7.2-stable_linux.x86_64'))
+          godot.chmod(0o755)
+          manifest = json.loads(Path('trusted/manager/runtime/linux.json').read_text())
+          powershell_archive = runtime / 'powershell.tar.gz'
+          download(manifest['source'], powershell_archive, manifest['sha256'])
+          powershell = runtime / 'powershell'
+          powershell.mkdir()
+          with tarfile.open(powershell_archive, 'r:gz') as archive:
+              archive.extractall(powershell, filter='data')
+          (powershell / 'pwsh').chmod(0o755)
+          PY
+
+      - name: Verify proposed catalog with trusted product rules
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          work = Path(os.environ['RUNNER_TEMP']) / 'catalog-validation'
+          trusted = Path('trusted').resolve()
+          output = work / 'verification'
+          command = [
+              'python3', str(trusted / 'tools/prepare_catalog_update.py'),
+              '--check-catalog',
+              '--baseline', str(trusted / 'catalog.json'),
+              '--catalog', str(work / 'catalog.json'),
+              '--output', str(output),
+              '--godot', str(work / 'runtime/godot'),
+              '--powershell', str(work / 'runtime/powershell/pwsh'),
+          ]
+          result = subprocess.run(command, timeout=240)
+          if result.returncode != 0:
+              raise SystemExit(result.returncode)
+          receipt = json.loads((work / 'input.json').read_text())
+          report = json.loads((output / 'report.json').read_text())
+          if report['input_sha256'] != receipt['input_sha256']:
+              raise ValueError('Verifier input checksum mismatch')
+          receipt['checker_exit_code'] = result.returncode
+          receipt['conclusion'] = 'success'
+          (work / 'catalog-validation.json').write_text(
+              json.dumps(receipt, indent=2) + '\n', encoding='utf-8',
+          )
+          PY
+
+      - name: Publish successful exact-head validation record
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: catalog-validation-${{ steps.catalog.outputs.head_sha }}
+          path: ${{ runner.temp }}/catalog-validation/catalog-validation.json
+          if-no-files-found: error
+          retention-days: 14

@@ -41,7 +41,39 @@ function Safe-Relative([string]$Name) {
     return $true
 }
 function Valid-Id([string]$Id) {return $Id -cmatch '^[a-z][a-z0-9_]{0,63}$' -and (Safe-Relative $Id)}
+function Valid-GameCredit($Credit) {
+    if($Credit -isnot [hashtable]){return $false}
+    return @($Credit.Keys) -ccontains 'text' -and @($Credit.Keys) -ccontains 'store_url' -and
+        $Credit.text -is [string] -and $Credit.store_url -is [string] -and
+        $Credit.text -ceq 'sobosuba by keepee' -and $Credit.store_url -ceq 'https://store.steampowered.com/app/1946560/sobosuba'
+}
+function Assert-PackageCredit($Package) {
+    if(Valid-GameCredit $Package.game_credit){return}
+    $exceptions=@{
+        'sobosandbox|1.3.0'='9cac7816ae47c0236d4477468a7a4d72acd5214399eb9a4f668c6f5644c66c60'
+        'greenscreensobos|1.0.0'='493140f1ebc50cba868563b8c7ec8d94dbd6d71a5d888579a64918e1673fca13'
+    }
+    # Catalog credit supplements only these exact, already published archives.
+    if($exceptions[$Package.id+'|'+$Package.version] -ceq $Package.sha256) {
+        $path=Join-Path $PSScriptRoot 'catalog.json'
+        if([IO.File]::Exists($path)) {
+            $catalog=Read-Map ([IO.File]::ReadAllText($path))
+            foreach($mod in @($catalog.mods)) {
+                if($mod -isnot [hashtable]){continue}
+                foreach($candidate in @($mod)+@($mod.variants)) {
+                    if($candidate -isnot [hashtable]){continue}
+                    $id=if($candidate.ContainsKey('id')){$candidate.id}else{$mod.id}
+                    if($id -is [string] -and $candidate.version -is [string] -and $candidate.sha256 -is [string] -and $id -ceq $Package.id -and $candidate.version -ceq $Package.version -and $candidate.sha256 -ceq $Package.sha256 -and (Valid-GameCredit $candidate.game_credit)) {
+                        $Package.game_credit=$candidate.game_credit;return
+                    }
+                }
+            }
+        }
+    }
+    Stop-Manager 'credit_required' @($Package.name)
+}
 function Read-PackageNotes($Metadata,$Files) {
+    if($Metadata.ContainsKey('game_credit') -and -not (Valid-GameCredit $Metadata.game_credit)){Stop-Manager 'invalid_metadata'}
     $description=$Metadata.description
     if($description -is [hashtable]){
         if($description.Count -gt 22){Stop-Manager 'invalid_metadata'}
@@ -187,6 +219,7 @@ function Read-Package([string]$Path) {
         }
         Read-PackageNotes $meta $files
         $meta.sha256=$sha;$meta.files=@($payload.Keys | Sort-Object);$meta.contents=$payload
+        Assert-PackageCredit $meta
         return $meta
     } catch {
         if($_.Exception.Data['key']) {throw}

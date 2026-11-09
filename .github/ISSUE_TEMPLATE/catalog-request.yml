@@ -1,0 +1,51 @@
+name: Catalog request / カタログ掲載申請
+description: Request help preparing a catalog PR. / カタログ掲載PRの準備を依頼します。
+title: "[Catalog] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Authors can submit a PR to this GitHub repository. Maintainers review and merge new MOD entries. This form helps prepare that PR.
+        作者はこのGitHubリポジトリへPRで申請できます。新しいMODの追加は人が確認して合流します。このフォームではPRの準備を依頼できます。
+
+        [Requirements / 掲載条件](https://github.com/T0y-9n/sobosuba-mods/blob/main/docs/CATALOG-CONTRIBUTING.md)
+  - type: input
+    id: mod
+    attributes:
+      label: MOD name and id / MOD名とID
+    validations:
+      required: true
+  - type: input
+    id: repository
+    attributes:
+      label: Author GitHub repository / 作者のGitHubリポジトリ
+      placeholder: https://github.com/owner/repository
+    validations:
+      required: true
+  - type: textarea
+    id: release
+    attributes:
+      label: Release, ZIP asset and digest / Release・ZIP資材・digest
+      description: Include the Release URL, ZIP URL and GitHub asset SHA256 digest. / ReleaseのURL、ZIPのURL、GitHub資材のSHA256 digestを記入してください。
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Release source and game versions / Releaseの公開元と対応ゲーム版
+      description: Include source.github, source.tag_prefix, source.asset and game_versions. / source.github・source.tag_prefix・source.assetとgame_versionsを記入してください。
+    validations:
+      required: true
+  - type: input
+    id: readme
+    attributes:
+      label: README at the Release tag / Releaseのタグ時点のREADME
+    validations:
+      required: true
+  - type: checkboxes
+    id: credit
+    attributes:
+      label: Required credit / 必要な作者表示
+      options:
+        - label: The ZIP metadata and author README meet the linked game-credit requirements. / ZIPの定義書と作者のREADMEが、案内にある原作者表示の条件を満たしています。
+          required: true

@@ -1,0 +1,108 @@
+{
+  "mods": [
+    {
+      "id": "prime_sobo",
+      "name": "Prime sobos",
+      "version": "1.2.3-1.0.5",
+      "game_versions": [
+        "1.2.3"
+      ],
+      "summary": "Prime-numbered sobos that only merge when the sum is a power of two.",
+      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.2.3-1.0.5/sobosuba-prime-balls-1.2.3-1.0.5.zip",
+      "sha256": "6ea9f14b8fd8c75bf30a249446213b30cd67dab17eb077afb879c086cd213774",
+      "variants": [
+        {
+          "version": "1.3.11-1.0.4",
+          "game_versions": [
+            "1.3.11"
+          ],
+          "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.3.11-1.0.4/sobosuba-prime-balls-1.3.11-1.0.4.zip",
+          "sha256": "56686857e1f1c8e55ad659247baf6b97fd363282b258220caf242d22d58982e2",
+          "game_credit": {
+            "text": "sobosuba by keepee",
+            "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
+          },
+          "source": {
+            "github": "T0y-9n/sobosuba-mods",
+            "tag_prefix": "1.3.11-",
+            "asset": "sobosuba-prime-balls-{version}.zip"
+          }
+        }
+      ],
+      "game_credit": {
+        "text": "sobosuba by keepee",
+        "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
+      },
+      "source": {
+        "github": "T0y-9n/sobosuba-mods",
+        "tag_prefix": "1.2.3-",
+        "asset": "sobosuba-prime-balls-{version}.zip"
+      }
+    },
+    {
+      "id": "special_sobo",
+      "name": "Special Sobos (beta)",
+      "version": "1.3.11-0.5.4",
+      "game_versions": [
+        "1.3.11"
+      ],
+      "summary": "Beta for sobosuba 1.3.11 with Small, Puffy, Magnet and Throwing sobos and 20 numeric settings.",
+      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.5.4/Special-Sobos-1.3.11-0.5.4.zip",
+      "sha256": "64c76f7f1f65fc46030b3695c9f919d893b9f9c6e19fc021de816f2c9f3ee385",
+      "game_credit": {
+        "text": "sobosuba by keepee",
+        "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
+      },
+      "source": {
+        "github": "T0y-9n/sobosuba-mods",
+        "tag_prefix": "special-1.3.11-",
+        "asset": "Special-Sobos-{version}.zip",
+        "prerelease": true
+      }
+    },
+    {
+      "id": "sobosandbox",
+      "name": "SoboSandbox",
+      "version": "1.3.0",
+      "game_versions": [
+        "1.3.11",
+        "1.3.10",
+        "1.3.9"
+      ],
+      "summary": "Sandbox mode with developer hotkeys, no game over, and disabled achievements and scores.",
+      "author": "Typhe681",
+      "zip": "https://github.com/Typhe681/SoboSandbox/releases/download/v1.3.0/SoboSandbox1.3.0.zip",
+      "sha256": "9cac7816ae47c0236d4477468a7a4d72acd5214399eb9a4f668c6f5644c66c60",
+      "game_credit": {
+        "text": "sobosuba by keepee",
+        "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
+      },
+      "source": {
+        "github": "Typhe681/SoboSandbox",
+        "tag_prefix": "v",
+        "asset": "SoboSandbox{version}.zip"
+      }
+    },
+    {
+      "id": "greenscreensobos",
+      "name": "GreenScreenSobos",
+      "version": "1.0.0",
+      "game_versions": [
+        "1.3.11"
+      ],
+      "summary": "Replaces sobo background colors with your own PNG, JPG or OGV media files.",
+      "author": "Typhe681",
+      "zip": "https://github.com/Typhe681/GreenScreenSobos/releases/download/v1.0.0/GreenScreenSobos1.0.0.zip",
+      "sha256": "493140f1ebc50cba868563b8c7ec8d94dbd6d71a5d888579a64918e1673fca13",
+      "game_credit": {
+        "text": "sobosuba by keepee",
+        "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
+      },
+      "source": {
+        "github": "Typhe681/GreenScreenSobos",
+        "tag_prefix": "v",
+        "asset": "GreenScreenSobos{version}.zip"
+      }
+    }
+  ]
+}
