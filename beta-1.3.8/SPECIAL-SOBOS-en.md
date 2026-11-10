@@ -5,7 +5,7 @@ https://store.steampowered.com/app/1946560/sobosuba
 
 Idea by Hilobo
 
-Version 1.3.11-0.5.5 for sobosuba 1.3.11. This package works on its own.
+Version 1.3.11-0.5.6 for sobosuba 1.3.11. This package works on its own.
 
 Special Sobos works only in classic (radix 2). Other modes, including Radix 3, play like the base game again.
 
@@ -65,6 +65,19 @@ Special runs keep scores local and block Steam scores, world-ranking submissions
 and achievements. Switch changes apply from the next run. Finish a saved special
 run before disabling or removing the mod. Settings and saves are kept when the
 manager removes the mod.
+
+
+## Export your settings
+
+Press **Export settings** in the Special Sobos settings screen to save the current
+switches, kind choices and numeric values as JSON in your Downloads folder.
+The filename includes the mod version and local date and time. Existing exports
+are kept. The screen shows the full saved path. If Downloads is unavailable or
+unwritable, the file is saved in the game's user-data folder instead. A failure
+at both locations is shown on screen and in the game log.
+
+The JSON also includes the mod version and export time. You can share it when
+reporting the settings you play with.
 
 
 ## Mobile settings

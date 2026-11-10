@@ -147,6 +147,57 @@ func reset_numbers(keys: Array = []) -> bool:
 	return true
 
 
+func export_settings(mod_version: String, directory_override: String = "") -> Dictionary:
+	var now: Dictionary = Time.get_datetime_dict_from_system()
+	var timestamp: String = "%04d%02d%02d_%02d%02d%02d" % [now.year, now.month, now.day, now.hour, now.minute, now.second]
+	var filename: String = "special_sobos_settings_%s_%s.json" % [mod_version, timestamp]
+	var payload: Dictionary = {
+		"enabled": enabled,
+		"traits": traits.duplicate(true),
+		"magnet_pull_multiplier": magnet_pull_multiplier,
+		"parameters": numbers.duplicate(true),
+		"mod_version": mod_version,
+		"exported_at": Time.get_datetime_string_from_system(false, false),
+	}
+	if not directory_override.is_empty():
+		return export_to_directory(directory_override, filename, payload)
+	var failures: PackedStringArray = []
+	var downloads: String = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+	if downloads.is_empty():
+		failures.append("downloads directory is unavailable")
+	else:
+		var download_result: Dictionary = export_to_directory(downloads, filename, payload)
+		if download_result.ok:
+			return download_result
+		failures.append("downloads: " + str(download_result.error))
+	var fallback_result: Dictionary = export_to_directory("user://", filename, payload)
+	if fallback_result.ok:
+		return fallback_result
+	failures.append("user data: " + str(fallback_result.error))
+	var reason: String = "; ".join(failures)
+	load((get_script() as Script).resource_path.get_base_dir().path_join("special_sobo.gd")).log_warning("settings export failed: " + reason)
+	return {"ok": false, "path": "", "error": reason}
+
+
+func export_to_directory(directory: String, filename: String, payload: Dictionary) -> Dictionary:
+	var path: String = directory.path_join(filename)
+	var suffix:= 2
+	while FileAccess.file_exists(path):
+		path = directory.path_join(filename.trim_suffix(".json") + "_%d.json" % suffix)
+		suffix += 1
+	var file:= FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		return {"ok": false, "path": "", "error": error_string(FileAccess.get_open_error())}
+	file.store_string(JSON.stringify(payload))
+	file.flush()
+	var write_error: Error = file.get_error()
+	file.close()
+	if write_error != OK:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+		return {"ok": false, "path": "", "error": error_string(write_error)}
+	return {"ok": true, "path": ProjectSettings.globalize_path(path), "error": ""}
+
+
 func write(enabled_value: bool, traits_value: Dictionary, pull_value: float, values: Dictionary = {}) -> bool:
 	var file:= FileAccess.open(path, FileAccess.WRITE)
 	if file == null:

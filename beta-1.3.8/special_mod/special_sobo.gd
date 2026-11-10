@@ -35,6 +35,7 @@ var parameter_rows: Dictionary = {}
 var number_inputs: Dictionary = {}
 var page_picker: SoboMenuButtonEnum
 var reset_button: SoboMenuButtonBool
+var export_button: SoboMenuButtonBool
 var settings_page := 0
 var diagnostics: RefCounted
 var diagnostic_frame := -1
@@ -681,6 +682,11 @@ func install_parameter_pages(list: Node, enum_model: SoboMenuButtonEnum, model: 
 	reset_button.bool_circles.hide()
 	reset_button.release_press.connect(reset_tuning)
 	list.add_child(reset_button)
+	export_button = copy_toggle(model)
+	export_button.name = "ExportSpecialSettings"
+	export_button.bool_circles.hide()
+	export_button.release_press.connect(export_current_settings)
+	list.add_child(export_button)
 
 
 func install_parameter_rows(list: Node, model: SoboMenuButtonBool) -> void:
@@ -719,8 +725,9 @@ func install_parameter_rows(list: Node, model: SoboMenuButtonBool) -> void:
 		if key == "magnet_pull_multiplier":
 			magnet_pull_input = input
 			magnet_pull_label = row.label
-	if reset_button != null:
-		list.move_child(reset_button, list.get_child_count() - 1)
+	if reset_button != null and export_button != null:
+		list.move_child(reset_button, list.get_child_count() - 2)
+		list.move_child(export_button, list.get_child_count() - 1)
 
 
 func parameter_active(key: String) -> bool:
@@ -792,6 +799,15 @@ func reset_tuning() -> void:
 	refresh_toggle()
 
 
+func export_current_settings() -> void:
+	var result: Dictionary = settings.export_settings(MOD_VERSION)
+	var japanese: bool = TranslationServer.get_locale().begins_with("ja")
+	if result.ok:
+		settings_screen.description_label.text = ("設定を書き出しました: " if japanese else "Settings exported to: ") + str(result.path)
+	else:
+		settings_screen.description_label.text = ("設定を書き出せませんでした: " if japanese else "Could not export settings: ") + str(result.error)
+
+
 func refresh_parameters() -> void:
 	if page_picker == null:
 		return
@@ -799,6 +815,7 @@ func refresh_parameters() -> void:
 	settings_page = clampi(settings_page, 0, groups.size() - 1)
 	page_picker.show()
 	reset_button.show()
+	export_button.show()
 	var japanese: bool = TranslationServer.get_locale().begins_with("ja")
 	var group: String = groups[settings_page]
 	page_picker.label.text = "設定ページ" if japanese else "Settings page"
@@ -808,6 +825,8 @@ func refresh_parameters() -> void:
 	traits_grid.visible = group == "kinds"
 	reset_button.label.text = "数値を初期値に戻す" if japanese else "Reset tuning to defaults"
 	reset_button.tooltip_text = "数値を保存して今の盤面に反映。種類の切替は維持します。" if japanese else "Save and apply the default numbers now. Kind switches are kept."
+	export_button.label.text = "設定を書き出す" if japanese else "Export settings"
+	export_button.tooltip_text = "今の設定をJSONファイルへ書き出します。" if japanese else "Write the current settings to a JSON file."
 	for key: String in parameter_rows:
 		var row: SoboMenuButtonBool = parameter_rows[key]
 		var spec: Array = settings.parameter_values[key]

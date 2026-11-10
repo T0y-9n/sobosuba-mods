@@ -102,6 +102,7 @@ func run() -> void:
 	await check_spawns(mode, prime)
 	await check_scoring(prime)
 	await check_settings(prime)
+	check_settings_export()
 	await check_missing_run_marker()
 	lines.append("natural_specials=%d" % mod.natural_specials)
 	finish()
@@ -334,6 +335,54 @@ func check_settings(prime: Node) -> void:
 	await start_run()
 	await frames()
 	check(not mod.run_special, "new ordinary run ignores an older special save unless load was called")
+
+
+func check_settings_export() -> void:
+	var available: bool = mod.settings.has_method("export_settings")
+	check(available, "settings export is available")
+	if not available:
+		return
+	var directory: String = mod.mod_dir().path_join("selftest_exports")
+	check(DirAccess.make_dir_recursive_absolute(directory) == OK, "settings export self-test directory is created")
+	var expected: Dictionary = {
+		"enabled": mod.settings.enabled,
+		"traits": mod.settings.traits.duplicate(true),
+		"magnet_pull_multiplier": mod.settings.magnet_pull_multiplier,
+		"parameters": mod.settings.numbers.duplicate(true),
+	}
+	var written: PackedStringArray = []
+	var first: Dictionary = {}
+	var second: Dictionary = {}
+	for attempt: int in 20:
+		var result: Dictionary = mod.settings.export_settings(mod.MOD_VERSION, directory)
+		if not result.get("ok", false):
+			first = result
+			break
+		var path: String = result.get("path", "")
+		written.append(path)
+		if not first.is_empty() and path == str(first.path).trim_suffix(".json") + "_2.json":
+			second = result
+			break
+		first = result
+	var parsed: Dictionary = {}
+	if first.get("ok", false):
+		var json := JSON.new()
+		if json.parse(FileAccess.get_file_as_string(first.path)) == OK and json.data is Dictionary:
+			parsed = json.data
+	var values_match: bool = (
+		parsed.get("enabled") == expected.enabled
+		and parsed.get("traits") == expected.traits
+		and parsed.get("magnet_pull_multiplier") == expected.magnet_pull_multiplier
+		and JSON.stringify(parsed.get("parameters")) == JSON.stringify(expected.parameters)
+		and parsed.get("mod_version") == mod.MOD_VERSION
+		and parsed.get("exported_at") is String
+		and not str(parsed.get("exported_at")).is_empty()
+	)
+	check(values_match, "settings export reads back the current values and export metadata")
+	check(first.get("ok", false) and second.get("ok", false) and first.path != second.path and FileAccess.file_exists(first.path) and FileAccess.file_exists(second.path), "two settings exports in the same second keep the earlier file")
+	for path: String in written:
+		DirAccess.remove_absolute(path)
+	DirAccess.remove_absolute(directory)
 
 
 func check_missing_run_marker() -> void:
