@@ -1,8 +1,8 @@
 # Prime Sobos for sobosuba 1.3.11
 
-Mod version 1.3.11-1.0.4. Requires sobosuba 1.3.11, the current regular release.
-For the older game version 1.2.3, download mod version 1.2.3-1.0.5.
-https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.5
+Mod version 1.3.11-1.0.5. Requires sobosuba 1.3.11, the current regular release.
+For the older game version 1.2.3, download mod version 1.2.3-1.0.6.
+https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6
 
 sobosuba by keepee
 https://store.steampowered.com/app/1946560/sobosuba

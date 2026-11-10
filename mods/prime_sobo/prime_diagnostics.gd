@@ -1,6 +1,6 @@
 extends RefCounted
 ## Only the main thread writes game data here, already copied into strings.
-const MOD_VERSION := "1.2.3-1.0.5"
+const MOD_VERSION := "1.2.3-1.0.6"
 const MOD_TAG := "[Prime Sobos %s]" % MOD_VERSION
 const STALL_MS := 5000
 const POLL_MS := 100

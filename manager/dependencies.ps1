@@ -125,7 +125,7 @@ function Get-DependencyPlan($Target,$Request) {
         }
         $next.enabled=$enabled;$next.manual=$false
         $final[$node.id+'|'+$node.layout]=$next
-        $changes+=,@{id=$node.id;name=$node.name;version=$node.version;action=$kind;enabled=$enabled;previous_version=$(if($null -ne $old){$old.version}else{''})}
+        $changes+=,@{id=$node.id;name=$node.name;version=$node.version;action=$kind;enabled=$enabled;credit_warning=(-not (Valid-GameCredit $node.game_credit));previous_version=$(if($null -ne $old){$old.version}else{''})}
         $tokenLines.Add($node.id+'|'+$node.version+'|'+[string]$next.source_sha256+'|'+[string]$enabled)
     }
     Assert-FinalDependencies @($final.Values)

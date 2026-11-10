@@ -2,10 +2,31 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Catalog update automation, unreleased
+
+- Prepare updates to existing catalog entries through the manager's release verification and package reader. Record rejected releases with their reasons and produce matching catalog copies and a reviewable patch for accepted releases.
+- Add bilingual GitHub contribution instructions, a PR template, an issue form and read-only catalog validation using trusted base code.
+- Add a separate GitHub PR sender with explicit submission, duplicate-update checks and required up-to-date validation. Deployment requires operator-approved credentials and GitHub repository settings.
+
+### Mod Manager 0.3.0-alpha.9, 2026-11-10
+
+- Show the original game's creator and store link in mod details and installation confirmations. Missing or incorrect package credit now produces a warning and allows installation, including dependencies and author-release updates. GitHub README credit checks also warn in the manager. Catalog contribution checks still require the credit.
+- Check the catalog's named GitHub repositories for newer compatible mod releases, verify their release digests and package metadata, and use the existing per-mod automatic update settings. Keep the last check result available offline and show why a release could not be accepted.
+- Add a single-run release watcher for Thor to report catalog updates without changing the catalog.
+- Keep verified author updates available when their display history cannot be saved, and show the storage error. Continue checking other candidates after a watcher notification fails.
+
 ### Mod Manager 0.3.0-alpha.8, 2026-11-09
 
 - Fixed labels disappearing when a checked control is hovered or a selection menu is open. The shared theme now supplies matching text and background colors for these states.
 - Download errors now distinguish connection failures, HTTP responses, invalid SHA256 metadata, conflicting dependency and catalog hashes, mismatched bytes and storage failures in all 22 manager languages.
+
+### Special Sobos 1.3.11-0.5.5, 2026-11-10
+
+- Add the original-game credit and purchase link to the package metadata and included README. Include this changelog. Gameplay is unchanged.
+
+### 1.2.3-1.0.6 and 1.3.11-1.0.5, 2026-11-10
+
+- Include the original-game credit, purchase link and current changelog in both game-version packages. Add the missing credit to the 1.2.3 package metadata. Gameplay is unchanged.
 
 ### Special Sobos 1.3.11-0.5.4, 2026-11-09
 
@@ -85,6 +106,18 @@ Changed: 5s now appear more often.
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### 管理アプリ0.3.0-alpha.9、2026-11-10
+
+- 原作の作者表示と購入先を説明欄と導入確認に表示します。作者表示が欠けたZIPは警告を表示して導入を続けられます。依存MODと作者Releaseの更新でも同じ扱いです。GitHub READMEの作者表示を確認できない場合も警告します。カタログへの掲載検査では作者表示を引き続き確認します。
+
+### Special Sobos 1.3.11-0.5.5、2026-11-10
+
+- 配布ZIPの定義書とREADMEに原作の作者表示と購入先を追加し、チェンジログを同梱しました。
+
+### 1.2.3-1.0.6と1.3.11-1.0.5、2026-11-10
+
+- 両方の配布ZIPに原作の作者表示、購入先、今回のチェンジログをそろえました。1.2.3版の定義書にも作者表示を追加しました。
 
 ### Special Sobos 1.3.11-0.5.4、2026-11-09
 

@@ -4,6 +4,8 @@
 2. ZIP the files with the layout below.
 3. Install the ZIP with Sobosuba Mod Manager and try it in the game.
 
+From manager alpha.9, missing or incorrect game credit produces a warning and installation can continue. For publication, set `game_credit` to `{"text":"sobosuba by keepee","store_url":"https://store.steampowered.com/app/1946560/sobosuba"}`. Catalog submissions must also credit keepee and link to the original game in the author's GitHub README.
+
 ## 1. Add the package definition
 
 ### 1.3.10 and 1.3.11
@@ -110,6 +112,8 @@ saved runs as well as the new behavior. Close the game again and check disabling
 enabling and uninstalling through the manager.
 
 ## Publish automatic updates
+
+Before publishing, run `powershell -NoProfile -File tools/check_mod_release.ps1 -Zip <final.zip>` from the repository root. It reads the final archive with the same package validator as the manager and rejects missing or invalid game credit. Keep the reported SHA256 with the release.
 
 Publish your ZIP at a permanent HTTPS download URL. Calculate its SHA256 after
 building the final ZIP, for example with PowerShell.

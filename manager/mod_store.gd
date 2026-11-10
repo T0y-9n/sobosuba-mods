@@ -13,7 +13,7 @@ func prepare_backend() -> bool:
 	backend_dir = ProjectSettings.globalize_path("user://backend")
 	if DirAccess.make_dir_recursive_absolute(backend_dir) != OK:
 		return false
-	for name in ["backend.ps1", "package.ps1", "transaction.ps1", "dependencies.ps1", "self_update.ps1"]:
+	for name in ["backend.ps1", "package.ps1", "transaction.ps1", "dependencies.ps1", "self_update.ps1", "catalog.json"]:
 		var bytes := FileAccess.get_file_as_bytes(source.path_join(name))
 		if bytes.is_empty():
 			return false

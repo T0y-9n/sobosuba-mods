@@ -123,7 +123,7 @@ func restore_minimum(source: String, previous_trust: bool) -> void:
 		_base_mods = mods.duplicate(true)
 
 func refresh_latest(game_version: String, inspect: Callable) -> Dictionary:
-	var result := await _release_source.refresh(self, mods, game_version, inspect, _trusted_catalog)
+	var result := await _release_source.refresh(self, mods, game_version, inspect, _trusted_catalog, false)
 	mods = result.mods
 	return result
 

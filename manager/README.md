@@ -1,11 +1,14 @@
 # Sobosuba Mod Manager
 
+sobosuba by keepee. This manager requires the original game.
+[Get sobosuba on Steam](https://store.steampowered.com/app/1946560/sobosuba).
+
 Manage mods for sobosuba **1.2.3**, **1.3.10** and **1.3.11**. The game is required.
 
-Supported mods include [Prime Sobos](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.0)
-and [Special Sobos 0.5.1 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.1).
+Supported mods include [Prime Sobos](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5)
+and [Special Sobos 0.5.5 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.5).
 
-1. Extract the common setup ZIP. On Windows, open the setup EXE in `Windows`. On Linux x86_64, open a terminal in `Linux` and run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.8.run`. Then open **Sobosuba Mod Manager** from the Start menu or application menu. See `INSTALL-en.md` for locations and removal. Portable downloads can still run their manager executable directly.
+1. Extract the common setup ZIP. On Windows, open the setup EXE in `Windows`. On Linux x86_64, open a terminal in `Linux` and run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.9.run`. Then open **Sobosuba Mod Manager** from the Start menu or application menu. See `INSTALL-en.md` for locations and removal. Portable downloads can still run their manager executable directly.
 
 2. Check the game folder. Use **Choose folder** if it is wrong or missing.
 
@@ -44,6 +47,14 @@ Use **Auto-update this mod** in a managed mod's details to allow automatic updat
 **Auto-update manager** is on by default. A new manager release is downloaded from this project's GitHub Releases. Windows installations in Program Files use the newer setup and ask for administrator approval when you close the app. Setup checks the expected version and tests startup in separate application data before keeping the new files. Portable Windows and Linux copies use a helper to replace the executable and restore it if startup fails. You can also choose **Update and restart**. Settings, game files and saves are kept. A failed package is not retried automatically. Keep the previous executable backup until you have used the new version.
 
 The catalog is also checked when a prerequisite cannot be found locally. Installing ZIPs with all prerequisites already present works offline. Installing a ZIP does not execute its mod code; only install mods from authors you trust, as the game will execute them later.
+
+## Original-game credit and author releases
+
+From alpha.9, details and installation confirmations show `sobosuba by keepee` and the [original game's purchase link](https://store.steampowered.com/app/1946560/sobosuba). A package with missing or incorrect `game_credit` shows a warning. You can confirm installation, including required mods, and opted-in automatic updates continue. Existing installations without credit also show the warning.
+
+The catalog can name an author's GitHub repository, tag prefix and ZIP filename pattern in `source`. On startup and **Check for updates**, the manager checks those repositories for newer releases. It verifies the release asset's SHA256 digest and the ZIP's ID, version, game versions before offering an update. Missing package credit or unverified GitHub README credit produces a warning. Catalog contribution checks continue to require both credits. A per-mod automatic update setting controls installation. Prereleases require explicit permission in that catalog source. Prime's 1.2.3 and 1.3.11 release series stay separate.
+
+When an author release cannot be checked or accepted, the row shows a reason and the catalog version stays available. The last check result and time remain available offline. The catalog's pinned version, URL and SHA256 remain the baseline for earlier managers.
 
 ## Supported packages
 

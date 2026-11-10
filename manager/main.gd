@@ -416,6 +416,7 @@ func refresh() -> void:
 	notice_error = ""
 	notice_key = ""
 	notice_args = []
+	notice_mod = {}
 	set_busy(true)
 	await read_state()
 	set_busy(false)
@@ -520,6 +521,15 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 		warning.name = "CompatibilityWarning"
 		warning.add_theme_color_override("font_color", UiTheme.DANGER)
 		text.add_child(warning)
+	var release_note := author_release_note(mod)
+	if not release_note.is_empty():
+		var release_warning := label(release_note, 13)
+		release_warning.name = "AuthorReleaseStatus"
+		release_warning.autowrap_mode = TextServer.AUTOWRAP_OFF
+		release_warning.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		release_warning.clip_text = true
+		text.add_child(release_warning)
+		button.tooltip_text += "\n" + release_note
 	text.minimum_size_changed.connect(func(): button.custom_minimum_size.y = maxf(112.0, text.get_combined_minimum_size().y + 24.0))
 	button.custom_minimum_size.y = maxf(112.0, text.get_combined_minimum_size().y + 24.0)
 	if not is_catalog:
@@ -667,6 +677,14 @@ func render_notice() -> void:
 	var warning := compatibility_warning(notice_mod) if notice_key == "changed" and notice_error.is_empty() else ""
 	if not warning.is_empty():
 		notice.text += "\n" + warning
+	if notice_key in ["changed", "offline"] and notice_mod.get("credit_warning", false):
+		notice.text += "\n" + words.word("credit_warning")
+		warning = words.word("credit_warning")
+	if notice_key in ["changed", "offline"]:
+		for change in notice_mod.get("changes", []):
+			if change.get("credit_warning", false) and change.get("id") != notice_mod.get("id"):
+				warning = words.word("credit_warning")
+				notice.text += "\n" + str(change.name) + "\n" + warning
 	notice.tooltip_text = notice.text
 	notice.add_theme_color_override("font_color", UiTheme.DANGER if not notice_error.is_empty() or not warning.is_empty() else UiTheme.SUCCESS if notice_key == "changed" else UiTheme.MUTED)
 	recovery_button.visible = notice_error == "recovery_needed"
@@ -684,6 +702,8 @@ func translate_dialogs() -> void:
 		var changes := PackedStringArray()
 		for change in pending_package.get("changes", []):
 			changes.append(str(change.name) + " (" + str(change.version) + ") - " + words.word("plan_" + str(change.action)))
+			if change.get("credit_warning", false):
+				changes.append(words.word("credit_warning"))
 		var summary := words.word("dependency_plan") + "\n" + "\n".join(changes) + "\n\n" if not changes.is_empty() else ""
 		preview_label.text = question + "\n\n" + summary + words.word("supported", [", ".join(pending_package.game_versions)]) + "\n" + words.word("destination", [target.get("root", "—")]) + "\n\n" + words.word("preserve") + "\n\n" + mod_notes(pending_package)
 	if not pending_mod.is_empty():
@@ -692,6 +712,13 @@ func translate_dialogs() -> void:
 
 func mod_notes(mod: Dictionary) -> String:
 	var parts := PackedStringArray()
+	var credit: Variant = mod.get("game_credit")
+	if mod.get("credit_warning", false) or not credit is Dictionary or credit.get("text") != "sobosuba by keepee" or credit.get("store_url") != "https://store.steampowered.com/app/1946560/sobosuba":
+		parts.append(words.word("credit_warning"))
+	parts.append("sobosuba by keepee\nhttps://store.steampowered.com/app/1946560/sobosuba")
+	var release_note := author_release_note(mod)
+	if not release_note.is_empty():
+		parts.append(release_note)
 	if not str(mod.get("author", "")).is_empty():
 		parts.append(words.word("author", [mod.author]))
 	var description := description_note(mod.get("description", mod.get("summary", "")))
@@ -703,6 +730,35 @@ func mod_notes(mod: Dictionary) -> String:
 	if mod.get("readme_unavailable", false):
 		parts.append(words.word("readme_unavailable"))
 	return "\n\n".join(parts)
+
+func author_release_note(mod: Dictionary) -> String:
+	if catalog.entry_layout(mod) != catalog.entry_layout({"game_versions":[store.game_version]}):
+		return ""
+	var status: Dictionary = catalog.release_status(mod.id, store.game_version)
+	var error := str(status.get("error", ""))
+	var message := ""
+	if error == "author_release_unavailable":
+		message = words.word(error)
+	elif error == "author_release_rejected":
+		message = words.word(error, [str(status.get("version", "")), author_release_reason(str(status.get("reason", "metadata")))])
+	if status.get("cached", false):
+		var checked_at := int(status.get("checked_at", 0))
+		var checked := Time.get_datetime_string_from_unix_time(checked_at, true) + " UTC"
+		var cached := words.word("author_release_cached", [str(status.get("cached_version", status.get("version", ""))), checked])
+		message += (" " if not message.is_empty() else "") + cached
+		if not str(status.get("cached_reason", "")).is_empty():
+			message += " " + words.word("author_release_rejected", [str(status.get("cached_version", "")), author_release_reason(str(status.cached_reason))])
+	if status.get("cache_error", false):
+		message += (" " if not message.is_empty() else "") + words.error_word("io_error")
+	var warnings: Array = status.get("warnings", mod.get("release_warnings", []))
+	if "game_credit" in warnings:
+		message += ("\n" if not message.is_empty() else "") + words.word("credit_warning")
+	if "readme" in warnings:
+		message += ("\n" if not message.is_empty() else "") + words.word("credit_readme_warning")
+	return message
+
+func author_release_reason(reason: String) -> String:
+	return words.word("author_release_" + (reason if reason in ["game_credit", "readme", "metadata", "sha256", "download", "source", "cache_invalid"] else "metadata"))
 
 func description_note(value: Variant) -> String:
 	if value is String:
@@ -820,6 +876,7 @@ func inspect_zip(path: String) -> void:
 	set_busy(true)
 	pending_apply = {}
 	pending_mode = "install"
+	notice_mod = {}
 	settings.mod_folder = path.get_base_dir()
 	settings.save()
 	var result := await invoke("inspect", {"zip": path})
@@ -936,28 +993,33 @@ func check_updates() -> void:
 	set_busy(true)
 	notice_error = ""
 	notice_key = ""
+	notice_mod = {}
 	var error := await catalog.refresh(settings.catalog_url)
 	if error != OK:
 		notice_key = "offline"
-	else:
+	await catalog.refresh_latest(store.game_version, invoke)
+	await read_state()
+	var selected := mods.duplicate(true)
+	var update_changes: Array = []
+	for mod in selected:
+		if mod.manual or not mod.compatible or not settings.mod_updates_enabled(mod_key(mod)) or not catalog.has_update(mod, store.game_version):
+			continue
+		var latest := catalog.find(mod.id, store.game_version)
+		if not Versions.supports_game(latest.get("game_versions", []), store.game_version):
+			continue
+		var result := await auto_update_mod(mod, latest)
+		if not result.ok:
+			notice_error = str(result.get("error", "invalid_metadata"))
+			notice_args = result.get("args", [])
+			if notice_error == "game_running" and update_timer != null:
+				update_timer.start(60.0)
+			break
+		notice_key = "changed"
+		notice_mod = result.get("data", {})
+		update_changes.append_array(notice_mod.get("changes", []))
 		await read_state()
-		var selected := mods.duplicate(true)
-		for mod in selected:
-			if mod.manual or not mod.compatible or not settings.mod_updates_enabled(mod_key(mod)) or not catalog.has_update(mod, store.game_version):
-				continue
-			var latest := catalog.find(mod.id, store.game_version)
-			if not Versions.supports_game(latest.get("game_versions", []), store.game_version):
-				continue
-			var result := await auto_update_mod(mod, latest)
-			if not result.ok:
-				notice_error = str(result.get("error", "invalid_metadata"))
-				notice_args = result.get("args", [])
-				if notice_error == "game_running" and update_timer != null:
-					update_timer.start(60.0)
-				break
-			notice_key = "changed"
-			notice_mod = result.get("data", {})
-			await read_state()
+	if not update_changes.is_empty():
+		notice_mod.changes = update_changes
 	if settings.manager_auto_update:
 		if not store.prepare_backend() or not await self_update.check_update(catalog):
 			if notice_error.is_empty():

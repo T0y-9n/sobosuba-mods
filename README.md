@@ -5,10 +5,9 @@ sobosuba by keepee. This mod requires the original game.
 
 ## Downloads by game version
 
-| Game | Prime Sobos download | Special Sobos download | SoboSandbox download | GreenScreenSobos |
-| --- | --- | --- | --- | --- |
-| Current 1.3.11 | [1.3.11-1.0.4](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.4) | [0.5.4 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.4) | [1.3.0 by Typhe681](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
-| Older 1.2.3 | [1.2.3-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.5) | - | - | - |
+- Game 1.3.11. [1.3.11-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5) and [Special Sobos 0.5.5 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.5).
+- Game 1.2.3. [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6).
+- [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) and [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0), by Typhe681.
 
 Smartphone layout support: Prime Sobos and Special Sobos now adapt their settings and labels to portrait screens. Checked on Windows with phone-size layouts; real-device touch, safe areas and software keyboards still need verification.
 
@@ -19,12 +18,13 @@ After installing it, add your own `.png`, `.jpg` or `.ogv` files to the `greensc
 If several files are present, the mod picks one at random. See the [author's instructions](https://github.com/Typhe681/GreenScreenSobos/tree/v1.0.0) for the Windows and Linux paths.
 The catalog downloads the original ZIP directly from the author.
 
-[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.7)
+[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.9)
 manages mods for 1.2.3, 1.3.10 and 1.3.11. Choose the mod package matching your game.
-Manager alpha.7 selects the matching Prime Sobos release from the catalog for 1.2.3 or 1.3.11.
+Manager alpha.9 selects the matching Prime Sobos release from the catalog for 1.2.3 or 1.3.11.
 These two releases keep separate installation locations and update settings; neither replaces the other.
 Earlier managers still read the original 1.2.3 catalog entry. Update the manager to select the 1.3.11 catalog release.
 For 1.3.11 installation, see [the package guide](beta-1.3.8/PRIME-SOBOS-en.md).
+From alpha.9, missing package credit or unverified GitHub README credit shows a warning and installation can continue.
 
 [English](#english) | [日本語](#日本語)
 
@@ -35,7 +35,7 @@ A mod that mixes prime numbers into [sobosuba](https://store.steampowered.com/ap
 You need the game. No game files are included here.
 keepee, the developer, said mods are fine as long as they need the game, that GitHub and streaming are fine, and that mod scores should go to our own server. Thanks, keepee!
 
-The current download is mod version `1.3.11-1.0.4`, made for sobosuba 1.3.11.
+The current download is mod version `1.3.11-1.0.5`, made for sobosuba 1.3.11.
 The manual installation steps below cover the older game version 1.2.3.
 Use the linked package guide for 1.3.11. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
@@ -150,6 +150,10 @@ MIT, see [LICENSE](LICENSE). The license covers only the code written for this m
 
 To keepee: all ideas, code and assets in my sobosuba mods and in the Sobo Mod Manager are yours to use, change or build into sobosuba or any of your work. Free, no credit needed, and I will never take this back or claim anything for it. If you ever want the rights formally transferred to you, just tell me and I'll do it. And if you take them over, I'll remove my mods and the manager from GitHub, so there is only your version.
 
+## Catalog listing requirements
+
+The mod author's GitHub README must credit sobosuba by keepee and link to the [original game](https://store.steampowered.com/app/1946560/sobosuba). The ZIP metadata must contain `game_credit` with `text` set to `sobosuba by keepee` and `store_url` set to `https://store.steampowered.com/app/1946560/sobosuba`. These two requirements let players follow a mod back to the original game.
+
 ## 日本語
 
 sobosubaはkeepeeさんの作品です。このMODを使うには原作が必要です。
@@ -157,10 +161,9 @@ sobosubaはkeepeeさんの作品です。このMODを使うには原作が必要
 
 ### ゲームの版ごとのダウンロード
 
-| ゲーム | 素数MOD | 特別なソボ | SoboSandbox | GreenScreenSobos |
-| --- | --- | --- | --- | --- |
-| 現在の通常版 1.3.11 | [1.3.11-1.0.4](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.4) | [0.5.4（beta）](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.4) | [1.3.0（作者 Typhe681）](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) | [1.0.0 by Typhe681](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0) |
-| 前の版 1.2.3 | [1.2.3-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.5) | - | - | - |
+- ゲーム1.3.11用の [1.3.11-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5) と [Special Sobos 0.5.5 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.5)。
+- ゲーム1.2.3用の [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6)。
+- Typhe681さんの [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) と [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0)。
 
 SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.3.11が挙げられています。
 
@@ -171,7 +174,7 @@ SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.
 ゲーム本体が必要です。このリポジトリにゲームのファイルは入っていません。
 作者の keepee さんから「ゲーム本体が要る作りならよい、GitHub と配信もよい、MOD の点数は自前のサーバで」と了承をもらっています。
 
-現在の配布版 `1.3.11-1.0.4` は、sobosuba 1.3.11向けのMOD 1.0.4です。以下の手動導入手順は前の版1.2.3を対象としています。1.3.11は上の導入案内を使ってください。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
+現在の配布版 `1.3.11-1.0.5` は、sobosuba 1.3.11向けのMOD 1.0.5です。以下の手動導入手順は前の版1.2.3を対象としています。1.3.11は上の導入案内を使ってください。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
 
 ### 素数の玉
 
@@ -283,3 +286,7 @@ MOD の文字はゲームの言語の設定に合わせて変わります。英�
 MIT。詳しくは [LICENSE](LICENSE)。このライセンスが及ぶのは、この MOD のために書いたコードだけです。sobosuba 本体と、そのコード・絵・音・文字は作者の keepee さんのものです。この MOD の一部 (スコア画面など) は本家のコードをなぞって手を加えたもので、その部分は keepee さんのものとし、ここでは許していません。非公式の MOD で、sobosuba の一部ではありません。keepee さんから直しや取り下げを求められたら従います。
 
 keepee さんへ: 私の sobosuba の MOD と Sobo Mod Manager にあるアイデア・コード・素材は、すべて自由に使い、変え、sobosuba やあなたのどの作品にも組み込んでください。無料で、名前を出す必要もありません。この約束は取り消さず、見返りも求めません。もし権利を正式に移してほしいときは、言ってもらえればそうします。そして、あなたが受け取ってくれるなら、私の MOD とマネージャーは GitHub から消します。あなたの版だけが残るようにします。
+
+## カタログの掲載条件
+
+MOD作者のGitHub READMEに、本家作者のkeepeeさんと購入先を記載してください。ZIPの定義書には、textをsobosuba by keepee、store_urlをhttps://store.steampowered.com/app/1946560/sobosuba とするgame_creditが必要です。この2点は、MODから原作へたどれるようにするための条件です。

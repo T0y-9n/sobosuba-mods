@@ -1,6 +1,6 @@
 # Install Sobosuba Mod Manager
 
-Version 0.3.0-alpha.8. The game is required to use mods.
+Version 0.3.0-alpha.9. The game is required to use mods.
 
 ## Windows
 
@@ -21,7 +21,7 @@ Ubuntu 22.04 or later, Python 3, tar and a desktop with OpenGL support are requi
 
 1. Extract this ZIP.
 2. Open a terminal in its `Linux` folder.
-3. Run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.8.run`.
+3. Run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.9.run`.
 4. Open **Sobosuba Mod Manager** from your application menu.
 
 The default location is `~/.local/opt/sobosuba-mod-manager`. The application-menu entry is saved under `${XDG_DATA_HOME:-~/.local/share}/applications`. An optional `--prefix "/your/folder"` chooses another application folder. Use a local filesystem that supports Unix executable permissions. Close the manager before running setup again.

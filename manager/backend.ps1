@@ -119,6 +119,7 @@ function All-Mods($Target) {
             if($meta.id -ne $id -or -not (Safe-Relative $meta.entry) -or $meta.autoload -cnotmatch '^[A-Za-z_][A-Za-z0-9_]{0,63}$'){continue}
             if(-not [IO.File]::Exists((Guard-Path (Join-Path $folder $meta.entry) $Target.game))){continue}
             $r=@{id=$id;name=$meta.name;version=[string]$meta.version;entry=$meta.entry;autoload=$meta.autoload;manual=$true;compatible=$false;game_versions=@();layout='game-autoload';root=$Target.game}
+            if(Valid-GameCredit $meta.game_credit){$r.game_credit=$meta.game_credit}
             $r.enabled=Is-Enabled $Target $r;$mods+=,$r
         }
     }
@@ -176,7 +177,7 @@ function Get-PackageOperations($Target,$Package,$Request,$Context) {
     if($hadUnowned -and -not $Request.adopt){Stop-Manager 'adopt_required'}
     if($old) {foreach($relative in $old.hashes.Keys) {if($relative -notin @($Package.files)) {$operations+=,@{path=(Guard-Path (Join-Path $root $relative) $root);bytes=$null}}}}
     $receipt=@{format=1;id=$Package.id;name=$Package.name;version=$Package.version;game_versions=@($Package.game_versions);layout=$Package.layout;entry=$Package.entry;autoload=$Package.autoload;hashes=$hashes;source_sha256=$Package.sha256}
-    foreach($field in @('description','author','readme','readme_text','readme_unavailable','dependencies')){$receipt[$field]=$Package[$field]}
+    foreach($field in @('description','author','readme','readme_text','readme_unavailable','dependencies','game_credit','credit_warning')){$receipt[$field]=$Package[$field]}
     if($Package.layout -eq 'user-data-styles') {
         $receipt.bootstrap=$Package.bootstrap;$receipt.bootstrap_bytes=[Convert]::ToBase64String($Package.contents[$Package.bootstrap]);$receipt.bootstrap_hash=Bytes-Hash $Package.contents[$Package.bootstrap]
         $boot=Guard-Path (Join-Path $root $Package.bootstrap) $root

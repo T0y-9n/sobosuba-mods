@@ -35,5 +35,9 @@
   "created_at": "2026-11-07",
   "languages": [
     "en"
-  ]
+  ],
+  "game_credit": {
+    "text": "sobosuba by keepee",
+    "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
+  }
 }

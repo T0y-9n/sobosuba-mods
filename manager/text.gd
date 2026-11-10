@@ -27,6 +27,8 @@ func word(key: String, args: Array = []) -> String:
 	return text
 
 func error_word(key: String, args: Array = []) -> String:
+	if key == "credit_required":
+		return word("err_credit_required")
 	var mapping := {"manager_update_failed":"err_manager_update", "dependency_missing":"err_dependency_missing", "dependency_cycle":"err_dependency_cycle", "dependency_version":"err_dependency_version", "dependency_required":"err_dependency_required", "dependency_limit":"err_dependency_limit", "dependency_download":"err_dependency_download", "plan_changed":"err_plan_changed", "version_mismatch": "err_version", "unknown_version": "err_target", "game_missing": "err_target", "invalid_metadata": "err_zip", "unsafe_zip": "err_zip", "zip_read": "err_zip", "zip_changed": "err_changed", "unsafe_path": "err_conflict", "file_conflict": "err_conflict", "recovery_needed": "err_recovery", "game_running": "err_running", "busy": "loading", "io_error": "err_io", "invalid_request": "error", "adopt_required": "err_adopt", "other_version_active": "err_other"}
 	var message := word(mapping.get(key, "error"))
 	# Display structured paths, versions and mod names returned by storage.
