@@ -5,11 +5,11 @@ sobosuba by keepee. This mod requires the original game.
 
 ## Downloads by game version
 
-- Game 1.3.11. [1.3.11-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5) and [Special Sobos 0.5.6 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.6).
+- Game 1.3.11. [1.3.11-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5) and [Special Sobos 0.5.7 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.7).
 - Game 1.2.3. [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6).
 - [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) and [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0), by Typhe681.
 
-Special Sobos 0.5.6 adds **Export settings**. Open its settings screen to save your current switches and numeric values as JSON in Downloads. The screen shows the saved path and uses the game's user-data folder if Downloads cannot be written.
+Special Sobos 0.5.7 adds **Import settings** under **Export settings**. The in-game file window opens in Downloads and reads a `special_sobos_settings_*.json` file. Readable values are saved and applied to the current board and the next run. A value outside the allowed range, or of the wrong type, stays as it is. A file that is not JSON, or is not a settings file, changes nothing.
 
 Smartphone layout support: Prime Sobos and Special Sobos now adapt their settings and labels to portrait screens. Checked on Windows with phone-size layouts; real-device touch, safe areas and software keyboards still need verification.
 
@@ -163,7 +163,7 @@ sobosubaはkeepeeさんの作品です。このMODを使うには原作が必要
 
 ### ゲームの版ごとのダウンロード
 
-- ゲーム1.3.11用の [1.3.11-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5) と [Special Sobos 0.5.6 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.6)。
+- ゲーム1.3.11用の [1.3.11-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5) と [Special Sobos 0.5.7 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.7)。
 - ゲーム1.2.3用の [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6)。
 - Typhe681さんの [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) と [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0)。
 
