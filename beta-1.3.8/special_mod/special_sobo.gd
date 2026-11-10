@@ -36,6 +36,8 @@ var number_inputs: Dictionary = {}
 var page_picker: SoboMenuButtonEnum
 var reset_button: SoboMenuButtonBool
 var export_button: SoboMenuButtonBool
+var import_button: SoboMenuButtonBool
+var import_dialog: FileDialog
 var settings_page := 0
 var diagnostics: RefCounted
 var diagnostic_frame := -1
@@ -687,6 +689,11 @@ func install_parameter_pages(list: Node, enum_model: SoboMenuButtonEnum, model: 
 	export_button.bool_circles.hide()
 	export_button.release_press.connect(export_current_settings)
 	list.add_child(export_button)
+	import_button = copy_toggle(model)
+	import_button.name = "ImportSpecialSettings"
+	import_button.bool_circles.hide()
+	import_button.release_press.connect(open_import_dialog)
+	list.add_child(import_button)
 
 
 func install_parameter_rows(list: Node, model: SoboMenuButtonBool) -> void:
@@ -725,9 +732,10 @@ func install_parameter_rows(list: Node, model: SoboMenuButtonBool) -> void:
 		if key == "magnet_pull_multiplier":
 			magnet_pull_input = input
 			magnet_pull_label = row.label
-	if reset_button != null and export_button != null:
-		list.move_child(reset_button, list.get_child_count() - 2)
-		list.move_child(export_button, list.get_child_count() - 1)
+	if reset_button != null and export_button != null and import_button != null:
+		list.move_child(reset_button, list.get_child_count() - 3)
+		list.move_child(export_button, list.get_child_count() - 2)
+		list.move_child(import_button, list.get_child_count() - 1)
 
 
 func parameter_active(key: String) -> bool:
@@ -808,6 +816,48 @@ func export_current_settings() -> void:
 		settings_screen.description_label.text = ("設定を書き出せませんでした: " if japanese else "Could not export settings: ") + str(result.error)
 
 
+func open_import_dialog() -> void:
+	if import_dialog == null:
+		import_dialog = FileDialog.new()
+		import_dialog.use_native_dialog = false
+		import_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+		import_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		import_dialog.filters = PackedStringArray(["special_sobos_settings_*.json ; JSON"])
+		import_dialog.file_selected.connect(import_selected_settings)
+		settings_screen.add_child(import_dialog)
+	var downloads := OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+	if not downloads.is_empty():
+		import_dialog.current_dir = downloads
+	import_dialog.popup_centered_ratio(0.7)
+
+
+func import_selected_settings(source_path: String) -> void:
+	var result: Dictionary = settings.import_settings(source_path)
+	if result.ok:
+		apply_tuning()
+		refresh_toggle()
+		refresh_parameters()
+	settings_screen.description_label.text = import_result_text(result)
+
+
+func import_result_text(result: Dictionary) -> String:
+	var japanese: bool = TranslationServer.get_locale().begins_with("ja")
+	if result.ok:
+		if japanese:
+			return "設定を読み込みました: %s（捨てた値が %d 個）" % [str(result.filename), int(result.discarded)]
+		return "Imported from %s (%d values discarded)" % [str(result.filename), int(result.discarded)]
+	var reason := str(result.error)
+	if japanese:
+		return "設定を読み込めませんでした: " + reason
+	if reason == "JSON を読めない":
+		reason = "the file is not valid JSON"
+	elif reason == "必要な形でない":
+		reason = "the file has no settings"
+	elif reason == "設定を書き込めない":
+		reason = "the settings could not be saved"
+	return "Could not import settings: " + reason
+
+
 func refresh_parameters() -> void:
 	if page_picker == null:
 		return
@@ -816,6 +866,7 @@ func refresh_parameters() -> void:
 	page_picker.show()
 	reset_button.show()
 	export_button.show()
+	import_button.show()
 	var japanese: bool = TranslationServer.get_locale().begins_with("ja")
 	var group: String = groups[settings_page]
 	page_picker.label.text = "設定ページ" if japanese else "Settings page"
@@ -827,6 +878,8 @@ func refresh_parameters() -> void:
 	reset_button.tooltip_text = "数値を保存して今の盤面に反映。種類の切替は維持します。" if japanese else "Save and apply the default numbers now. Kind switches are kept."
 	export_button.label.text = "設定を書き出す" if japanese else "Export settings"
 	export_button.tooltip_text = "今の設定をJSONファイルへ書き出します。" if japanese else "Write the current settings to a JSON file."
+	import_button.label.text = "設定を読み込む" if japanese else "Import settings"
+	import_button.tooltip_text = "書き出したJSONを選んで、読めた値だけ今の盤面と次のプレイに反映します。" if japanese else "Choose an exported JSON file. Readable values apply now and on the next run."
 	for key: String in parameter_rows:
 		var row: SoboMenuButtonBool = parameter_rows[key]
 		var spec: Array = settings.parameter_values[key]

@@ -5,7 +5,7 @@ https://store.steampowered.com/app/1946560/sobosuba
 
 Idea by Hilobo
 
-Version 1.3.11-0.5.6 for sobosuba 1.3.11. This package works on its own.
+Version 1.3.11-0.5.7 for sobosuba 1.3.11. This package works on its own.
 
 Special Sobos works only in classic (radix 2). Other modes, including Radix 3, play like the base game again.
 
@@ -78,6 +78,16 @@ at both locations is shown on screen and in the game log.
 
 The JSON also includes the mod version and export time. You can share it when
 reporting the settings you play with.
+
+## Import your settings
+
+Press **Import settings**, directly under **Export settings**. The game's own
+file window opens in Downloads and lists `special_sobos_settings_*.json`. It
+does not use the operating system's file window. Readable switches and numbers
+are saved and applied to the current board and the next run. A value outside
+its range, or of the wrong type, is left unchanged. The mod version and export
+time in the file are not applied. If the file is not JSON, or is not a settings
+file, nothing is written.
 
 
 ## Mobile settings

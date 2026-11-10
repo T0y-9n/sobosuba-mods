@@ -198,6 +198,79 @@ func export_to_directory(directory: String, filename: String, payload: Dictionar
 	return {"ok": true, "path": ProjectSettings.globalize_path(path), "error": ""}
 
 
+func import_settings(source_path: String) -> Dictionary:
+	var filename := source_path.get_file()
+	var file := FileAccess.open(source_path, FileAccess.READ)
+	if file == null:
+		return {"ok": false, "filename": filename, "discarded": 0, "error": "JSON を読めない"}
+	var text := file.get_as_text()
+	file.close()
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		return {"ok": false, "filename": filename, "discarded": 0, "error": "JSON を読めない"}
+	if not json.data is Dictionary:
+		return {"ok": false, "filename": filename, "discarded": 0, "error": "必要な形でない"}
+	var data: Dictionary = json.data
+	if not data.has("enabled") and not data.has("traits") and not data.has("magnet_pull_multiplier") and not data.has("parameters"):
+		return {"ok": false, "filename": filename, "discarded": 0, "error": "必要な形でない"}
+	var next_enabled := enabled
+	var next_traits: Dictionary = traits.duplicate(true)
+	var next_pull := magnet_pull_multiplier
+	var next_numbers: Dictionary = numbers.duplicate(true)
+	var discarded := 0
+	var accepted := 0
+	if data.has("enabled"):
+		if data.get("enabled") is bool:
+			next_enabled = bool(data.enabled)
+			accepted += 1
+		else:
+			discarded += 1
+	if data.has("magnet_pull_multiplier"):
+		var pull: Variant = data.get("magnet_pull_multiplier")
+		if (pull is float or pull is int) and valid_magnet_pull(float(pull)):
+			next_pull = float(pull)
+			accepted += 1
+		else:
+			discarded += 1
+	if data.has("parameters"):
+		var saved_numbers: Variant = data.get("parameters")
+		if saved_numbers is Dictionary:
+			for key: String in next_numbers:
+				if not saved_numbers.has(key):
+					continue
+				var value: Variant = saved_numbers.get(key)
+				if (value is float or value is int) and valid_number(key, float(value)):
+					next_numbers[key] = float(value)
+					accepted += 1
+				else:
+					discarded += 1
+			for key: String in saved_numbers:
+				if not parameter_values.has(key):
+					next_numbers[key] = saved_numbers[key]
+					accepted += 1
+		else:
+			discarded += 1
+	if data.has("traits"):
+		var saved: Variant = data.get("traits")
+		if saved is Dictionary:
+			for kind: Variant in saved:
+				if saved.get(kind) is bool:
+					next_traits[kind] = saved[kind]
+					accepted += 1
+				else:
+					discarded += 1
+		else:
+			discarded += 1
+	if accepted > 0:
+		if not write(next_enabled, next_traits, next_pull, next_numbers):
+			return {"ok": false, "filename": filename, "discarded": discarded, "error": "設定を書き込めない"}
+		enabled = next_enabled
+		traits = next_traits
+		magnet_pull_multiplier = next_pull
+		numbers = next_numbers
+	return {"ok": true, "filename": filename, "discarded": discarded, "error": ""}
+
+
 func write(enabled_value: bool, traits_value: Dictionary, pull_value: float, values: Dictionary = {}) -> bool:
 	var file:= FileAccess.open(path, FileAccess.WRITE)
 	if file == null:

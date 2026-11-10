@@ -21,6 +21,10 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 - Fixed labels disappearing when a checked control is hovered or a selection menu is open. The shared theme now supplies matching text and background colors for these states.
 - Download errors now distinguish connection failures, HTTP responses, invalid SHA256 metadata, conflicting dependency and catalog hashes, mismatched bytes and storage failures in all 22 manager languages.
 
+### Special Sobos 1.3.11-0.5.7, 2026-11-10
+
+- Add **Import settings** under **Export settings**. Choose a `special_sobos_settings_*.json` file in the in-game file window, opened in Downloads. Values outside the allowed range, or of the wrong type, stay as they are. Readable values are saved and applied to the current board and the next run. A file that is not JSON, or not a settings file, changes nothing.
+
 ### Special Sobos 1.3.11-0.5.6, 2026-11-10
 
 - Add **Export settings** to the Special Sobos settings screen. Save the current switches, kind choices and numeric values as JSON in Downloads, with the mod version and export time.
