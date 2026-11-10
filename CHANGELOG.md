@@ -4,6 +4,7 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 
 ### Catalog update automation, unreleased
 
+- Bind validation results to the workflow run's pull-request head and recorded base separately, while requiring the base to remain current main.
 - Prepare updates to existing catalog entries through the manager's release verification and package reader. Record rejected releases with their reasons and produce matching catalog copies and a reviewable patch for accepted releases.
 - Add bilingual GitHub contribution instructions, a PR template, an issue form and read-only catalog validation using trusted base code.
 - Add a separate GitHub PR sender with explicit submission, duplicate-update checks and required up-to-date validation. Deployment requires operator-approved credentials and GitHub repository settings.

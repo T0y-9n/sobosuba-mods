@@ -96,8 +96,11 @@ jobs:
           pull_number = int(identity[1])
           head_sha = identity[2]
           main_sha = api(repository + '/git/ref/heads/main')['object']['sha']
-          if run.get('head_sha') != main_sha:
-              raise ValueError('Validation base is no longer current main')
+          references = [item for item in run.get('pull_requests', []) if item.get('number') == pull_number]
+          if (run.get('head_sha') != head_sha or len(references) != 1
+                  or references[0].get('base', {}).get('sha') != main_sha
+                  or references[0].get('head', {}).get('sha') != head_sha):
+              raise ValueError('Validation run does not match the PR head and current main')
           pull_path = repository + '/pulls/' + str(pull_number)
 
           def validate_current_pull():
