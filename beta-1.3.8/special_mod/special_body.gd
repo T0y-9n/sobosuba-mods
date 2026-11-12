@@ -1,6 +1,18 @@
 extends "res://game_elements/sobo/sobo.gd"
 
 
+func apply_style() -> void:
+	super.apply_style()
+	var kind: String = str(get_meta("special_sobo_trait", ""))
+	if kind == "darkmatter":
+		var bg: Color = StyleManager.current_style.background_color
+		color = Color(bg.r, bg.g, bg.b, 1.0)
+		visual_color = color
+		sobo_label.visible = false
+		for suba: Suba in subas:
+			suba.queue_redraw()
+
+
 func _physics_process(dt: float) -> void:
 	var mod: Node = get_node_or_null("/root/SpecialSobo")
 	var _diagnostic: RefCounted = mod.diagnostic_scope("special_body.physics") if mod != null else null
@@ -36,6 +48,7 @@ func apply_sobo_state(state: SoboState) -> void:
 		super.apply_sobo_state(state)
 		return
 	var kind: String = str(state.get_meta("special_sobo_trait", ""))
+	mod.restore_extra_shape(self, state)
 	super.apply_sobo_state(state)
 	mod.restore_extra_state(self, state.get_meta("special_extra", {}))
 	if kind == "small":

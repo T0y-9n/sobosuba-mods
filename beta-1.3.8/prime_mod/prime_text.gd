@@ -81,20 +81,6 @@ const WORDS:= {
 		"zh_CN": "把质数模式的分数上传到全球排行榜。已上传的分数无法删除。关闭后，之后的对局不再上传。",
 		"zh_TW": "把質數模式的分數上傳到全球排行榜。已上傳的分數無法刪除。關閉後，之後的對局不再上傳。",
 	},
-	"guide description": {
-		"en": "Prime balls (3, 5, 11, 13, 19) join in. Only pairs that add up to a power of two merge (3+5=8 and so on).\nPressing starts the run again.",
-		"ja": "素数の玉 (3・5・11・13・19) が混ざる。足して 2 の累乗になる組だけ合体する (3+5=8 など)\n押すと試合をやり直す",
-		"de": "Primzahlbälle (3, 5, 11, 13, 19) kommen dazu. Nur Paare, deren Summe eine Zweierpotenz ist, verschmelzen (3+5=8 usw.).\nDrücken startet die Runde neu.",
-		"es": "Aparecen bolas primas (3, 5, 11, 13, 19). Solo se fusionan las parejas que suman una potencia de dos (3+5=8, etc.).\nAl pulsar, la partida empieza de nuevo.",
-		"it": "Arrivano le palline prime (3, 5, 11, 13, 19). Si fondono solo le coppie che sommano a una potenza di due (3+5=8 ecc.).\nPremendo, la partita ricomincia.",
-		"cs": "Přibudou prvočíselné míčky (3, 5, 11, 13, 19). Spojí se jen dvojice, jejichž součet je mocnina dvou (3+5=8 atd.).\nStisknutím začne hra znovu.",
-		"pl": "Pojawiają się kulki pierwsze (3, 5, 11, 13, 19). Łączą się tylko pary, których suma jest potęgą dwójki (3+5=8 itd.).\nNaciśnięcie zaczyna grę od nowa.",
-		"ru": "Появляются простые шары (3, 5, 11, 13, 19). Сливаются только пары, сумма которых — степень двойки (3+5=8 и т. д.).\nНажатие начинает игру заново.",
-		"sr": "Pojavljuju se proste kugle (3, 5, 11, 13, 19). Spajaju se samo parovi čiji je zbir stepen dvojke (3+5=8 itd.).\nPritiskom igra počinje ispočetka.",
-		"zh_CN": "会出现质数球（3、5、11、13、19）。只有相加为 2 的幂的组合才会合并（如 3+5=8）。\n按下后重新开始本局。",
-		"zh_TW": "會出現質數球（3、5、11、13、19）。只有相加為 2 的冪的組合才會合併（如 3+5=8）。\n按下後重新開始本局。",
-	},
-	# The board after a run: this run, best, and the local rank (one of the two below).
 	"board line": {
 		"en": "prime mode: this run %d / best %d (local %s)",
 		"ja": "素数モード 今回 %d 点 / 自己ベスト %d 点 (手元 %s)",

@@ -5,7 +5,7 @@ https://store.steampowered.com/app/1946560/sobosuba
 
 Idea by Hilobo
 
-Version 1.3.11-0.5.7 for sobosuba 1.3.11. This package works on its own.
+Version 1.3.11-0.6.2 for sobosuba 1.3.11. This package works on its own.
 
 Special Sobos works only in classic (radix 2). Other modes, including Radix 3, play like the base game again.
 
@@ -15,6 +15,9 @@ Special Sobos works only in classic (radix 2). Other modes, including Radix 3, p
 | Puffy | Feels less gravity after leaving the selection bar. |
 | Magnet | Attracts nearby ordinary sobos, repels other magnets, and holds non-magnets it touches. It does not launch them. |
 | Throwing | Immediately throws a sobo it touches, then waits for its cooldown before throwing the same sobo again. |
+| Tornado | Stirs the sobos around it. A larger number reaches farther and pushes harder. At 64 it covers the whole board. |
+| Liquid | Soft and heavy. It spreads out and sinks into the stack. |
+| Dark matter | Black, with no number and no mark. Its size is random, from the smallest sobo this run can spawn up to the largest one on the board. It keeps its real number and merges only with that number. Merging with an ordinary sobo keeps it dark matter with a new size. Two of the same number become an ordinary sobo. |
 
 ## Install
 
@@ -31,10 +34,11 @@ For manual installation, copy `special_mod` and `styles` into the game's user-da
 ## Tune while playing
 
 Press **Settings page** to cycle through Kinds, Spawn chance, Relative frequency,
-Small / Puffy, Magnet and Throwing. Type a number and press Enter, or leave the
+Small / Puffy, Magnet, Throwing, Frequency: tornado, liquid, dark matter, Tornado
+and Liquid. Type a number and press Enter, or leave the
 field, to save it and apply it to the current board. Decimals are allowed except
 for counts and shape levels. A value outside the stated range is rejected and
-the previous number returns. **Reset tuning to defaults** resets all twenty
+the previous number returns. **Reset tuning to defaults** resets all the
 numbers together and keeps your kind switches.
 
 | Setting | Range | Initial value |
@@ -50,6 +54,15 @@ numbers together and keeps your kind switches.
 | Maximum held sobos | 0–20, whole number | 3 |
 | Throwing launch speed | 0–3000 | 500 |
 | Throwing cooldown | 0.05–30 seconds | 2 |
+| Relative frequency of Tornado, Liquid, Dark matter | 0–100 each | 3, 3, 3 |
+| Tornado start delay | 0–30 seconds | 0.8 |
+| Most sobos a tornado pushes | 1–32, whole number | 8 |
+| Tornado range in radii | 1–20 | 4 |
+| Tornado force | 0–5 | 0.9 |
+| Tornado speed limit | 1–1000 | 140 |
+| Liquid softness multiplier | 1–3 | 1.65 |
+| Liquid area multiplier | 0.5–3 | 0.95 |
+| Liquid additional gravity multiplier | 0–10 | 2 |
 
 A frequency of zero prevents that kind from being picked. If all frequencies are
 zero, no new special sobos appear. Spawn chances and frequencies affect future

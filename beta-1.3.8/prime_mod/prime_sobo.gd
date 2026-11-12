@@ -2,6 +2,7 @@ extends Node
 ## Prime sobos for sobosuba (Godot 4.7.2).
 ## Primes never merge with anything, except a pair of primes whose sum is a power of two
 ## (3+5=8, 3+13=16, 5+11=16, 13+19=32), which merges into the regular sobo of that value.
+## A 7 merges only with another 7 into 14, and that chain doubles through 458752. It does not score.
 ## Loaded as an autoload through override.cfg next to sobosuba.exe.
 ## In a prime run, Steam leaderboard uploads, live friend scores and achievements are off.
 ## "prime balls" in settings -> game turns prime mode off (the game as it is) from the next run.
@@ -10,8 +11,9 @@ const MOD_VERSION:= preload("prime_diagnostics.gd").MOD_VERSION
 const MOD_TAG:= preload("prime_diagnostics.gd").MOD_TAG
 ## SoboManager builds the data for the sizes 2^0 .. 2^19 itself: twenty powers of two.
 const EXPECTED_POWER_OF_TWO_SIZES:= 20
-const PRIMES: Array[int] = [3, 5, 11, 13, 19]
-const PRIME_WEIGHTS: Array[float] = [4.0, 6.0, 2.0, 2.0, 1.0]
+const PRIMES: Array[int] = [3, 5, 11, 13, 19, 7]
+const PRIME_WEIGHTS: Array[float] = [4.0, 6.0, 2.0, 2.0, 1.0, 4.0]
+const SEVEN_CHAIN_MAX := 458752
 const PRIME_COLOR:= Color(0.62, 0.62, 0.68)
 
 var replaced: Dictionary[int, bool] = { }
@@ -43,9 +45,6 @@ var prime_toggle: SoboMenuButtonBool = null
 ## The "send scores" switch (spec §8), right under prime balls: whether a run's score goes to the world.
 var send_toggle: SoboMenuButtonBool = null
 var screenshot_toggle: SoboMenuButtonBool = null
-## prime balls again on the game's how-to-play guide (spec §9), with a line under it saying what it is.
-var guide_toggle: SoboMenuButtonBool = null
-var guide_label: Label = null
 ## The mode of the run being played: prime balls, no Steam upload / live score / achievements.
 var run_prime:= false
 var game_mode_scope: Script = null
@@ -80,11 +79,15 @@ func _ready() -> void:
 		# A sobo's value is its size. The game builds the data from the size alone (n = log2(size)),
 		# so a prime sits between its neighbouring powers of two. Built now so the first spawn is not slow.
 		SoboManager.get_sobo_data(p)
+	var chain := 14
+	while chain <= SEVEN_CHAIN_MAX:
+		SoboManager.get_sobo_data(chain)
+		chain *= 2
 	game_mode_scope = load(mod_dir().path_join("game_mode_scope.gd"))
 	prime_settings = load(mod_dir().path_join("prime_settings.gd")).new()
 	prime_text = load(mod_dir().path_join("prime_text.gd"))
 	prime_level = load(mod_dir().path_join("prime_level.gd"))
-	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")):
+	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")) or FileAccess.file_exists(mod_dir().path_join("seven.flag")):
 		# The self test starts prime, in its own file; the player's switch is never touched.
 		prime_settings.path = prime_settings.SELFTEST_PATH
 		prime_settings.set_enabled(true)
@@ -104,7 +107,7 @@ func _ready() -> void:
 		SteamManager.steam_initialized.connect(apply_steam_identity, CONNECT_ONE_SHOT)
 	scores = load(mod_dir().path_join("prime_scores.gd")).new()
 	scores.online = online
-	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")):
+	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")) or FileAccess.file_exists(mod_dir().path_join("seven.flag")):
 		scores.save_path = scores.SELFTEST_SAVE_PATH
 		online.identity_path = "user://prime_sobo_online_selftest.json"
 		# Artificial test scores must never reach a public server or the real identity.
@@ -114,7 +117,11 @@ func _ready() -> void:
 	install_scores_screen()
 	enabled = true
 	print("%s loaded: power-of-two sizes %d, sobo datas %d, primes %s" % [MOD_TAG, base, SoboManager.sobo_datas.size(), PRIMES])
-	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")):
+	if FileAccess.file_exists(mod_dir().path_join("seven.flag")):
+		selftest = true
+		guard_disabled_for_test = false
+		run_seven_selftest.call_deferred()
+	elif FileAccess.file_exists(mod_dir().path_join("selftest.flag")):
 		selftest = true
 		guard_disabled_for_test = FileAccess.file_exists(mod_dir().path_join("noguard.flag"))
 		run_selftest.call_deferred()
@@ -179,7 +186,6 @@ func install_scores_screen() -> void:
 	install_prime_toggle(menu)
 	install_send_toggle(menu)
 	install_screenshot_toggle(menu)
-	install_guide_toggle()
 
 
 ## "scores" opens the prime screen while prime mode is on, the game's own while it is off.
@@ -243,9 +249,6 @@ func refresh_texts() -> void:
 	if screenshot_toggle != null:
 		screenshot_toggle.label.text = word(SCREENSHOT_TEXT)
 		screenshot_toggle.tooltip_text = word("save screenshots description")
-	if guide_toggle != null:
-		guide_toggle.label.text = word(TOGGLE_TEXT)
-		guide_label.text = guide_description()
 
 
 ## The settings screen shows tr(tooltip_text) for the hovered switch at the bottom.
@@ -254,8 +257,6 @@ func toggle_description() -> String:
 
 
 func refresh_prime_toggle() -> void:
-	if guide_toggle != null:
-		guide_toggle.set_value(prime_settings.enabled)
 	if prime_toggle == null:
 		return
 	prime_toggle.set_value(prime_settings.enabled)
@@ -351,105 +352,6 @@ func set_send_scores(value: bool) -> void:
 	refresh_send_toggle()
 
 
-## prime balls on the game's how-to-play guide (spec §9): another copy of the settings switch on the
-## game's screen layer (Ui, where its side panels are pressed during a run), hidden until the guide
-## shows, with a line under it saying what prime balls are.
-func install_guide_toggle() -> void:
-	var model: SoboMenuButtonBool = prime_toggle
-	if model == null || Ui._0 == null:
-		push_warning("%s guide switch not installed: prime balls or the game's Ui is not there" % MOD_TAG)
-		return
-	var button: SoboMenuButtonBool = model.duplicate(Node.DUPLICATE_GROUPS | Node.DUPLICATE_SCRIPTS | Node.DUPLICATE_USE_INSTANTIATION)
-	for prop: Dictionary in model.get_property_list():
-		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE && prop.usage & PROPERTY_USAGE_STORAGE:
-			button.set(prop.name, value_for_copy(model.get(prop.name), model, button))
-	button.name = "GuidePrimeBalls"
-	button.label.text = word(TOGGLE_TEXT)
-	button.release_press.connect(on_guide_toggle_pressed)
-	# The game swaps this theme's font when the language changes; Ui itself carries no theme.
-	button.theme = load("res://ui/theme.tres")
-	button.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	button.size = model.size.max(model.get_combined_minimum_size())
-	button.visible = false
-	# A new Label: a copy of the game's own Label crashed the game when a new run began.
-	var text:= Label.new()
-	text.name = "GuideText"
-	text.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	text.autowrap_mode = TextServer.AUTOWRAP_OFF
-	var look: LabelSettings = model.label.label_settings
-	var settings:= LabelSettings.new()
-	settings.font_color = look.font_color if look != null else model.label.get_theme_color("font_color")
-	settings.font_size = maxi(8, roundi((look.font_size if look != null else model.label.get_theme_font_size("font_size")) * 0.5))
-	text.label_settings = settings
-	text.text = guide_description()
-	button.add_child(text)
-	Ui._0.add_child(button)
-	guide_toggle = button
-	guide_label = text
-	refresh_prime_toggle()
-	print("%s guide switch installed: %s" % [MOD_TAG, button.get_path()])
-
-
-func guide_description() -> String:
-	return word("guide description")
-
-
-## Shown only while the game's guide shows its controls (not the demo note) and the menu is closed,
-## under the guide's box on the screen. The guide turns with the camera, so this is done every frame.
-func place_guide_toggle() -> void:
-	if guide_toggle == null:
-		return
-	var mode: GameScene = GameModeManager.current_scene if is_instance_valid(GameModeManager.current_scene) else null
-	var guide: Instructions = mode.instructions if mode != null && is_instance_valid(mode.instructions) else null
-	var shown: Control = guide.current_control if guide != null && is_instance_valid(guide.current_control) else null
-	var showing: bool = is_classic_run() && shown != null && shown != guide.demo_explanation && shown.is_visible_in_tree() && Menu._0 != null && Menu._0.visible == false
-	guide_toggle.visible = showing
-	if not showing:
-		return
-	var viewport: Rect2 = get_viewport().get_visible_rect()
-	if OS.has_feature("mobile"):
-		viewport = viewport.intersection(MobileManager.get_usable_rect())
-	var available: Rect2 = (Ui._0.get_final_transform().affine_inverse() * viewport).grow(-8.0)
-	if not available.has_area():
-		guide_toggle.hide()
-		return
-	guide_toggle.size.x = maxf(guide_toggle.get_combined_minimum_size().x, minf(prime_toggle.size.x, available.size.x))
-	guide_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	guide_label.custom_minimum_size.x = guide_toggle.size.x
-	guide_label.size.x = guide_toggle.size.x
-	guide_label.size.y = guide_label.get_combined_minimum_size().y
-	guide_label.position = Vector2(0.0, guide_toggle.size.y + 4.0)
-	var content_size := Vector2(guide_toggle.size.x, guide_label.position.y + guide_label.size.y)
-	var fit: float = minf(1.0, minf(available.size.x / content_size.x, available.size.y / content_size.y))
-	guide_toggle.scale = Vector2.ONE * fit
-	var extent: Vector2 = content_size * fit
-	var box: Rect2 = guide_screen_box(shown)
-	guide_toggle.position = Vector2(
-		clampf(box.get_center().x - extent.x / 2.0, available.position.x, available.end.x - extent.x),
-		clampf(box.end.y + 8.0, available.position.y, available.end.y - extent.y))
-
-
-## A control's box on the screen, in Ui's coordinates.
-func guide_screen_box(control: Control) -> Rect2:
-	var xform: Transform2D = Ui._0.get_final_transform().affine_inverse() * control.get_global_transform_with_canvas()
-	var box:= Rect2(xform * Vector2.ZERO, Vector2.ZERO)
-	for corner: Vector2 in [Vector2(control.size.x, 0.0), control.size, Vector2(0.0, control.size.y)]:
-		box = box.expand(xform * corner)
-	return box
-
-
-## The run that has just begun is thrown away and started again the way the game's game-over
-## "new game" does, so the new run takes the switch (on_game_mode_start). start_game_mode never
-## loads the game's save (only the menu's resume does).
-func on_guide_toggle_pressed() -> void:
-	if not is_classic_run():
-		return
-	set_prime_enabled(prime_settings.enabled == false)
-	if is_instance_valid(GameModeManager.current_scene) && GameModeManager.current_game_mode != null:
-		GameModeManager.start_game_mode(GameModeManager.current_game_mode)
-
-
 ## A run starts (a new one, or one continued from the game's save). SaveLoadManager.load() keeps
 ## the loaded game_state until the run is applied, so it is set here only for a continued run.
 func on_game_mode_start(_scene: GameScene) -> void:
@@ -504,8 +406,6 @@ func on_menu_screen_changed(new_screen: MenuScreen) -> void:
 
 ## The game pauses processing when opening a menu, so hide the run overlays on its signal.
 func on_menu_opened() -> void:
-	if guide_toggle != null:
-		guide_toggle.hide()
 	if level_label != null:
 		level_label.hide()
 	if diagnostics != null:
@@ -599,6 +499,28 @@ func is_prime_sobo(sobo: Sobo) -> bool:
 
 func is_power_of_two(v: int) -> bool:
 	return v > 0 && (v & (v - 1)) == 0
+
+
+func is_seven_chain(v: int) -> bool:
+	if v < 7 or v % 7 != 0:
+		return false
+	return is_power_of_two(v / 7)
+
+
+## The doubled sobo is created directly. SoboManager.merge emits on_sobo_merge, and the classic
+## mode adds the new size to the score from that signal, so this chain never calls it.
+func merge_seven(a: Sobo, b: Sobo, doubled: int, sa: Suba, sb: Suba) -> void:
+	diagnostic_tick("merge_seven %d" % doubled)
+	var contact_pos: Vector2 = (sa.global_position + sb.global_position) / 2.0
+	var shockwave_area: float = a.data.outer_circle.area
+	MergeSound.play_at_with_area(contact_pos, shockwave_area)
+	Shockwave.create(contact_pos, shockwave_area / SoboManager.shockwave_life_per_sobo_area)
+	var child: Sobo = create_prime(doubled, (a.center + b.center) / 2.0)
+	var mode:= GameModeManager.current_scene as SceneClassic
+	if mode != null:
+		mode.enter_stack(child)
+	a.queue_free()
+	b.queue_free()
 
 
 ## Regular sobos have a size of 2^n; a prime sobo's size is the prime itself.
@@ -787,9 +709,23 @@ func try_prime_merge(primes: Array[Sobo]) -> void:
 		for sa: Suba in a.subas:
 			for sb: Suba in sa.contacting_other_subas:
 				var b: Sobo = sb.sobo
-				if b == a || is_prime_sobo(b) == false || b.merged_this_frame || b.is_queued_for_deletion():
+				if b == a || is_instance_valid(b) == false || b.data == null || b.merged_this_frame || b.is_queued_for_deletion():
 					continue
-				var sum: int = a.data.size + b.data.size
+				var va: int = a.data.size
+				var vb: int = b.data.size
+				if is_prime_sobo(b) == false:
+					# Spec §2 (2026-11-12): a seven chain from 14 up meets the plain 2^k, its seventh,
+					# and both become the plain 8 * 2^k. 7 itself still pairs only with 7.
+					if va >= 14 and is_seven_chain(va) and is_power_of_two(va + vb):
+						merge_primes(a, b, sa, sb, va + vb)
+						return
+					continue
+				if is_seven_chain(va) or is_seven_chain(vb):
+					if va == vb and va * 2 <= SEVEN_CHAIN_MAX:
+						merge_seven(a, b, va * 2, sa, sb)
+						return
+					continue
+				var sum: int = va + vb
 				if is_power_of_two(sum) == false:
 					continue
 				merge_primes(a, b, sa, sb, sum)
@@ -825,7 +761,6 @@ func _process(_dt: float) -> void:
 	diagnostic_tick("_process")
 	if enabled == false:
 		return
-	place_guide_toggle()
 	refresh_level_label()
 	if not is_prime_run():
 		return
@@ -866,6 +801,174 @@ func diagnostic_tick(entry: String) -> void:
 func _exit_tree() -> void:
 	if diagnostics != null:
 		diagnostics.stop()
+
+
+func run_seven_selftest() -> void:
+	var lines: PackedStringArray = []
+	forced_chance = 0.0
+	await start_default_run()
+	for i in 30:
+		await get_tree().physics_frame
+	var mode:= GameModeManager.current_scene as SceneClassic
+	check(lines, "seven board started", mode != null, "run_prime=%s" % run_prime)
+	var seven_i: int = PRIMES.find(7)
+	check(lines, "7 is spawned at weight 4", seven_i >= 0 and is_equal_approx(PRIME_WEIGHTS[seven_i], 4.0), "primes=%s weights=%s" % [PRIMES, PRIME_WEIGHTS])
+	if mode == null:
+		await finish_seven(lines)
+		return
+	var merges: Array = []
+	SignalBus.on_sobo_merge.connect(func(o0: Sobo, o1: Sobo, ns: Sobo) -> void: merges.append([o0.data.size, o1.data.size, ns.data.size]))
+	await push_seven_pair(lines, mode, merges, "7+7", 7, 7, true, 0.0)
+	await push_seven_pair(lines, mode, merges, "7+8", 7, 8, false, 140.0)
+	await push_seven_pair(lines, mode, merges, "7+3", 7, 3, false, 280.0)
+	await push_seven_pair(lines, mode, merges, "14+28", 14, 28, false, 420.0)
+	await push_seven_pair(lines, mode, merges, "458752+458752", 458752, 458752, false, 900.0)
+	await push_seven_plain(lines, mode, merges, "14+2", 14, 2, true, 140.0)
+	await push_seven_plain(lines, mode, merges, "28+4", 28, 4, true, 280.0)
+	await push_seven_plain(lines, mode, merges, "14+4", 14, 4, false, 420.0)
+	await push_seven_plain(lines, mode, merges, "7+1", 7, 1, false, 560.0)
+	await open_pre7_save(lines, mode)
+	await finish_seven(lines)
+
+
+func push_seven_pair(lines: PackedStringArray, mode: SceneClassic, merges: Array, pair_name: String, left: int, right: int, must_merge: bool, y: float) -> void:
+	print("%s seven pair %s" % [MOD_TAG, pair_name])
+	var before_14: int = count_size(left * 2)
+	var score_before: int = ScoreManager.current_score
+	var merges_before: int = merges.size()
+	var waves_before: int = shockwave_count()
+	var wave_peak: int = waves_before
+	var a: Sobo = create_prime(left, Vector2(-30, -200.0 + y))
+	var b: Sobo = create_prime(right, Vector2(30, -200.0 + y))
+	mode.enter_stack(a)
+	mode.enter_stack(b)
+	var touched := false
+	var became := false
+	for f in 90:
+		if alive(a) and alive(b):
+			var d: Vector2 = a.center.direction_to(b.center)
+			if d.is_finite():
+				a.apply_uniform_acceleration(d * 300.0)
+				b.apply_uniform_acceleration(-d * 300.0)
+			for s: Suba in a.subas:
+				for o: Suba in s.contacting_other_subas:
+					if o.sobo == b:
+						touched = true
+		elif must_merge and count_size(left * 2) > before_14:
+			became = true
+		wave_peak = maxi(wave_peak, shockwave_count())
+		await get_tree().physics_frame
+	var score_after: int = ScoreManager.current_score
+	if must_merge:
+		if became == false:
+			became = alive(a) == false and alive(b) == false and count_size(left * 2) > before_14
+		check(lines, "%s doubles and the score stays" % pair_name, touched and became and score_before == score_after, "touched=%s score %d -> %d merges=%s" % [touched, score_before, score_after, merges.slice(merges_before)])
+		check(lines, "%s adds one shockwave" % pair_name, wave_peak == waves_before + 1, "before=%d peak=%d" % [waves_before, wave_peak])
+	else:
+		var involved := false
+		for recorded: Array in merges.slice(merges_before):
+			if (recorded[0] == left and recorded[1] == right) or (recorded[0] == right and recorded[1] == left):
+				involved = true
+		check(lines, "%s does not merge" % pair_name, touched and alive(a) and alive(b) and involved == false and score_before == score_after, "touched=%s alive=%s %s score %d -> %d" % [touched, alive(a), alive(b), score_before, score_after])
+	for s: Sobo in SoboManager.all_sobos.duplicate():
+		if is_instance_valid(s) and s.data != null and (s.data.size == left or s.data.size == right or s.data.size == left * 2):
+			s.queue_free()
+
+
+## A seven-chain prime against a plain sobo (spec §2, 2026-11-12): 7 * 2^k with k >= 1 and a plain 2^k
+## become the plain sobo 8 * 2^k through the game's merge. Every other pair stays apart.
+func push_seven_plain(lines: PackedStringArray, mode: SceneClassic, merges: Array, pair_name: String, seven: int, plain: int, must_merge: bool, y: float) -> void:
+	print("%s seven plain %s" % [MOD_TAG, pair_name])
+	var total: int = seven + plain
+	var before_total: int = count_size(total)
+	var merges_before: int = merges.size()
+	var a: Sobo = create_prime(seven, Vector2(-30, -200.0 + y))
+	var b: Sobo = SoboManager.create(plain, Vector2(30, -200.0 + y))
+	mode.enter_stack(a)
+	mode.enter_stack(b)
+	var touched := false
+	for f in 90:
+		if alive(a) and alive(b):
+			var d: Vector2 = a.center.direction_to(b.center)
+			if d.is_finite():
+				a.apply_uniform_acceleration(d * 300.0)
+				b.apply_uniform_acceleration(-d * 300.0)
+			for s: Suba in a.subas:
+				for o: Suba in s.contacting_other_subas:
+					if o.sobo == b:
+						touched = true
+		await get_tree().physics_frame
+	var involved := false
+	for recorded: Array in merges.slice(merges_before):
+		if (recorded[0] == seven and recorded[1] == plain) or (recorded[0] == plain and recorded[1] == seven):
+			involved = true
+	if must_merge:
+		var result: Sobo = null
+		for s: Sobo in SoboManager.all_sobos:
+			if is_instance_valid(s) and s.data != null and s.data.size == total:
+				result = s
+		var plain_color: bool = result != null and result.color.is_equal_approx(StyleManager.current_sobo_palette.color_for_size(total))
+		check(lines, "%s becomes the plain %d" % [pair_name, total], touched and involved and alive(a) == false and alive(b) == false and count_size(total) > before_total and result != null and is_prime_sobo(result) == false and plain_color, "touched=%s merges=%s alive=%s %s plain_color=%s" % [touched, merges.slice(merges_before), alive(a), alive(b), plain_color])
+	else:
+		check(lines, "%s does not merge" % pair_name, touched and alive(a) and alive(b) and involved == false, "touched=%s alive=%s %s merges=%s" % [touched, alive(a), alive(b), merges.slice(merges_before)])
+	for s: Sobo in SoboManager.all_sobos.duplicate():
+		if is_instance_valid(s) and s.data != null and (s.data.size == seven or s.data.size == plain or s.data.size == total):
+			s.queue_free()
+
+
+func shockwave_count() -> int:
+	var n: int = 0
+	if Main._0 == null:
+		return 0
+	for child: Node in Main._0.get_children():
+		if child is Shockwave:
+			n += 1
+	return n
+
+
+func count_size(size: int) -> int:
+	var n:= 0
+	if size < 0:
+		return 0
+	for s: Sobo in SoboManager.all_sobos:
+		if is_instance_valid(s) and s.data != null and s.data.size == size:
+			n += 1
+	return n
+
+
+func open_pre7_save(lines: PackedStringArray, mode: SceneClassic) -> void:
+	if FileAccess.file_exists("user://run.sav") == false:
+		lines.append("save: 開いていない")
+		print("%s seven save: 開いていない" % MOD_TAG)
+		return
+	var state: GameState = SaveLoadManager.read_save()
+	if state == null:
+		check(lines, "a save from before 7 opens", false, "user://run.sav unreadable")
+		return
+	await mode.apply_game_state(state)
+	var sizes: PackedStringArray = []
+	for s: Sobo in SoboManager.all_sobos:
+		if is_instance_valid(s) and s.data != null:
+			sizes.append(str(s.data.size))
+	check(lines, "a save from before 7 opens", true, "mode=%s sizes=%s" % [state.mode_name, " ".join(sizes)])
+
+
+func finish_seven(lines: PackedStringArray) -> void:
+	var fails:= 0
+	for l: String in lines:
+		if l.contains("FAIL"):
+			fails += 1
+		print("%s seven %s" % [MOD_TAG, l])
+	var f:= FileAccess.open(mod_dir().path_join("seven_result.txt"), FileAccess.WRITE)
+	if f:
+		f.store_string(("\n".join(lines)) + ("\nfailures=%d\n" % fails))
+		f.close()
+	# Quitting in the same frame as the pre-7 save's bodies (one of them is size -1)
+	# access-violates on the way out. Free them, let that frame finish, then quit.
+	SoboManager.free_all()
+	for _i in 3:
+		await get_tree().physics_frame
+	get_tree().quit(1 if fails > 0 else 0)
 
 
 # ---------------------------------------------------------------- self test
@@ -1460,11 +1563,9 @@ func selftest_prime_toggle(lines: PackedStringArray) -> void:
 	check(lines, "prime toggle: the real settings file is untouched", board_fingerprint(prime_settings.PATH) == real_settings_before, "%s -> %s" % [real_settings_before, board_fingerprint(prime_settings.PATH)])
 
 
-## Self test: prime balls on the how-to-play guide (spec §9), in prime_sobo_settings_selftest.json only.
-## It starts runs again, so it runs last. The game's own run in between is switched back on as soon
-## as it has started, before anything is played in it.
+## Self test: the how-to-play guide shows only the game's own words. Prime balls is switched in the
+## game's settings, not on the guide (commander 2026-11-12 21:54).
 func selftest_guide_toggle(lines: PackedStringArray) -> void:
-	var real_settings_before: String = board_fingerprint(prime_settings.PATH)
 	await start_default_run()
 	for i in 10:
 		await get_tree().process_frame
@@ -1473,28 +1574,12 @@ func selftest_guide_toggle(lines: PackedStringArray) -> void:
 	if SettingsManager.settings.show_instructions == false || guide == null || is_instance_valid(guide.current_control) == false:
 		lines.append("guide toggle: not checked (show_instructions=%s guide=%s)" % [SettingsManager.settings.show_instructions, guide])
 		return
-	var box: Rect2 = guide_screen_box(guide.current_control)
-	var placed: Rect2 = Rect2(guide_toggle.position, guide_toggle.size) if guide_toggle != null else Rect2()
-	var screen: Rect2 = Ui._0.get_final_transform().affine_inverse() * get_viewport().get_visible_rect()
-	var own_nodes: bool = guide_toggle != null && guide_toggle.get_parent() == Ui._0 && guide_toggle.label != prime_toggle.label && guide_toggle.bool_circles != prime_toggle.bool_circles && guide_toggle.is_ancestor_of(guide_toggle.bool_circles) && guide_label != null && guide_toggle.is_ancestor_of(guide_label)
-	var shown: bool = own_nodes && guide_toggle.is_visible_in_tree() && guide_toggle.label.text == word(TOGGLE_TEXT) && guide_label.text == guide_description() && guide_toggle.bool_circles.visible == prime_settings.enabled
-	check(lines, "guide toggle: prime balls under the game's guide, own nodes, same state as the setting", shown && placed.position.y >= box.end.y && screen.encloses(placed), "toggle=%s rect=%s guide=%s screen=%s" % [guide_toggle, placed, box, screen])
-	if guide_toggle == null:
-		return
-	if DisplayServer.get_name() != "headless":
-		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png(mod_dir().path_join("selftest_guide.png"))
-	var before: Node = GameModeManager.current_scene
-	guide_toggle.release_press.emit()
-	var started: bool = await wait_new_run(before)
-	var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(prime_settings.SELFTEST_PATH))
-	var off_run: bool = started && prime_settings.enabled == false && run_prime == false && saved is Dictionary && saved.get("enabled") == false && guide_toggle.bool_circles.visible == false && prime_toggle.bool_circles.visible == false
-	before = GameModeManager.current_scene
-	guide_toggle.release_press.emit()
-	var started_again: bool = await wait_new_run(before)
-	check(lines, "guide toggle: off is written and the run starts again as the game's own", off_run, "new_run=%s run_prime=%s saved=%s" % [started, run_prime, saved])
-	check(lines, "guide toggle: on again starts a prime run", started_again && prime_settings.enabled && run_prime && guide_toggle.bool_circles.visible && prime_toggle.bool_circles.visible, "new_run=%s run_prime=%s" % [started_again, run_prime])
-	check(lines, "guide toggle: the real settings file is untouched", board_fingerprint(prime_settings.PATH) == real_settings_before, "")
+	var found: Array[String] = []
+	for label: Node in Ui._0.find_children("*", "Label", true, false):
+		var shown_label: Label = label as Label
+		if shown_label.is_visible_in_tree() && shown_label.text == word(TOGGLE_TEXT):
+			found.append(str(shown_label.get_path()))
+	check(lines, "guide toggle: no prime balls switch on the game's guide", guide.current_control.is_visible_in_tree() && found.is_empty(), "found=%s" % [found])
 
 
 ## Starts the default mode the way the game does (GameModeManager.start_default_game_mode), but

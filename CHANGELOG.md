@@ -21,6 +21,11 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 - Fixed labels disappearing when a checked control is hovered or a selection menu is open. The shared theme now supplies matching text and background colors for these states.
 - Download errors now distinguish connection failures, HTTP responses, invalid SHA256 metadata, conflicting dependency and catalog hashes, mismatched bytes and storage failures in all 22 manager languages.
 
+### Special Sobos 1.3.11-0.6.2, 2026-11-12
+
+- Add tornado, liquid and dark matter sobos. Tornado stirs the sobos around it, liquid spreads out and sinks, and dark matter hides its shape (random) and its number. It merges only with the same number.
+- The three new kinds have settings too, with their own switches and frequencies.
+
 ### Special Sobos 1.3.11-0.5.7, 2026-11-10
 
 - Add **Import settings** under **Export settings**. Choose a `special_sobos_settings_*.json` file in the in-game file window, opened in Downloads. Values outside the allowed range, or of the wrong type, stay as they are. Readable values are saved and applied to the current board and the next run. A file that is not JSON, or not a settings file, changes nothing.
@@ -33,6 +38,12 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 ### Special Sobos 1.3.11-0.5.5, 2026-11-10
 
 - Add the original-game credit and purchase link to the package metadata and included README. Include this changelog. Gameplay is unchanged.
+
+### 1.3.11-1.0.7, 2026-11-12
+
+- 7 now appears at the same weight as 3. A 7 merges only with a 7 into 14, and can keep doubling up to 458752. It stays gray. It does not score.
+- From 14 up (14 + 2 = 16, 28 + 4 = 32, 56 + 8 = 64 ...), it merges with these sobos and becomes an ordinary sobo.
+- The prime balls switch is only under Settings → game. The same switch on the game's how-to-play screen is removed.
 
 ### 1.2.3-1.0.6 and 1.3.11-1.0.5, 2026-11-10
 
@@ -117,6 +128,11 @@ Changed: 5s now appear more often.
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
 
+### Special Sobos 1.3.11-0.6.2、2026-11-12
+
+- トルネード・液体・ダークマターのソボを追加しました。トルネードは周りのソボをかき混ぜ、液体は広がって沈み、ダークマターは形状（ランダム）と数字が隠されています。同じ数字とだけ合体します。
+- 新しい 3 種にも設定を用意し、スイッチと出現比率を用意しています。
+
 ### 管理アプリ0.3.0-alpha.9、2026-11-10
 
 - 原作の作者表示と購入先を説明欄と導入確認に表示します。作者表示が欠けたZIPは警告を表示して導入を続けられます。依存MODと作者Releaseの更新でも同じ扱いです。GitHub READMEの作者表示を確認できない場合も警告します。カタログへの掲載検査では作者表示を引き続き確認します。
@@ -124,6 +140,12 @@ MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では
 ### Special Sobos 1.3.11-0.5.5、2026-11-10
 
 - 配布ZIPの定義書とREADMEに原作の作者表示と購入先を追加し、チェンジログを同梱しました。
+
+### 1.3.11-1.0.7、2026-11-12
+
+- 7 を、3 と同じ重みで出現するようになります。7 は 7 とだけ合体して 14 になり、458752 まで倍になりえます。灰色のままです。点は入りません。
+- 14 以上で（14 + 2 = 16、28 + 4 = 32、56 + 8 = 64 ・・・）これらのソボと合体して、普通のソボになります。
+- 素数の玉のスイッチを「設定 → ゲーム」だけにした。本家の遊び方の画面にあった同じスイッチを外しました。
 
 ### 1.2.3-1.0.6と1.3.11-1.0.5、2026-11-10
 

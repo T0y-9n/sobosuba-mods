@@ -7,7 +7,8 @@ var tuning: Script
 
 func _process(_delta: float) -> void:
 	global_rotation = Cam._0.rotation if Cam._0 != null else 0.0
-	global_position = sobo.extra_mass_ball.global_position
+	if is_instance_valid(sobo):
+		position = sobo.get_label_position()
 	queue_redraw()
 
 

@@ -77,6 +77,7 @@ func run() -> void:
 	mod.forced_chance = -1.0
 	check(is_equal_approx(mod.run_chance(), mod.tuning.CHANCES[mode.spawn_pool.current_spawn_pool.size() - 1]), "chance reads the real spawn pool")
 	check(mod.tuning.CHANCES == [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08], "seven specified spawn chances")
+	check_release_kinds()
 	var small_count:= 0
 	var puffy_count:= 0
 	var magnet_count:= 0
@@ -106,6 +107,36 @@ func run() -> void:
 	await check_missing_run_marker()
 	lines.append("natural_specials=%d" % mod.natural_specials)
 	finish()
+
+
+## 0.6.2 ships tornado, liquid and dark matter next to the four first kinds. The other kinds,
+## their settings, words, code paths and tests are taken out, not hidden.
+func check_release_kinds() -> void:
+	var effects: Node = mod.extra_effects
+	check(effects != null and ",".join(effects.KINDS) == "washer,liquid,darkmatter", "added kinds are tornado, liquid and dark matter only: %s" % [effects.KINDS if effects != null else "none"])
+	if effects == null:
+		return
+	var removed: Array[String] = ["splitter", "shuffle", "rock", "translucent", "bigbang", "minus"]
+	var left: PackedStringArray = []
+	for kind: String in removed:
+		if mod.settings.trait_kinds().has(kind) or mod.trait_weights.has(kind):
+			left.append("kind " + kind)
+		for key: String in effects.Parameters.VALUES:
+			if key.contains(kind):
+				left.append("setting " + key)
+		for key: String in effects.WORDS:
+			if key.contains(kind):
+				left.append("word " + key)
+	for key: String in ["extra_search_interval"]:
+		if effects.Parameters.VALUES.has(key):
+			left.append("setting " + key)
+	for method: String in ["split_touching", "spawn_half", "shuffle_pair", "set_number_only", "hold_rocks", "capture_rock", "settle_translucents", "bigbang_touch", "crack_sobo", "cancel_minuses", "settle_minuses"]:
+		if effects.has_method(method) or mod.has_method(method):
+			left.append("method " + method)
+	for file: String in ["shuffle_pulse.gd", "special_bigbang_selftest.gd", "special_bigbang_weight_selftest.gd", "special_minus_selftest.gd", "special_rock_selftest.gd", "special_shuffle_merge_selftest.gd", "special_shuffle_selftest.gd", "special_splitter_easy_selftest.gd", "special_splitter_selftest.gd", "special_translucent_look_selftest.gd", "special_translucent_selftest.gd"]:
+		if FileAccess.file_exists(mod.mod_dir().path_join(file)):
+			left.append("file " + file)
+	check(left.is_empty(), "removed kinds leave nothing behind: %s" % ", ".join(left))
 
 
 func check_small(mode: SceneClassic) -> void:

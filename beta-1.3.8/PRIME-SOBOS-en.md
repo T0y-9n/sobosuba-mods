@@ -1,8 +1,7 @@
 # Prime Sobos for sobosuba 1.3.11
 
-Mod version 1.3.11-1.0.5. Requires sobosuba 1.3.11, the current regular release.
-For the older game version 1.2.3, download mod version 1.2.3-1.0.6.
-https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6
+Mod version 1.3.11-1.0.7. Requires sobosuba 1.3.11, the current regular release.
+For the older game version 1.2.3, the mod version is 1.2.3-1.0.6.
 
 sobosuba by keepee
 https://store.steampowered.com/app/1946560/sobosuba
@@ -22,7 +21,7 @@ styles/prime_bootstrap.tres. No override.cfg is needed for this version.
 ## Play
 
 Use prime balls in the game's settings to turn the mode on or off for the next
-run. Some spawns become 3, 5, 11, 13 or 19. Two prime sobos merge only when
+run. Some spawns become 3, 5, 7, 11, 13 or 19. Two prime sobos merge only when
 their sum is a power of two, such as 3 + 5 = 8. Two 3s stay separate.
 Prime runs disable Steam achievements and the official leaderboard.
 Send scores to the mod's separate ranking is off by default.

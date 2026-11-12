@@ -1,6 +1,6 @@
 extends RefCounted
 
-const MOD_VERSION := "1.3.11-0.5.7"
+const MOD_VERSION := "1.3.11-0.6.2"
 const STALL_MSEC := 5000
 
 class ScopeGuard extends RefCounted:

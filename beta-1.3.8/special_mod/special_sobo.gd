@@ -66,6 +66,7 @@ func is_classic_run() -> bool:
 func _ready() -> void:
 	diagnostics = DiagnosticLogger.new()
 	diagnostics.log("loaded")
+	process_physics_priority = 100
 	tuning = load(mod_dir().path_join("special_tuning.gd"))
 	settings = load(mod_dir().path_join("special_settings.gd")).new()
 	text = load(mod_dir().path_join("special_text.gd"))
@@ -74,7 +75,7 @@ func _ready() -> void:
 		trait_weights = tuning.WEIGHTS.duplicate()
 	else:
 		settings.base_traits.clear()
-	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")):
+	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado.flag")) or FileAccess.file_exists(mod_dir().path_join("darkmatter.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado_settings.flag")) or FileAccess.file_exists(mod_dir().path_join("marker.flag")):
 		settings.path = settings.SELFTEST_PATH
 	settings.load_file()
 	magnet_pull_multiplier = settings.magnet_pull_multiplier
@@ -86,6 +87,8 @@ func _ready() -> void:
 	SignalBus.on_safety_spawn.connect(on_safety_spawn)
 	SignalBus.on_sobo_merge.connect(on_sobo_merge)
 	SignalBus.on_game_over.connect(disarm_diagnostics)
+	var effects: Node = load(mod_dir().path_join("special_effects.gd")).new()
+	add_child(effects)
 	finish_setup.call_deferred()
 
 
@@ -148,7 +151,7 @@ func register_extra_effects(controller: Node) -> void:
 	settings.extra_traits.assign(controller.KINDS)
 	settings.register_parameters(controller.Parameters.VALUES)
 	for kind: String in controller.KINDS:
-		trait_weights[kind] = 1.0
+		trait_weights[kind] = 3.0
 	settings.load_file()
 	for sobo: Sobo in SoboManager.all_sobos:
 		restore_extra_state(sobo, sobo.get_meta("special_extra", {}))
@@ -170,12 +173,12 @@ func restore_extra_state(sobo: Sobo, saved: Variant) -> void:
 	var data: Dictionary = saved.duplicate(true) if saved is Dictionary else {}
 	if is_instance_valid(extra_effects):
 		extra_effects.restore(sobo, data)
-	elif data.get("lock") is Dictionary:
-		var lock: Dictionary = data.lock
-		if lock.get("previous") is bool:
-			sobo.allow_merges = lock.previous
-		data.erase("lock")
 	sobo.set_meta("special_extra", data)
+
+
+func restore_extra_shape(sobo: Sobo, saved: SoboState) -> void:
+	if is_instance_valid(extra_effects):
+		extra_effects.prepare_saved_shape(sobo, saved)
 
 
 func finish_setup() -> void:
@@ -188,6 +191,22 @@ func finish_setup() -> void:
 		var suite: Node = load(mod_dir().path_join("special_selftest.gd")).new()
 		suite.mod = self
 		add_child(suite)
+	elif FileAccess.file_exists(mod_dir().path_join("tornado.flag")):
+		var tornado: Node = load(mod_dir().path_join("special_tornado_selftest.gd")).new()
+		tornado.mod = self
+		add_child(tornado)
+	elif FileAccess.file_exists(mod_dir().path_join("darkmatter.flag")):
+		var darkmatter: Node = load(mod_dir().path_join("special_darkmatter_selftest.gd")).new()
+		darkmatter.mod = self
+		add_child(darkmatter)
+	elif FileAccess.file_exists(mod_dir().path_join("tornado_settings.flag")):
+		var tornado_settings: Node = load(mod_dir().path_join("special_tornado_settings_selftest.gd")).new()
+		tornado_settings.mod = self
+		add_child(tornado_settings)
+	elif FileAccess.file_exists(mod_dir().path_join("marker.flag")):
+		var marker_test: Node = load(mod_dir().path_join("special_marker_selftest.gd")).new()
+		marker_test.mod = self
+		add_child(marker_test)
 
 
 func install_score_guard() -> void:
@@ -205,6 +224,7 @@ func patch_script(target: Node, path: String) -> void:
 
 
 func on_game_mode_start(mode: GameScene) -> void:
+	follow_merge.call_deferred()
 	run_serial += 1
 	small_waiting.clear()
 	sticky_links.clear()
@@ -215,6 +235,12 @@ func on_game_mode_start(mode: GameScene) -> void:
 	apply_run(false if GameModeManager.run.replay else (bool(saved.get_meta("special_sobo_run", true)) if continued else settings.enabled))
 	if is_classic_run() and mode is SceneClassic:
 		mode.ready.connect(patch_mode.bind(weakref(mode)), CONNECT_ONE_SHOT)
+
+
+func follow_merge() -> void:
+	if SignalBus.on_sobo_merge.is_connected(on_sobo_merge):
+		SignalBus.on_sobo_merge.disconnect(on_sobo_merge)
+	SignalBus.on_sobo_merge.connect(on_sobo_merge)
 
 
 func patch_mode(reference: WeakRef) -> void:
@@ -305,6 +331,10 @@ func apply_trait(sobo: Sobo, kind: String) -> Sobo:
 	var _diagnostic: RefCounted = diagnostic_scope("special_sobo.apply_trait")
 	if not is_classic_run() or kind == "" or not SoboManager.power_of_two_sizes.has(sobo.data.size) or (kind == "small" and sobo.data.size == 1):
 		return sobo
+	if kind == "darkmatter":
+		sobo = dress_darkmatter(sobo)
+		diagnostics.log("trait " + diagnostic_sobo(sobo))
+		return sobo
 	if kind == "small":
 		sobo = replace_small(sobo)
 	elif sobo.get_script().resource_path != mod_dir().path_join("special_body.gd"):
@@ -312,6 +342,61 @@ func apply_trait(sobo: Sobo, kind: String) -> Sobo:
 	add_marker(sobo, kind)
 	diagnostics.log("trait " + diagnostic_sobo(sobo))
 	return sobo
+
+
+func dress_darkmatter(sobo: Sobo) -> Sobo:
+	var face: int = pick_dark_face(sobo)
+	var body: Sobo = replace_shape(sobo, make_dark_data(sobo.data.size, face), "darkmatter")
+	if body.get_script().resource_path != mod_dir().path_join("special_body.gd"):
+		patch_script(body, mod_dir().path_join("special_body.gd"))
+	body.apply_style()
+	return body
+
+
+func pick_dark_face(sobo: Sobo) -> int:
+	var low := 1
+	var high: int = sobo.data.size
+	var mode: SceneClassic = GameModeManager.current_scene as SceneClassic
+	if mode != null and mode.spawn_pool != null and not mode.spawn_pool.current_spawn_pool.is_empty():
+		low = mode.spawn_pool.current_spawn_pool[0]
+		for size: int in mode.spawn_pool.current_spawn_pool:
+			low = mini(low, size)
+	for other: Sobo in SoboManager.all_sobos:
+		if is_instance_valid(other) and not other.is_queued_for_deletion():
+			high = maxi(high, other.data.size)
+	high = maxi(high, sobo.data.size)
+	var faces: Array[int] = []
+	var size := maxi(low, 1)
+	while size <= high:
+		if size != sobo.data.size:
+			faces.append(size)
+		if size > high / 2:
+			break
+		size *= 2
+	if faces.is_empty():
+		return maxi(sobo.data.size, 1)
+	return faces[randi_range(0, faces.size() - 1)]
+
+
+func make_dark_data(true_size: int, face: int) -> SoboManager.SoboData:
+	var source: SoboManager.SoboData = SoboManager.get_sobo_data(face)
+	var data := SoboManager.SoboData.new()
+	for prop: Dictionary in source.get_property_list():
+		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE:
+			data.set(prop.name, source.get(prop.name))
+	data.inner_circle = copy_circle(source.inner_circle)
+	data.outer_circle = copy_circle(source.outer_circle)
+	data.circular_positions = source.circular_positions.duplicate()
+	data.size = true_size
+	return data
+
+
+func copy_circle(source: SoboManager.SoboCircle) -> SoboManager.SoboCircle:
+	var copy := SoboManager.SoboCircle.new()
+	copy.area = source.area
+	copy.radius = source.radius
+	copy.circumference = source.circumference
+	return copy
 
 
 func add_marker(sobo: Sobo, kind: String) -> void:
@@ -404,7 +489,9 @@ func on_sobo_merge(old0: Sobo, old1: Sobo, result: Sobo) -> void:
 		finish_small_merge.call_deferred(weakref(result), run_serial)
 	else:
 		apply_trait(result, kind)
-		restore_extra_state(result, capture_extra_state(old0 if trait0 != "" else old1))
+		var extra: Dictionary = capture_extra_state(old0 if trait0 != "" else old1)
+		extra.erase("shape_size")
+		restore_extra_state(result, extra)
 
 
 func finish_small_merge(reference: WeakRef, serial: int) -> void:
@@ -965,7 +1052,7 @@ func refresh_toggle() -> void:
 		settings_entry.label.text = toggle.label.text
 		settings_entry.tooltip_text = text.get_text("special sobos description")
 		settings_screen.side_title_text = toggle.label.text
-	toggle.tooltip_text = text.get_text("special sobos description") if extra_effects == null else extra_effects.get_text("special sobos description")
+	toggle.tooltip_text = text.get_text("special sobos description")
 	toggle.bool_circles.visible = settings.enabled
 	for kind: String in trait_toggles:
 		var button: SoboMenuButtonBool = trait_toggles[kind]
