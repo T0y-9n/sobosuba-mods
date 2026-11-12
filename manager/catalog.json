@@ -12,12 +12,12 @@
       "sha256": "83a1c8cd0296a7c20a272a95f963c9fba0ff519c958dc4817014aa6c803379fd",
       "variants": [
         {
-          "version": "1.3.11-1.0.5",
+          "version": "1.3.11-1.0.7",
           "game_versions": [
             "1.3.11"
           ],
-          "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.3.11-1.0.5/sobosuba-prime-balls-1.3.11-1.0.5.zip",
-          "sha256": "67c967d568ae4827934a9b9f792877678fa81bf76dc0fefcea4aba5d33500cce",
+          "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.3.11-1.0.7/sobosuba-prime-balls-1.3.11-1.0.7.zip",
+          "sha256": "04a8768b750c6ab11632901017e84f817cc02c065e690d0ebd36b0bf611da0ea",
           "game_credit": {
             "text": "sobosuba by keepee",
             "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
@@ -42,13 +42,13 @@
     {
       "id": "special_sobo",
       "name": "Special Sobos (beta)",
-      "version": "1.3.11-0.5.7",
+      "version": "1.3.11-0.6.2",
       "game_versions": [
         "1.3.11"
       ],
-      "summary": "Beta for sobosuba 1.3.11 with Small, Puffy, Magnet and Throwing sobos and 20 numeric settings.",
-      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.5.7/Special-Sobos-1.3.11-0.5.7.zip",
-      "sha256": "2cd73e3b3590a66c6030086ad5778cb1815b4bbd1e6c2e0f3b6a6c255ee53fbe",
+      "summary": "Beta for sobosuba 1.3.11 with Small, Puffy, Magnet, Throwing, Tornado, Liquid and Dark matter sobos and numeric settings.",
+      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.6.2/Special-Sobos-1.3.11-0.6.2.zip",
+      "sha256": "7fa2a362b2d98b7edb6d682cd8b54d272cf1a8d3866e017c6f9676e54ed8302f",
       "game_credit": {
         "text": "sobosuba by keepee",
         "store_url": "https://store.steampowered.com/app/1946560/sobosuba"

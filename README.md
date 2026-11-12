@@ -5,11 +5,11 @@ sobosuba by keepee. This mod requires the original game.
 
 ## Downloads by game version
 
-- Game 1.3.11. [1.3.11-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5) and [Special Sobos 0.5.7 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.7).
+- Game 1.3.11. [1.3.11-1.0.7](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.7) and [Special Sobos 0.6.2 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.2).
 - Game 1.2.3. [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6).
 - [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) and [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0), by Typhe681.
 
-Special Sobos 0.5.7 adds **Import settings** under **Export settings**. The in-game file window opens in Downloads and reads a `special_sobos_settings_*.json` file. Readable values are saved and applied to the current board and the next run. A value outside the allowed range, or of the wrong type, stays as it is. A file that is not JSON, or is not a settings file, changes nothing.
+Special Sobos 0.6.2 adds tornado, liquid and dark matter sobos. Prime Sobos 1.3.11-1.0.7 adds 7. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 Smartphone layout support: Prime Sobos and Special Sobos now adapt their settings and labels to portrait screens. Checked on Windows with phone-size layouts; real-device touch, safe areas and software keyboards still need verification.
 
@@ -37,13 +37,13 @@ A mod that mixes prime numbers into [sobosuba](https://store.steampowered.com/ap
 You need the game. No game files are included here.
 keepee, the developer, said mods are fine as long as they need the game, that GitHub and streaming are fine, and that mod scores should go to our own server. Thanks, keepee!
 
-The current download is mod version `1.3.11-1.0.5`, made for sobosuba 1.3.11.
+The current download is mod version `1.3.11-1.0.7`, made for sobosuba 1.3.11.
 The manual installation steps below cover the older game version 1.2.3.
 Use the linked package guide for 1.3.11. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ### Prime balls
 
-In sobosuba every ball is a power of two: 1, 2, 4, 8 and so on. With this mod, some spawns are a grey 3, 5, 11, 13 or 19 instead.
+In sobosuba every ball is a power of two: 1, 2, 4, 8 and so on. With this mod, some spawns are a grey 3, 5, 7, 11, 13 or 19 instead.
 
 How many depends on the prime level, shown under your score. The game already lets bigger balls spawn as a run goes on, in seven stages. Each stage is one prime level, and the share of prime spawns climbs through the primes: 11%, 13%, 17%, 19%, 23%, 29% and 31%.
 
@@ -163,7 +163,7 @@ sobosubaはkeepeeさんの作品です。このMODを使うには原作が必要
 
 ### ゲームの版ごとのダウンロード
 
-- ゲーム1.3.11用の [1.3.11-1.0.5](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5) と [Special Sobos 0.5.7 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.7)。
+- ゲーム1.3.11用の [1.3.11-1.0.7](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.7) と [Special Sobos 0.6.2 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.2)。
 - ゲーム1.2.3用の [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6)。
 - Typhe681さんの [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) と [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0)。
 
@@ -176,11 +176,11 @@ SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.
 ゲーム本体が必要です。このリポジトリにゲームのファイルは入っていません。
 作者の keepee さんから「ゲーム本体が要る作りならよい、GitHub と配信もよい、MOD の点数は自前のサーバで」と了承をもらっています。
 
-現在の配布版 `1.3.11-1.0.5` は、sobosuba 1.3.11向けのMOD 1.0.5です。以下の手動導入手順は前の版1.2.3を対象としています。1.3.11は上の導入案内を使ってください。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
+現在の配布版 `1.3.11-1.0.7` は、sobosuba 1.3.11向けのMOD 1.0.7です。以下の手動導入手順は前の版1.2.3を対象としています。1.3.11は上の導入案内を使ってください。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
 
 ### 素数の玉
 
-sobosuba の玉は 1, 2, 4, 8… と 2 の累乗しかありません。この MOD では、ときどき 3・5・11・13・19 の灰色の玉が出てきます。
+sobosuba の玉は 1, 2, 4, 8… と 2 の累乗しかありません。この MOD では、ときどき 3・5・7・11・13・19 の灰色の玉が出てきます。
 
 どれくらい出るかは、点数の下に出る素数レベルで決まります。本家は試合が進むにつれて大きい玉を出すようにしていき、それが 7 段階あります。その 1 段階が素数レベルの 1 つで、素数の玉の割合も素数で上がっていきます: 11%・13%・17%・19%・23%・29%・31%。
 
