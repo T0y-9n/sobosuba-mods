@@ -1,0 +1,48 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="1"]
+script/source = "extends Resource
+
+func _init() -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var autoload_name := \"SoboCrashFix\"
+	var entry := \"user://sobo_crash_fix/sobo_crash_fix.gd\"
+	if tree.root.get_node_or_null(autoload_name) != null:
+		return
+	var script := GDScript.new()
+	script.source_code = FileAccess.get_file_as_string(entry)
+	script.take_over_path(entry)
+	if script.reload() != OK:
+		return
+	var node: Node = script.new()
+	node.name = autoload_name
+	# Every mod joins one queue. The first one adds them all, in the order the
+	# Sobosuba Mod Manager saved, once every bootstrap has run.
+	var queue: Array = Engine.get_meta(\"sobosuba_mod_queue\", [])
+	queue.append([\"sobo_crash_fix\", node])
+	Engine.set_meta(\"sobosuba_mod_queue\", queue)
+	if queue.size() > 1:
+		return
+	var add_queued := func() -> void:
+		var waiting: Array = Engine.get_meta(\"sobosuba_mod_queue\", [])
+		Engine.remove_meta(\"sobosuba_mod_queue\")
+		var order: Array = []
+		if FileAccess.file_exists(\"user://mod_load_order.json\"):
+			var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(\"user://mod_load_order.json\"))
+			if saved is Dictionary and saved.get(\"order\") is Array:
+				order = saved.order
+		var ranked: Array = []
+		for index in waiting.size():
+			var rank: int = order.find(waiting[index][0])
+			ranked.append([rank if rank >= 0 else order.size(), index, waiting[index][1]])
+		ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+		var root: Window = (Engine.get_main_loop() as SceneTree).root
+		for item: Array in ranked:
+			root.add_child(item[2])
+	add_queued.call_deferred()
+"
+
+[resource]
+script = SubResource("1")

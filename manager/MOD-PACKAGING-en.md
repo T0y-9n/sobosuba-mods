@@ -31,9 +31,9 @@ Special Sobos 1.3.11-0.5.0. Replace its details and file list with your own.
 | `dependencies` | Required mods, or `[]` if your mod works on its own. |
 
 These versions load resources from `user://styles/` at startup. Save this UTF-8 file
-as `styles/my_mod_bootstrap.tres`. Change the two strings `MyMod` and
-`user://my_mod/main.gd` to match `autoload`, `payload_root` and `entry` in your
-definition. The entry script must extend `Node`.
+as `styles/my_mod_bootstrap.tres`. Change the strings `MyMod`,
+`user://my_mod/main.gd` and `my_mod` to match `autoload`, `payload_root`, `entry`
+and `id` in your definition. The entry script must extend `Node`.
 
 ```ini
 [gd_resource type="Resource" load_steps=2 format=3]
@@ -56,7 +56,30 @@ func _init() -> void:
 		return
 	var node: Node = script.new()
 	node.name = autoload_name
-	tree.root.add_child.call_deferred(node)
+	# Every mod joins one queue. The first one adds them all, in the order the
+	# Sobosuba Mod Manager saved, once every bootstrap has run.
+	var queue: Array = Engine.get_meta(\"sobosuba_mod_queue\", [])
+	queue.append([\"my_mod\", node])
+	Engine.set_meta(\"sobosuba_mod_queue\", queue)
+	if queue.size() > 1:
+		return
+	var add_queued := func() -> void:
+		var waiting: Array = Engine.get_meta(\"sobosuba_mod_queue\", [])
+		Engine.remove_meta(\"sobosuba_mod_queue\")
+		var order: Array = []
+		if FileAccess.file_exists(\"user://mod_load_order.json\"):
+			var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(\"user://mod_load_order.json\"))
+			if saved is Dictionary and saved.get(\"order\") is Array:
+				order = saved.order
+		var ranked: Array = []
+		for index in waiting.size():
+			var rank: int = order.find(waiting[index][0])
+			ranked.append([rank if rank >= 0 else order.size(), index, waiting[index][1]])
+		ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+		var root: Window = (Engine.get_main_loop() as SceneTree).root
+		for item: Array in ranked:
+			root.add_child(item[2])
+	add_queued.call_deferred()
 "
 
 [resource]
@@ -64,6 +87,12 @@ script = SubResource("1")
 ```
 
 This uses the loading sequence from Special Sobos' `special_bootstrap.tres`.
+The end of the template sets the load order. Each mod joins one queue, and the
+first bootstrap adds every queued mod after all of them have run, in the order
+the manager saved in `user://mod_load_order.json` (`{"order": ["id", ...]}`).
+Mods that are not in that list, or the whole queue when there is no list, keep
+the order in which the game found them. Keep this part as it is: the first
+bootstrap in the queue does the work for every mod.
 The template was checked on Windows 1.3.11, build 26465074.
 The manager copies the files to the game's user-data folder. For a manual check,
 put `my_mod/main.gd` and `styles/my_mod_bootstrap.tres` under that folder yourself.

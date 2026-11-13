@@ -104,7 +104,10 @@
     "author_release_cache_invalid": "an invalid saved release check",
     "author_release_readme": "missing required game credit or store link in the author’s README",
     "credit_warning": "Warning: this package lacks the original-game credit or purchase link. You can continue installing.",
-    "credit_readme_warning": "Warning: the GitHub README credit or purchase link could not be verified. You can continue installing."
+    "credit_readme_warning": "Warning: the GitHub README credit or purchase link could not be verified. You can continue installing.",
+    "load_order": "Load order: {0} of {1}",
+    "load_earlier": "Load earlier",
+    "load_later": "Load later"
   },
   "ja": {
     "title": "Sobosuba MOD管理",
@@ -211,7 +214,10 @@
     "author_release_cache_invalid": "保存した確認結果が正しくない",
     "author_release_readme": "作者のREADMEに必要な作者表示か購入先がない",
     "credit_warning": "警告。このパッケージには原作の作者表示または購入先がありません。導入は続けられます。",
-    "credit_readme_warning": "警告。GitHubのREADMEで原作の作者表示または購入先を確認できませんでした。導入は続けられます。"
+    "credit_readme_warning": "警告。GitHubのREADMEで原作の作者表示または購入先を確認できませんでした。導入は続けられます。",
+    "load_order": "読み込みの順: {1} 個中 {0} 番目",
+    "load_earlier": "先に読む",
+    "load_later": "後に読む"
   },
   "de": {
     "title": "Sobosuba-Modverwaltung",
@@ -318,7 +324,10 @@
     "author_release_cache_invalid": "einer ungültigen gespeicherten Prüfung",
     "author_release_readme": "fehlender Spielurheberangabe oder Shop-Verknüpfung in der README des Autors",
     "credit_warning": "Warnung. In diesem Paket fehlen Urheberangabe oder Kauflink des Originalspiels. Die Installation kann fortgesetzt werden.",
-    "credit_readme_warning": "Warnung. Urheberangabe oder Kauflink in der GitHub-README konnten nicht geprüft werden. Die Installation kann fortgesetzt werden."
+    "credit_readme_warning": "Warnung. Urheberangabe oder Kauflink in der GitHub-README konnten nicht geprüft werden. Die Installation kann fortgesetzt werden.",
+    "load_order": "Ladereihenfolge: {0} von {1}",
+    "load_earlier": "Früher laden",
+    "load_later": "Später laden"
   },
   "es": {
     "title": "Gestor de mods de Sobosuba",
@@ -425,7 +434,10 @@
     "author_release_cache_invalid": "una comprobación guardada no válida",
     "author_release_readme": "falta de autoría o enlace de compra en el README del autor",
     "credit_warning": "Advertencia. Este paquete no incluye el autor o el enlace de compra del juego original. Puedes continuar la instalación.",
-    "credit_readme_warning": "Advertencia. No se pudo verificar el autor o el enlace de compra en el README de GitHub. Puedes continuar la instalación."
+    "credit_readme_warning": "Advertencia. No se pudo verificar el autor o el enlace de compra en el README de GitHub. Puedes continuar la instalación.",
+    "load_order": "Orden de carga: {0} de {1}",
+    "load_earlier": "Cargar antes",
+    "load_later": "Cargar después"
   },
   "es_MX": {
     "title": "Administrador de mods de Sobosuba",
@@ -532,7 +544,10 @@
     "author_release_cache_invalid": "una comprobación guardada no válida",
     "author_release_readme": "falta de autoría o enlace de compra en el README del autor",
     "credit_warning": "Advertencia. Este paquete no incluye el autor o el enlace de compra del juego original. Puedes continuar la instalación.",
-    "credit_readme_warning": "Advertencia. No se pudo verificar el autor o el enlace de compra en el README de GitHub. Puedes continuar la instalación."
+    "credit_readme_warning": "Advertencia. No se pudo verificar el autor o el enlace de compra en el README de GitHub. Puedes continuar la instalación.",
+    "load_order": "Orden de carga: {0} de {1}",
+    "load_earlier": "Cargar antes",
+    "load_later": "Cargar después"
   },
   "fr": {
     "title": "Gestionnaire de mods Sobosuba",
@@ -639,7 +654,10 @@
     "author_release_cache_invalid": "une vérification enregistrée invalide",
     "author_release_readme": "l’absence des crédits ou du lien d’achat dans le README de l’auteur",
     "credit_warning": "Attention. Ce paquet ne contient pas le nom du créateur ou le lien d’achat du jeu original. Vous pouvez poursuivre l’installation.",
-    "credit_readme_warning": "Attention. Le nom du créateur ou le lien d’achat du README GitHub n’a pas pu être vérifié. Vous pouvez poursuivre l’installation."
+    "credit_readme_warning": "Attention. Le nom du créateur ou le lien d’achat du README GitHub n’a pas pu être vérifié. Vous pouvez poursuivre l’installation.",
+    "load_order": "Ordre de chargement : {0} sur {1}",
+    "load_earlier": "Charger plus tôt",
+    "load_later": "Charger plus tard"
   },
   "it": {
     "title": "Gestore mod Sobosuba",
@@ -746,7 +764,10 @@
     "author_release_cache_invalid": "una verifica salvata non valida",
     "author_release_readme": "mancanza dei crediti o del link di acquisto nel README dell’autore",
     "credit_warning": "Avviso. Il pacchetto non include il creatore o il link di acquisto del gioco originale. Puoi continuare l’installazione.",
-    "credit_readme_warning": "Avviso. Impossibile verificare il creatore o il link di acquisto nel README di GitHub. Puoi continuare l’installazione."
+    "credit_readme_warning": "Avviso. Impossibile verificare il creatore o il link di acquisto nel README di GitHub. Puoi continuare l’installazione.",
+    "load_order": "Ordine di caricamento: {0} di {1}",
+    "load_earlier": "Carica prima",
+    "load_later": "Carica dopo"
   },
   "pt_BR": {
     "title": "Gerenciador de mods Sobosuba",
@@ -853,7 +874,10 @@
     "author_release_cache_invalid": "uma verificação salva inválida",
     "author_release_readme": "ausência dos créditos ou do link de compra no README do autor",
     "credit_warning": "Aviso. Este pacote não inclui o criador ou o link de compra do jogo original. Você pode continuar a instalação.",
-    "credit_readme_warning": "Aviso. Não foi possível verificar o criador ou o link de compra no README do GitHub. Você pode continuar a instalação."
+    "credit_readme_warning": "Aviso. Não foi possível verificar o criador ou o link de compra no README do GitHub. Você pode continuar a instalação.",
+    "load_order": "Ordem de carregamento: {0} de {1}",
+    "load_earlier": "Carregar antes",
+    "load_later": "Carregar depois"
   },
   "cs": {
     "title": "Správce modů Sobosuba",
@@ -960,7 +984,10 @@
     "author_release_cache_invalid": "neplatné uložené kontrole",
     "author_release_readme": "chybějícímu autorovi hry nebo odkazu na obchod v README autora",
     "credit_warning": "Upozornění. V balíčku chybí autor původní hry nebo odkaz na nákup. V instalaci lze pokračovat.",
-    "credit_readme_warning": "Upozornění. Autora nebo odkaz na nákup v README na GitHubu nelze ověřit. V instalaci lze pokračovat."
+    "credit_readme_warning": "Upozornění. Autora nebo odkaz na nákup v README na GitHubu nelze ověřit. V instalaci lze pokračovat.",
+    "load_order": "Pořadí načítání: {0} z {1}",
+    "load_earlier": "Načíst dříve",
+    "load_later": "Načíst později"
   },
   "pl": {
     "title": "Menedżer modów Sobosuba",
@@ -1067,7 +1094,10 @@
     "author_release_cache_invalid": "nieprawidłowego zapisanego wyniku kontroli",
     "author_release_readme": "braku autora gry lub odnośnika zakupu w README autora",
     "credit_warning": "Ostrzeżenie. W pakiecie brakuje autora oryginalnej gry lub odnośnika do zakupu. Możesz kontynuować instalację.",
-    "credit_readme_warning": "Ostrzeżenie. Nie udało się sprawdzić autora lub odnośnika do zakupu w README na GitHubie. Możesz kontynuować instalację."
+    "credit_readme_warning": "Ostrzeżenie. Nie udało się sprawdzić autora lub odnośnika do zakupu w README na GitHubie. Możesz kontynuować instalację.",
+    "load_order": "Kolejność wczytywania: {0} z {1}",
+    "load_earlier": "Wczytaj wcześniej",
+    "load_later": "Wczytaj później"
   },
   "ru": {
     "title": "Менеджер модов Sobosuba",
@@ -1174,7 +1204,10 @@
     "author_release_cache_invalid": "недействительного сохранённого результата проверки",
     "author_release_readme": "отсутствия автора игры или ссылки на покупку в README автора",
     "credit_warning": "Предупреждение. В пакете нет автора оригинальной игры или ссылки на покупку. Установку можно продолжить.",
-    "credit_readme_warning": "Предупреждение. Не удалось проверить автора или ссылку на покупку в README GitHub. Установку можно продолжить."
+    "credit_readme_warning": "Предупреждение. Не удалось проверить автора или ссылку на покупку в README GitHub. Установку можно продолжить.",
+    "load_order": "Порядок загрузки: {0} из {1}",
+    "load_earlier": "Загружать раньше",
+    "load_later": "Загружать позже"
   },
   "sr": {
     "title": "Управљање Sobosuba модовима",
@@ -1281,7 +1314,10 @@
     "author_release_cache_invalid": "неважећег сачуваног резултата провере",
     "author_release_readme": "недостајућег аутора игре или везе за куповину у README аутора",
     "credit_warning": "Упозорење. У пакету недостаје аутор оригиналне игре или веза за куповину. Можете наставити инсталацију.",
-    "credit_readme_warning": "Упозорење. Није могуће проверити аутора или везу за куповину у GitHub README датотеци. Можете наставити инсталацију."
+    "credit_readme_warning": "Упозорење. Није могуће проверити аутора или везу за куповину у GitHub README датотеци. Можете наставити инсталацију.",
+    "load_order": "Редослед учитавања: {0} од {1}",
+    "load_earlier": "Учитај раније",
+    "load_later": "Учитај касније"
   },
   "zh_CN": {
     "title": "Sobosuba 模组管理器",
@@ -1388,7 +1424,10 @@
     "author_release_cache_invalid": "保存的验证结果无效",
     "author_release_readme": "作者的 README 缺少必需的作者信息或购买链接",
     "credit_warning": "警告。此软件包缺少原作作者署名或购买链接。您可以继续安装。",
-    "credit_readme_warning": "警告。无法确认 GitHub README 中的原作作者署名或购买链接。您可以继续安装。"
+    "credit_readme_warning": "警告。无法确认 GitHub README 中的原作作者署名或购买链接。您可以继续安装。",
+    "load_order": "加载顺序：第 {0} 个，共 {1} 个",
+    "load_earlier": "提前加载",
+    "load_later": "延后加载"
   },
   "zh_TW": {
     "title": "Sobosuba 模組管理員",
@@ -1495,7 +1534,10 @@
     "author_release_cache_invalid": "儲存的驗證結果無效",
     "author_release_readme": "作者的 README 缺少必要的作者資訊或購買連結",
     "credit_warning": "警告。此套件缺少原作作者署名或購買連結。您可以繼續安裝。",
-    "credit_readme_warning": "警告。無法確認 GitHub README 中的原作作者署名或購買連結。您可以繼續安裝。"
+    "credit_readme_warning": "警告。無法確認 GitHub README 中的原作作者署名或購買連結。您可以繼續安裝。",
+    "load_order": "載入順序：第 {0} 個，共 {1} 個",
+    "load_earlier": "提前載入",
+    "load_later": "延後載入"
   },
   "ko": {
     "title": "Sobosuba 모드 관리자",
@@ -1602,7 +1644,10 @@
     "author_release_cache_invalid": "유효하지 않은 저장된 확인 결과",
     "author_release_readme": "제작자 README의 필수 게임 제작자 표시 또는 구매 링크 누락",
     "credit_warning": "경고. 이 패키지에 원작자 표시 또는 구매 링크가 없습니다. 설치를 계속할 수 있습니다.",
-    "credit_readme_warning": "경고. GitHub README의 원작자 표시 또는 구매 링크를 확인하지 못했습니다. 설치를 계속할 수 있습니다."
+    "credit_readme_warning": "경고. GitHub README의 원작자 표시 또는 구매 링크를 확인하지 못했습니다. 설치를 계속할 수 있습니다.",
+    "load_order": "불러오기 순서: {1}개 중 {0}번째",
+    "load_earlier": "먼저 불러오기",
+    "load_later": "나중에 불러오기"
   },
   "tr": {
     "title": "Sobosuba Mod Yöneticisi",
@@ -1709,7 +1754,10 @@
     "author_release_cache_invalid": "geçersiz kaydedilmiş denetim sonucu",
     "author_release_readme": "yazarın README dosyasında gerekli oyun geliştiricisi veya mağaza bağlantısının eksik olması",
     "credit_warning": "Uyarı. Bu pakette özgün oyunun geliştiricisi veya satın alma bağlantısı eksik. Kuruluma devam edebilirsiniz.",
-    "credit_readme_warning": "Uyarı. GitHub README dosyasındaki geliştirici veya satın alma bağlantısı doğrulanamadı. Kuruluma devam edebilirsiniz."
+    "credit_readme_warning": "Uyarı. GitHub README dosyasındaki geliştirici veya satın alma bağlantısı doğrulanamadı. Kuruluma devam edebilirsiniz.",
+    "load_order": "Yükleme sırası: {1} içinde {0}",
+    "load_earlier": "Daha önce yükle",
+    "load_later": "Daha sonra yükle"
   },
   "uk": {
     "title": "Менеджер модів Sobosuba",
@@ -1816,7 +1864,10 @@
     "author_release_cache_invalid": "недійсний збережений результат перевірки",
     "author_release_readme": "відсутність автора гри або посилання для купівлі в README автора",
     "credit_warning": "Попередження. У пакунку немає автора оригінальної гри або посилання на придбання. Можна продовжити встановлення.",
-    "credit_readme_warning": "Попередження. Не вдалося перевірити автора або посилання на придбання в README GitHub. Можна продовжити встановлення."
+    "credit_readme_warning": "Попередження. Не вдалося перевірити автора або посилання на придбання в README GitHub. Можна продовжити встановлення.",
+    "load_order": "Порядок завантаження: {0} з {1}",
+    "load_earlier": "Завантажувати раніше",
+    "load_later": "Завантажувати пізніше"
   },
   "id": {
     "title": "Pengelola Mod Sobosuba",
@@ -1923,7 +1974,10 @@
     "author_release_cache_invalid": "hasil pemeriksaan tersimpan tidak valid",
     "author_release_readme": "kredit game atau tautan pembelian yang diwajibkan tidak ada di README pembuat",
     "credit_warning": "Peringatan. Paket ini tidak mencantumkan pembuat game asli atau tautan pembelian. Anda dapat melanjutkan pemasangan.",
-    "credit_readme_warning": "Peringatan. Kredit pembuat atau tautan pembelian di README GitHub tidak dapat diverifikasi. Anda dapat melanjutkan pemasangan."
+    "credit_readme_warning": "Peringatan. Kredit pembuat atau tautan pembelian di README GitHub tidak dapat diverifikasi. Anda dapat melanjutkan pemasangan.",
+    "load_order": "Urutan muat: {0} dari {1}",
+    "load_earlier": "Muat lebih awal",
+    "load_later": "Muat lebih akhir"
   },
   "vi": {
     "title": "Trình quản lý mod Sobosuba",
@@ -2030,7 +2084,10 @@
     "author_release_cache_invalid": "kết quả kiểm tra đã lưu không hợp lệ",
     "author_release_readme": "README của tác giả thiếu thông tin tác giả trò chơi hoặc liên kết mua bắt buộc",
     "credit_warning": "Cảnh báo. Gói này thiếu tên tác giả trò chơi gốc hoặc liên kết mua. Bạn có thể tiếp tục cài đặt.",
-    "credit_readme_warning": "Cảnh báo. Không thể xác minh tên tác giả hoặc liên kết mua trong README trên GitHub. Bạn có thể tiếp tục cài đặt."
+    "credit_readme_warning": "Cảnh báo. Không thể xác minh tên tác giả hoặc liên kết mua trong README trên GitHub. Bạn có thể tiếp tục cài đặt.",
+    "load_order": "Thứ tự tải: {0} trên {1}",
+    "load_earlier": "Tải sớm hơn",
+    "load_later": "Tải muộn hơn"
   },
   "nl": {
     "title": "Sobosuba-modbeheer",
@@ -2137,7 +2194,10 @@
     "author_release_cache_invalid": "een ongeldig opgeslagen controleresultaat",
     "author_release_readme": "ontbrekende spelmakersvermelding of winkellink in de README van de maker",
     "credit_warning": "Waarschuwing. Dit pakket mist de maker of kooplink van het oorspronkelijke spel. Je kunt doorgaan met installeren.",
-    "credit_readme_warning": "Waarschuwing. De maker of kooplink in de GitHub-README kon niet worden gecontroleerd. Je kunt doorgaan met installeren."
+    "credit_readme_warning": "Waarschuwing. De maker of kooplink in de GitHub-README kon niet worden gecontroleerd. Je kunt doorgaan met installeren.",
+    "load_order": "Laadvolgorde: {0} van {1}",
+    "load_earlier": "Eerder laden",
+    "load_later": "Later laden"
   },
   "hu": {
     "title": "Sobosuba modkezelő",
@@ -2244,7 +2304,10 @@
     "author_release_cache_invalid": "érvénytelen mentett ellenőrzési eredmény",
     "author_release_readme": "a készítő README fájljából hiányzó játékalkotói megjelölés vagy vásárlási hivatkozás",
     "credit_warning": "Figyelem. A csomagból hiányzik az eredeti játék készítője vagy vásárlási hivatkozása. A telepítés folytatható.",
-    "credit_readme_warning": "Figyelem. A GitHub README készítői adata vagy vásárlási hivatkozása nem ellenőrizhető. A telepítés folytatható."
+    "credit_readme_warning": "Figyelem. A GitHub README készítői adata vagy vásárlási hivatkozása nem ellenőrizhető. A telepítés folytatható.",
+    "load_order": "Betöltési sorrend: {0} / {1}",
+    "load_earlier": "Betöltés korábban",
+    "load_later": "Betöltés később"
   },
   "ro": {
     "title": "Manager de moduri Sobosuba",
@@ -2351,6 +2414,9 @@
     "author_release_cache_invalid": "unui rezultat de verificare salvat nevalid",
     "author_release_readme": "lipsei autorului jocului sau a linkului de cumpărare în README-ul autorului",
     "credit_warning": "Avertisment. Pachetul nu include autorul jocului original sau linkul de cumpărare. Puteți continua instalarea.",
-    "credit_readme_warning": "Avertisment. Autorul sau linkul de cumpărare din README de pe GitHub nu a putut fi verificat. Puteți continua instalarea."
+    "credit_readme_warning": "Avertisment. Autorul sau linkul de cumpărare din README de pe GitHub nu a putut fi verificat. Puteți continua instalarea.",
+    "load_order": "Ordinea de încărcare: {0} din {1}",
+    "load_earlier": "Încarcă mai devreme",
+    "load_later": "Încarcă mai târziu"
   }
 }

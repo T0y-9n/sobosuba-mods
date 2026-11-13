@@ -6,6 +6,7 @@ sobosuba by keepee. This mod requires the original game.
 ## Downloads by game version
 
 - Game 1.3.11. [1.3.11-1.0.7](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.7) and [Special Sobos 0.6.2 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.2).
+- Game 1.3.11. [Sobo Crash Fix 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/crash-fix-1.3.11-1.0.0). Stops a crash in the game itself when a sobo is removed by a merge or at the end of a run.
 - Game 1.2.3. [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6).
 - [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) and [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0), by Typhe681.
 
@@ -20,13 +21,14 @@ After installing it, add your own `.png`, `.jpg` or `.ogv` files to the `greensc
 If several files are present, the mod picks one at random. See the [author's instructions](https://github.com/Typhe681/GreenScreenSobos/tree/v1.0.0) for the Windows and Linux paths.
 The catalog downloads the original ZIP directly from the author.
 
-[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.9)
+[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.10)
 manages mods for 1.2.3, 1.3.10 and 1.3.11. Choose the mod package matching your game.
 Manager alpha.9 selects the matching Prime Sobos release from the catalog for 1.2.3 or 1.3.11.
 These two releases keep separate installation locations and update settings; neither replaces the other.
 Earlier managers still read the original 1.2.3 catalog entry. Update the manager to select the 1.3.11 catalog release.
 For 1.3.11 installation, see [the package guide](beta-1.3.8/PRIME-SOBOS-en.md).
 From alpha.9, missing package credit or unverified GitHub README credit shows a warning and installation can continue.
+From alpha.10, you can change the load order of mods from the mod details. Sobo Crash Fix already supports it; other mods will support it from their next release.
 
 [English](#english) | [日本語](#日本語)
 
@@ -164,6 +166,7 @@ sobosubaはkeepeeさんの作品です。このMODを使うには原作が必要
 ### ゲームの版ごとのダウンロード
 
 - ゲーム1.3.11用の [1.3.11-1.0.7](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.7) と [Special Sobos 0.6.2 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.2)。
+- ゲーム1.3.11用の [Sobo Crash Fix 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/crash-fix-1.3.11-1.0.0)。ソボが合体や回の終わりで消えるときの、本家のクラッシュを止める MOD です。
 - ゲーム1.2.3用の [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6)。
 - Typhe681さんの [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) と [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0)。
 

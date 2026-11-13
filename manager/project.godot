@@ -6,7 +6,7 @@ config/name="Sobosuba Mod Manager"
 
 config/icon="res://assets/sobosuba-mod-manager.png"
 
-config/version="0.3.0-alpha.9"
+config/version="0.3.0-alpha.10"
 
 run/main_scene="res://main.tscn"
 

@@ -133,12 +133,13 @@ function All-Mods($Target) {
     }
     return ,$mods
 }
-function Owned-Operations($Receipt,[bool]$Remove) {
+function Owned-Operations($Receipt,[bool]$Remove,$Incoming=$null) {
     $ops=@()
     foreach($relative in $Receipt.hashes.Keys) {
         $path=Guard-Path (Join-Path $Receipt.root $relative) $Receipt.root
         $hash=Current-Hash $path
-        if($hash -and $hash -ne $Receipt.hashes[$relative]) {Stop-Manager 'file_conflict' @($path)}
+        $same=$Incoming -and $Incoming.contents.ContainsKey($relative) -and $hash -eq (Bytes-Hash $Incoming.contents[$relative])
+        if($hash -and $hash -ne $Receipt.hashes[$relative] -and -not $same) {Stop-Manager 'file_conflict' @($path)}
         if($Remove -and $hash){$ops+=,@{path=$path;bytes=$null}}
     }
     return ,$ops
@@ -160,7 +161,7 @@ function Get-PackageOperations($Target,$Package,$Request,$Context) {
     }
     $old=@((Read-Receipts $root) | Where-Object {$_.id -eq $Package.id})
     $enabled=$true;$hashes=@{};$operations=@();$hadUnowned=$false
-    if($old.Count) {$old=$old[0];$null=Owned-Operations $old $false;$enabled=Is-Enabled $Target $old}else{$old=$null}
+    if($old.Count) {$old=$old[0];$null=Owned-Operations $old $false $Package;$enabled=Is-Enabled $Target $old}else{$old=$null}
     if($Request.ContainsKey('force_enabled')){$enabled=[bool]$Request.force_enabled}
     foreach($relative in $Package.files) {
         $path=Guard-Path (Join-Path $root $relative) $root
@@ -197,6 +198,25 @@ function Get-PackageOperations($Target,$Package,$Request,$Context) {
     $operations+=,@{path=$receiptPath;bytes=(Json-Bytes $receipt)}
     return ,$operations
 }
+# The bootstraps add their mods in this order (user://mod_load_order.json). Game 1.2.3 has no bootstraps.
+function Order-Path($Target) {return Guard-Path (Join-Path $Target.user 'mod_load_order.json') $Target.user}
+function Read-Order($Target) {
+    if($Target.version -eq '1.2.3'){return ,@()}
+    $path=Order-Path $Target
+    if(-not [IO.File]::Exists($path)){return ,@()}
+    try{$saved=Read-Map ([IO.File]::ReadAllText($path))}catch{return ,@()}
+    return ,@(@($saved.order)|Where-Object {$_ -is [string] -and (Valid-Id $_)})
+}
+function Save-Order($Target,$Order) {
+    if($Target.version -eq '1.2.3' -or $null -eq $Order){Stop-Manager 'invalid_request'}
+    $ids=@($Order);$seen=@{}
+    if($ids.Count -gt 64){Stop-Manager 'invalid_request'}
+    foreach($id in $ids){
+        if($id -isnot [string] -or -not (Valid-Id $id) -or $seen.ContainsKey($id)){Stop-Manager 'invalid_request'}
+        $seen[$id]=$true
+    }
+    Write-Transaction $Target.user @(@{path=(Order-Path $Target);bytes=(Json-Bytes @{order=[object[]]$ids})})
+}
 function Invoke-Manager($Request) {
     $mutex=[Threading.Mutex]::new($false,'Local\SoboModManager-FileOperations')
     $held=$false
@@ -205,7 +225,7 @@ function Invoke-Manager($Request) {
         if(-not $held){Stop-Manager 'busy'}
         $target=Get-Target $Request
         if($Request.action -in @('target','detect')) {return @{ok=$true;data=$target}}
-        $mutating=$Request.action -in @('install','enable','disable','uninstall','recover')
+        $mutating=$Request.action -in @('install','enable','disable','uninstall','recover','set_order')
         if($mutating) {
             if(@(Get-Process -Name sobosuba,sobosuba.x86_64,sobosuba.exe -ErrorAction SilentlyContinue).Count){Stop-Manager 'game_running'}
             foreach($root in @($target.game,$target.user)|Select-Object -Unique){Recover-Transaction $root}
@@ -228,8 +248,9 @@ function Invoke-Manager($Request) {
         }
         if($Request.action -eq 'recover'){return @{ok=$true;data=@{}}}
         foreach($root in @($target.game,$target.user)){if([IO.File]::Exists((Guard-Path (Join-Path $root '.sobo-mod-manager/pending.json') $root))){Stop-Manager 'recovery_needed'}}
+        if($Request.action -eq 'set_order'){Save-Order $target $Request.order;return @{ok=$true;data=@{order=(Read-Order $target)}}}
         $mods=All-Mods $target
-        if($Request.action -eq 'list'){return @{ok=$true;data=@{mods=@($mods);target=$target}}}
+        if($Request.action -eq 'list'){return @{ok=$true;data=@{mods=@($mods);target=$target;order=(Read-Order $target)}}}
         $m=@($mods | Where-Object {$_.id -eq $Request.id -and (-not $Request.layout -or $_.layout -eq $Request.layout)})
         if($m.Count -ne 1 -or $m[0].manual){Stop-Manager 'adopt_required'};$m=$m[0]
         if($Request.action -notin @('enable','disable','uninstall')){Stop-Manager 'invalid_request'}

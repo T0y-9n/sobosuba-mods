@@ -21,6 +21,7 @@ var restart_button: Button
 var mod_update_check: CheckBox
 var busy := false
 var mods: Array = []
+var load_order: Array = []
 var target: Dictionary = {}
 var bindings: Array = []
 var controls: Array[BaseButton] = []
@@ -430,8 +431,10 @@ func read_state() -> void:
 			if not mod.get("manual", false):
 				mod.compatible = Versions.supports_game(mod.get("game_versions", []), store.game_version)
 		target = result.data.target
+		load_order = result.data.get("order", [])
 	else:
 		mods = []
+		load_order = []
 		target = {}
 		notice_error = str(result.get("error", "invalid_request"))
 		notice_args = result.get("args", [])
@@ -590,7 +593,7 @@ func render_rows() -> void:
 	path_label.tooltip_text = path_label.text
 	detected_label.text = words.word("detected", [target.detected]) if not str(target.get("detected", "")).is_empty() else words.word("selected")
 	library_count.text = words.word("mod_count", [mods.size()])
-	var installed: Array = mods.filter(matches_filters)
+	var installed: Array = in_load_order(mods).filter(matches_filters)
 	var installed_keys: Array = mods.map(mod_key)
 	var available: Array = catalog.for_game(store.game_version).filter(func(mod: Dictionary) -> bool: return str(mod.id) + "|" + catalog.entry_layout(mod) not in installed_keys and matches_filters(mod))
 	var visible_mods := installed + available
@@ -664,6 +667,8 @@ func render_details() -> void:
 		details.add_child(label(notes, 14))
 	details.add_child(detail_destination)
 	caption(details, "preserve", 14)
+	if orders_on_load(mod):
+		add_load_order_row(mod)
 	detail_toggle_button = action(detail_actions, "disable" if mod.enabled else "enable", toggle_enabled.bind(mod), "secondary" if mod.enabled else "primary")
 	var blocked: bool = not mod.enabled and not mod.compatible
 	detail_toggle_button.set_meta("blocked", blocked)
@@ -671,6 +676,53 @@ func render_details() -> void:
 	detail_toggle_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var remove := action(detail_actions, "uninstall", confirm_operation.bind("uninstall", mod), "danger")
 	remove.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+# The bootstraps add their mods in the saved order; mods not in it follow in the order the game finds them.
+func orders_on_load(mod: Dictionary) -> bool:
+	return mod.get("layout", "") == "user-data-styles" and not mod.get("manual", false)
+
+func in_load_order(list: Array) -> Array:
+	var ranked: Array = []
+	for index in list.size():
+		var mod: Dictionary = list[index]
+		var rank: int = load_order.find(mod.id) if orders_on_load(mod) else -1
+		ranked.append([rank if rank >= 0 else load_order.size(), index, mod])
+	ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+	return ranked.map(func(item: Array) -> Dictionary: return item[2])
+
+func load_order_ids() -> Array:
+	return in_load_order(mods).filter(orders_on_load).map(func(mod: Dictionary) -> String: return str(mod.id))
+
+func add_load_order_row(mod: Dictionary) -> void:
+	var ids := load_order_ids()
+	var place := ids.find(str(mod.id))
+	details.add_child(label(words.word("load_order", [place + 1, ids.size()]), 14))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", UiTheme.SPACE_MD)
+	details.add_child(row)
+	for step: int in [-1, 1]:
+		var move := action(row, "load_earlier" if step < 0 else "load_later", move_load_order.bind(mod, step))
+		move.set_meta("order_step", step)
+		move.set_meta("blocked", place + step < 0 or place + step >= ids.size())
+		move.disabled = busy or bool(move.get_meta("blocked"))
+
+func move_load_order(mod: Dictionary, step: int) -> void:
+	if busy:
+		return
+	var ids := load_order_ids()
+	var place := ids.find(str(mod.id))
+	if place < 0 or place + step < 0 or place + step >= ids.size():
+		return
+	ids[place] = ids[place + step]
+	ids[place + step] = str(mod.id)
+	set_busy(true)
+	var result := await invoke("set_order", {"order": ids})
+	notice_key = ""
+	notice_error = "" if result.ok else str(result.get("error", "invalid_request"))
+	notice_args = [] if result.ok else result.get("args", [])
+	await read_state()
+	set_busy(false)
+	render_notice()
 
 func render_notice() -> void:
 	notice.text = words.error_word(notice_error, notice_args) if not notice_error.is_empty() else words.word(notice_key) if not notice_key.is_empty() else words.word("ready")

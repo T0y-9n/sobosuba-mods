@@ -8,7 +8,7 @@ Manage mods for sobosuba **1.2.3**, **1.3.10** and **1.3.11**. The game is requi
 Supported mods include [Prime Sobos](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.5)
 and [Special Sobos 0.5.5 (beta)](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.5.5).
 
-1. Extract the common setup ZIP. On Windows, open the setup EXE in `Windows`. On Linux x86_64, open a terminal in `Linux` and run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.9.run`. Then open **Sobosuba Mod Manager** from the Start menu or application menu. See `INSTALL-en.md` for locations and removal. Portable downloads can still run their manager executable directly.
+1. Extract the common setup ZIP. On Windows, open the setup EXE in `Windows`. On Linux x86_64, open a terminal in `Linux` and run `sh Sobosuba-Mod-Manager-Setup-Linux-x86_64-v0.3.0-alpha.10.run`. Then open **Sobosuba Mod Manager** from the Start menu or application menu. See `INSTALL-en.md` for locations and removal. Portable downloads can still run their manager executable directly.
 
 2. Check the game folder. Use **Choose folder** if it is wrong or missing.
 

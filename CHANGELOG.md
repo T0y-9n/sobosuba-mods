@@ -2,6 +2,15 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Mod Manager 0.3.0-alpha.10, 2026-11-13
+
+- Set the mod load order from the mod details: move a mod earlier or later. The order is saved as `mod_load_order.json` in the game's user data folder. Mods released with the new loader follow it, starting with Sobo Crash Fix 1.3.11-1.0.0. Other mods keep their current order until their next release.
+- Fix updates that stopped with a file conflict when the newer release's files had already been copied in by hand. Files that already match the new release no longer count as changed. A managed file you edited yourself still stops the update.
+
+### Sobo Crash Fix 1.3.11-1.0.0, 2026-11-13
+
+- First release. Stops a game crash when a sobo is removed, by a merge or at the end of a run, while the game is still pushing it apart from another sobo. Changes nothing else. Works with or without other mods. Not needed once the game fixes the crash.
+
 ### Catalog update automation, unreleased
 
 - Bind validation results to the workflow run's pull-request head and recorded base separately, while requiring the base to remain current main.
@@ -127,6 +136,15 @@ Changed: 5s now appear more often.
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### 管理アプリ0.3.0-alpha.10、2026-11-13
+
+- MOD の説明欄で、読み込みの順を前後に動かせるようにした。順はゲームのユーザーデータの `mod_load_order.json` に保存する。従うのは新しい読み込みの仕組みで出した MOD で、まず Sobo Crash Fix 1.3.11-1.0.0。ほかの MOD は次の版から従う。
+- 新しい版のファイルを手で写した後の更新が、ファイルの競合で止まらないようにした。新しい版と同じ中身のファイルは、変えたファイルとして扱わない。自分で書き換えた管理中のファイルがあれば、今までどおり更新を止める。
+
+### Sobo Crash Fix 1.3.11-1.0.0、2026-11-13
+
+- 初めての公開。ソボが合体や回の終わりで消えるとき、本家がそのソボを別のソボから押し離している途中だと、ゲームがクラッシュする。それを止めるようにした。ほかは何も変えない。ほかの MOD があってもなくても使える。本家で直れば要らなくなる。
 
 ### Special Sobos 1.3.11-0.6.2、2026-11-12
 
