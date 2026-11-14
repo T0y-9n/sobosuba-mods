@@ -5,7 +5,7 @@ https://store.steampowered.com/app/1946560/sobosuba
 
 Idea by Hilobo
 
-Version 1.3.11-0.6.2 for sobosuba 1.3.11. This package works on its own.
+Version 1.3.11-0.6.5 for sobosuba 1.3.11. This package works on its own.
 
 Special Sobos works only in classic (radix 2). Other modes, including Radix 3, play like the base game again.
 
@@ -18,6 +18,9 @@ Special Sobos works only in classic (radix 2). Other modes, including Radix 3, p
 | Tornado | Stirs the sobos around it. A larger number reaches farther and pushes harder. At 64 it covers the whole board. |
 | Liquid | Soft and heavy. It spreads out and sinks into the stack. |
 | Dark matter | Black, with no number and no mark. Its size is random, from the smallest sobo this run can spawn up to the largest one on the board. It keeps its real number and merges only with that number. Merging with an ordinary sobo keeps it dark matter with a new size. Two of the same number become an ordinary sobo. |
+| Change | Swaps numbers with the first sobo it touches, once, as soon as they touch. Only the number moves, with the merge rule that goes with it. Shapes, colors and the other sobo's own effect stay. |
+| Rock | Keeps the shape it had when thrown, or when it was merged. It can still roll as a whole. Its weight stays the same. |
+| Big Bang | A negative number. Touching the same positive number sets off a chain from itself: every sobo it reaches splits, one step at a time, down to 1. A larger number reaches farther, and 64 reaches the whole board. No sobo merges until about a second after the last split. Two of the same negative number become an ordinary double. In a full pile, a sobo with no room to split stops early. |
 
 ## Install
 
@@ -34,7 +37,7 @@ For manual installation, copy `special_mod` and `styles` into the game's user-da
 ## Tune while playing
 
 Press **Settings page** to cycle through Kinds, Spawn chance, Relative frequency,
-Small / Puffy, Magnet, Throwing, Frequency: tornado, liquid, dark matter, Tornado
+Small / Puffy, Magnet, Throwing, Frequency: tornado, liquid, dark matter, change, rock, Big Bang, Tornado
 and Liquid. Type a number and press Enter, or leave the
 field, to save it and apply it to the current board. Decimals are allowed except
 for counts and shape levels. A value outside the stated range is rejected and
@@ -54,7 +57,7 @@ numbers together and keeps your kind switches.
 | Maximum held sobos | 0–20, whole number | 3 |
 | Throwing launch speed | 0–3000 | 500 |
 | Throwing cooldown | 0.05–30 seconds | 2 |
-| Relative frequency of Tornado, Liquid, Dark matter | 0–100 each | 3, 3, 3 |
+| Relative frequency of Tornado, Liquid, Dark matter, Change, Rock, Big Bang | 0–100 each | 3, 3, 3, 3, 3, 0.75 |
 | Tornado start delay | 0–30 seconds | 0.8 |
 | Most sobos a tornado pushes | 1–32, whole number | 8 |
 | Tornado range in radii | 1–20 | 4 |

@@ -25,8 +25,8 @@ metadata = {
     'payload_root': 'special_mod', 'entry': 'special_sobo.gd', 'autoload': 'SpecialSobo',
     'bootstrap': bootstrap,
     'description': {
-        'en': 'Small, puffy, magnet, throwing, tornado, liquid and dark matter sobos, with numeric tuning settings.',
-        'ja': '小さい・ふわふわ・磁石・投げ飛ばす・トルネード・液体・ダークマターのソボと数値の設定。',
+        'en': 'Small, puffy, magnet, throwing, tornado, liquid, dark matter, change, rock and Big Bang sobos, with numeric tuning settings.',
+        'ja': '小さい・ふわふわ・磁石・投げ飛ばす・トルネード・液体・ダークマター・チェンジ・岩・ビッグバンのソボと数値の設定。',
     },
     'format_version': 1, 'game_versions': ['1.3.11'], 'install_layout': 'user-data-styles',
     'dependencies': [], 'readme': 'README-en.md', 'files': sorted(payload),

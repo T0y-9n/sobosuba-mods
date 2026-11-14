@@ -2,6 +2,35 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Undo 1.3.11-1.0.0, 2026-11-14
+
+- First release.
+- Press U to go back to the board from just before you launched a sobo. You can go back up to five times.
+- While this mod is on, no mode sends your score to the base game's leaderboard. Nothing is kept in the local scores, on Steam, or in the score your friends see.
+
+### Catalog update automation, unreleased
+
+- Bind validation results to the workflow run's pull-request head and recorded base separately, while requiring the base to remain current main.
+- Prepare updates to existing catalog entries through the manager's release verification and package reader. Record rejected releases with their reasons and produce matching catalog copies and a reviewable patch for accepted releases.
+- Add bilingual GitHub contribution instructions, a PR template, an issue form and read-only catalog validation using trusted base code.
+- Add a separate GitHub PR sender with explicit submission, duplicate-update checks and required up-to-date validation. Deployment requires operator-approved credentials and GitHub repository settings.
+
+### Special Sobos 1.3.11-0.6.5, 2026-11-14
+
+- Change, rock and Big Bang sobos have been added to tornado, liquid and dark matter. Each one has a switch and a spawn rate in the settings.
+- Change swaps numbers with the first sobo it touches, once, at the moment they touch. Only the number and its merge rule are swapped. Shape, color and the other sobo's effect stay the same.
+- Rock keeps the shape it had when thrown or merged, and rolls in that shape. When the game fixes its shape ("fixing shape"), it goes back to its original shape and size instead of turning into a small circle.
+- Big Bang is a negative number. When it touches the same positive number, a chain spreads out from that sobo. Each sobo it reaches is pushed outward from the blast and splits one step at a time down to 1, even on a packed board. Nothing merges for about 1 second after the last split. While the pile is pushing a side bumper in, it waits instead of splitting, so a Big Bang does not cause a game over.
+- In the settings screen, each on/off circle now appears at the right end of its row. The screen fits, and descriptions appear under each row.
+- Sobos without an effect record no longer write errors to the log.
+- The mod now follows the load order set in the mod manager.
+
+### Prime Sobos 1.3.11-1.0.8, 2026-11-14
+
+- A sobo that receives a prime number from a Special Sobos change no longer turns gray. It keeps the original color left by the change.
+- The mod now follows the load order set in the mod manager.
+- Runs with Special Sobos and runs with Undo turned on no longer count as Prime records. They are not added to your local top 10, do not change the best score your Steam friends see, and are not sent to the world ranking (since the first version).
+
 ### Mod Manager 0.3.0-alpha.10, 2026-11-13
 
 - Set the mod load order from the mod details: move a mod earlier or later. The order is saved as `mod_load_order.json` in the game's user data folder. Mods released with the new loader follow it, starting with Sobo Crash Fix 1.3.11-1.0.0. Other mods keep their current order until their next release.
@@ -10,13 +39,6 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 ### Sobo Crash Fix 1.3.11-1.0.0, 2026-11-13
 
 - First release. Stops a game crash when a sobo is removed, by a merge or at the end of a run, while the game is still pushing it apart from another sobo. Changes nothing else. Works with or without other mods. Not needed once the game fixes the crash.
-
-### Catalog update automation, unreleased
-
-- Bind validation results to the workflow run's pull-request head and recorded base separately, while requiring the base to remain current main.
-- Prepare updates to existing catalog entries through the manager's release verification and package reader. Record rejected releases with their reasons and produce matching catalog copies and a reviewable patch for accepted releases.
-- Add bilingual GitHub contribution instructions, a PR template, an issue form and read-only catalog validation using trusted base code.
-- Add a separate GitHub PR sender with explicit submission, duplicate-update checks and required up-to-date validation. Deployment requires operator-approved credentials and GitHub repository settings.
 
 ### Mod Manager 0.3.0-alpha.9, 2026-11-10
 
@@ -136,6 +158,28 @@ Changed: 5s now appear more often.
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### Undo 1.3.11-1.0.0、2026-11-14
+
+- 初めての公開。
+- U を押すと、ソボを放つ直前の盤面へ戻れるようになります。5 回まで戻せます。
+- このMODを有効にしている間は、どのモードでも本家のリーダーボードに点数は送信されません。手元の順位表・Steam・フレンドに見える点のどれにも残らないようにしています。
+
+### Special Sobos 1.3.11-0.6.5、2026-11-14
+
+- トルネード・液体・ダークマターに、チェンジ・岩・ビッグバンのソボが足されました。どれも設定にスイッチと出現比率があります。
+- チェンジは、最初に触れたソボと、触れた時に 1 回だけ数字を入れ替えます。入れ替わるのは数字とその合体の決まりだけで、形・色・相手の効果はそのままです。
+- 岩は、投げた時か合体した時の形状を保ち、その形状のまま転がります。ゲームが形状を直した（「fixing shape」）ときも、小さい丸にならず、元の形状と大きさに戻るようにしています。
+- ビッグバンは負の数です。同じ正の数に触れると、そのソボを中心に連鎖が広がり、届いたソボは爆心から外へはじかれて、詰まった盤面でも 1 段ずつ 1 まで割れていきます。最後に割れてから約 1 秒間はマージしません。山が横のバンパーを押し込んでいる間は割らずに待ち、ビッグバンでゲームオーバーにならないようにしてあります。
+- 設定画面で、入切の丸がそれぞれの行の右端に出るようにしました。画面に収まり、説明は行の下に出るようにしました。
+- 効果の記録を持たないソボで、ログにエラーが出ないようにしました。
+- 管理アプリで決めた読み込みの順に従うようにしました。
+
+### Prime Sobos 1.3.11-1.0.8、2026-11-14
+
+- Special Sobos のチェンジで素数を受け取ったソボが、灰色に塗り替わらないようにしました。チェンジで残した元の色のまま出ます。
+- 管理アプリで決めた読み込みの順に従うようにしました。
+- Special Sobos の回と、Undo を入にした回は、Prime の記録に入らないようにしました。手元の上位 10 に載らず、Steam のフレンドに見える最高点も変わらず、世界の順位へも送られません（最初のバージョンから）
 
 ### 管理アプリ0.3.0-alpha.10、2026-11-13
 

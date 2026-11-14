@@ -26,7 +26,30 @@ func _init() -> void:
 	if err != OK:
 		return
 	var node: Object = gd.new()
-	tree.root.add_child.call_deferred(node)
+	# Every mod joins one queue. The first one adds them all, in the order the
+	# Sobosuba Mod Manager saved, once every bootstrap has run.
+	var queue: Array = Engine.get_meta(\"sobosuba_mod_queue\", [])
+	queue.append([\"prime_sobo\", node])
+	Engine.set_meta(\"sobosuba_mod_queue\", queue)
+	if queue.size() > 1:
+		return
+	var add_queued := func() -> void:
+		var waiting: Array = Engine.get_meta(\"sobosuba_mod_queue\", [])
+		Engine.remove_meta(\"sobosuba_mod_queue\")
+		var order: Array = []
+		if FileAccess.file_exists(\"user://mod_load_order.json\"):
+			var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(\"user://mod_load_order.json\"))
+			if saved is Dictionary and saved.get(\"order\") is Array:
+				order = saved.order
+		var ranked: Array = []
+		for index in waiting.size():
+			var rank: int = order.find(waiting[index][0])
+			ranked.append([rank if rank >= 0 else order.size(), index, waiting[index][1]])
+		ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+		var root: Window = (Engine.get_main_loop() as SceneTree).root
+		for item: Array in ranked:
+			root.add_child(item[2])
+	add_queued.call_deferred()
 	_log(\"prime_sobo add_child deferred\")
 
 func _log(msg: String) -> void:

@@ -4,9 +4,15 @@ extends "res://game_elements/sobo/sobo.gd"
 func apply_style() -> void:
 	super.apply_style()
 	var kind: String = str(get_meta("special_sobo_trait", ""))
+	if has_meta("special_shuffle_color"):
+		color = (get_meta("special_shuffle_color") as Color).lerp(Color.WHITE, flashing)
+		visual_color = color
+		for suba: Suba in subas:
+			suba.queue_redraw()
 	if kind == "darkmatter":
 		var bg: Color = StyleManager.current_style.background_color
-		color = Color(bg.r, bg.g, bg.b, 1.0)
+		if not has_meta("special_shuffle_color"):
+			color = Color(bg.r, bg.g, bg.b, 1.0)
 		visual_color = color
 		sobo_label.visible = false
 		for suba: Suba in subas:
@@ -28,6 +34,8 @@ func fix_shape() -> void:
 	set_meta("special_sobo_shape_repairs", int(get_meta("special_sobo_shape_repairs", 0)) + 1)
 	mod.shape_repairs += 1
 	super.fix_shape()
+	if str(get_meta("special_sobo_trait", "")) == "rock" and is_instance_valid(mod.extra_effects):
+		mod.extra_effects.restore_rock(self)
 
 
 func capture_sobo_state() -> SoboState:

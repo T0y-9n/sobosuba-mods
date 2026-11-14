@@ -765,7 +765,8 @@ func _process(_dt: float) -> void:
 	if not is_prime_run():
 		return
 	for sobo: Sobo in SoboManager.all_sobos:
-		if is_prime_sobo(sobo) && sobo.flashing <= 0.0:
+		# A shuffle in Special Sobos can hand a prime number to another body; that body keeps its color.
+		if is_prime_sobo(sobo) && sobo.flashing <= 0.0 && not sobo.has_meta("special_shuffle_color"):
 			sobo.color = PRIME_COLOR
 			# Sobo.apply_style copies color to visual_color, which is what the game draws with.
 			# TODO-138: visual_color belongs to the native SoboCore (not in the decompiled sources); confirm in game that this tints the prime.

@@ -208,13 +208,17 @@ func on_game_over() -> void:
 	_over_serial += 1
 	var serial: int = _over_serial
 	last_score = score
-	last_rank = add_local_score(score)
-	publish_best()
+	# A Special Sobos run or an Undo run is not a Prime record: no local entry, no new best
+	# on Steam, and nothing sent to the world ranking.
+	var counts: bool = not Engine.get_meta("special_sobo_run", false) and not Engine.get_meta("undo_run", false)
+	last_rank = add_local_score(score) if counts else -1
+	if counts:
+		publish_best()
 	refresh_friends()
 	label.text = board_text(score, last_rank)
 	_board_wanted = true
 	refresh_board_visibility()
-	if online != null && online.enabled && not Engine.get_meta("special_sobo_run", false):
+	if online != null && online.enabled && counts:
 		var duration_s: int = int((Time.get_ticks_msec() - _round_started_ms) / 1000)
 		submit_run_score.call_deferred(serial, score, duration_s, get_parent().run_chance())
 	print(MOD_TAG + " game over: score=%d local_rank=%d best=%d friends=%d" % [score, last_rank, best_local(), friends.size()])

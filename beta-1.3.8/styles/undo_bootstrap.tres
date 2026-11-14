@@ -1,0 +1,26 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="1"]
+script/source = "extends Resource
+
+func _init() -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var node: Node = tree.root.get_node_or_null(\"UndoSobo\")
+	if is_instance_valid(node):
+		return
+	var path := \"user://undo_mod/undo_sobo.gd\"
+	if not FileAccess.file_exists(path):
+		return
+	var gd := GDScript.new()
+	gd.source_code = FileAccess.get_file_as_string(path)
+	gd.take_over_path(path)
+	if gd.reload() != OK:
+		return
+	node = gd.new()
+	tree.root.add_child.call_deferred(node)
+"
+
+[resource]
+script = SubResource("1")

@@ -75,7 +75,7 @@ func _ready() -> void:
 		trait_weights = tuning.WEIGHTS.duplicate()
 	else:
 		settings.base_traits.clear()
-	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado.flag")) or FileAccess.file_exists(mod_dir().path_join("darkmatter.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado_settings.flag")) or FileAccess.file_exists(mod_dir().path_join("marker.flag")):
+	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado.flag")) or FileAccess.file_exists(mod_dir().path_join("darkmatter.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado_settings.flag")) or FileAccess.file_exists(mod_dir().path_join("bigbang.flag")) or FileAccess.file_exists(mod_dir().path_join("weight_bigbang.flag")) or FileAccess.file_exists(mod_dir().path_join("marker.flag")) or FileAccess.file_exists(mod_dir().path_join("shuffle_merge.flag")) or FileAccess.file_exists(mod_dir().path_join("contacts.flag")) or FileAccess.file_exists(mod_dir().path_join("shuffle_touch.flag")) or FileAccess.file_exists(mod_dir().path_join("rock_repair.flag")) or FileAccess.file_exists(mod_dir().path_join("settings_layout.flag")) or FileAccess.file_exists(mod_dir().path_join("prime_record.flag")):
 		settings.path = settings.SELFTEST_PATH
 	settings.load_file()
 	magnet_pull_multiplier = settings.magnet_pull_multiplier
@@ -203,10 +203,42 @@ func finish_setup() -> void:
 		var tornado_settings: Node = load(mod_dir().path_join("special_tornado_settings_selftest.gd")).new()
 		tornado_settings.mod = self
 		add_child(tornado_settings)
+	elif FileAccess.file_exists(mod_dir().path_join("bigbang.flag")):
+		var bigbang: Node = load(mod_dir().path_join("special_bigbang_selftest.gd")).new()
+		bigbang.mod = self
+		add_child(bigbang)
+	elif FileAccess.file_exists(mod_dir().path_join("weight_bigbang.flag")):
+		var bigbang_weight: Node = load(mod_dir().path_join("special_bigbang_weight_selftest.gd")).new()
+		bigbang_weight.mod = self
+		add_child(bigbang_weight)
 	elif FileAccess.file_exists(mod_dir().path_join("marker.flag")):
 		var marker_test: Node = load(mod_dir().path_join("special_marker_selftest.gd")).new()
 		marker_test.mod = self
 		add_child(marker_test)
+	elif FileAccess.file_exists(mod_dir().path_join("shuffle_merge.flag")):
+		var shuffle_merge: Node = load(mod_dir().path_join("special_shuffle_merge_selftest.gd")).new()
+		shuffle_merge.mod = self
+		add_child(shuffle_merge)
+	elif FileAccess.file_exists(mod_dir().path_join("contacts.flag")):
+		var contacts: Node = load(mod_dir().path_join("special_contacts_selftest.gd")).new()
+		contacts.mod = self
+		add_child(contacts)
+	elif FileAccess.file_exists(mod_dir().path_join("shuffle_touch.flag")):
+		var shuffle_touch: Node = load(mod_dir().path_join("special_shuffle_touch_selftest.gd")).new()
+		shuffle_touch.mod = self
+		add_child(shuffle_touch)
+	elif FileAccess.file_exists(mod_dir().path_join("rock_repair.flag")):
+		var rock_repair: Node = load(mod_dir().path_join("special_rock_repair_selftest.gd")).new()
+		rock_repair.mod = self
+		add_child(rock_repair)
+	elif FileAccess.file_exists(mod_dir().path_join("settings_layout.flag")):
+		var settings_layout: Node = load(mod_dir().path_join("special_settings_layout_selftest.gd")).new()
+		settings_layout.mod = self
+		add_child(settings_layout)
+	elif FileAccess.file_exists(mod_dir().path_join("prime_record.flag")):
+		var prime_record: Node = load(mod_dir().path_join("special_prime_record_selftest.gd")).new()
+		prime_record.mod = self
+		add_child(prime_record)
 
 
 func install_score_guard() -> void:
@@ -224,6 +256,7 @@ func patch_script(target: Node, path: String) -> void:
 
 
 func on_game_mode_start(mode: GameScene) -> void:
+	warn_without_crash_fix()
 	follow_merge.call_deferred()
 	run_serial += 1
 	small_waiting.clear()
@@ -296,6 +329,13 @@ func trait_of(sobo: Sobo) -> String:
 	return str(sobo.get_meta(TRAIT_META, ""))
 
 
+# Special Sobos needs the separate Sobo Crash Fix mod. Checked when a run starts,
+# after every mod has been added to the tree.
+func warn_without_crash_fix() -> void:
+	if get_tree().root.get_node_or_null("SoboCrashFix") == null:
+		diagnostics.log("warning Sobo Crash Fix is not installed; install it with Special Sobos")
+
+
 func on_safety_spawn(sobo: Sobo) -> void:
 	if not is_classic_run():
 		return
@@ -340,8 +380,19 @@ func apply_trait(sobo: Sobo, kind: String) -> Sobo:
 	elif sobo.get_script().resource_path != mod_dir().path_join("special_body.gd"):
 		patch_script(sobo, mod_dir().path_join("special_body.gd"))
 	add_marker(sobo, kind)
+	if kind == "bigbang" and is_instance_valid(extra_effects):
+		extra_effects.set_value(sobo, -sobo.data.size)
+		block_negative_merge(sobo)
 	diagnostics.log("trait " + diagnostic_sobo(sobo))
 	return sobo
+
+
+## A negative Big Bang must never reach the game's own merge: two −1 count as the same
+## size there, and −2 has no shape (the native library crashed on it). The mod's own
+## rule turns two equal negatives into an ordinary double instead.
+func block_negative_merge(sobo: Sobo) -> void:
+	if is_instance_valid(sobo) and trait_of(sobo) == "bigbang" and sobo.data.size < 0:
+		sobo.allow_merges = false
 
 
 func dress_darkmatter(sobo: Sobo) -> Sobo:
@@ -481,7 +532,16 @@ func on_sobo_merge(old0: Sobo, old1: Sobo, result: Sobo) -> void:
 	forget_sticky(old1)
 	var trait0: String = trait_of(old0)
 	var trait1: String = trait_of(old1)
-	if trait0.is_empty() == trait1.is_empty():
+	if is_instance_valid(extra_effects):
+		var spent0: bool = extra_effects.state(old0).get("spent", false) == true
+		var spent1: bool = extra_effects.state(old1).get("spent", false) == true
+		if trait0 != "" and trait1 != "" and extra_effects.Parameters.shuffle_kept(trait0, spent0, trait1, spent1):
+			var saved: Dictionary = extra_effects.state(old0 if trait0 == "shuffle" and not spent0 else old1)
+			extra_effects.keep_shuffle(result, saved)
+			return
+		if extra_effects.Parameters.merge_outcome(trait0, trait1) == "plain":
+			return
+	elif trait0.is_empty() == trait1.is_empty():
 		return
 	var kind: String = trait0 if not trait0.is_empty() else trait1
 	if kind == "small":
@@ -492,6 +552,8 @@ func on_sobo_merge(old0: Sobo, old1: Sobo, result: Sobo) -> void:
 		var extra: Dictionary = capture_extra_state(old0 if trait0 != "" else old1)
 		extra.erase("shape_size")
 		restore_extra_state(result, extra)
+		if kind == "rock" and is_instance_valid(extra_effects):
+			extra_effects.capture_rock(result)
 
 
 func finish_small_merge(reference: WeakRef, serial: int) -> void:
@@ -673,6 +735,7 @@ func install_toggle() -> void:
 	var button: SoboMenuButtonBool = copy_toggle(model)
 	button.name = "SpecialSobos"
 	button.release_press.connect(on_toggle_pressed)
+	button.resized.connect(button.bool_circles.queue_redraw)
 	list.add_child(button)
 	toggle = button
 	settings_screen.first_button_hovered = toggle
@@ -700,14 +763,27 @@ func reserve_description_space() -> void:
 		if label.size.x <= 0.0:
 			continue
 		var measure: Label = label.duplicate(Node.DUPLICATE_SCRIPTS)
+		measure.clip_text = false
 		measure.hide()
 		label.add_child(measure)
 		measure.size = Vector2(label.size.x, 0.0)
-		var height: float = label.custom_minimum_size.y
+		var own_page: bool = screen == settings_screen
+		var height: float = 0.0 if own_page else label.custom_minimum_size.y
 		for button: SoboButton in SoboButton.list:
 			if screen.is_ancestor_of(button):
 				measure.text = tr(button.tooltip_text)
 				height = maxf(height, measure.get_minimum_size().y)
+		if own_page:
+			# Our page has more rows than the base page: reserve only what fits the
+			# screen, and cut a longer description instead of growing the page.
+			label.clip_text = true
+			var holder: Control = label
+			while holder.get_parent() is Control and not holder.get_parent() is BoxContainer:
+				holder = holder.get_parent()
+			var list := holder.get_parent() as Control
+			if list != null:
+				var rows: float = list.get_combined_minimum_size().y - holder.get_combined_minimum_size().y
+				height = minf(height, maxf(0.0, screen.size.y - rows))
 		label.custom_minimum_size.y = height
 		measure.free()
 
@@ -724,6 +800,8 @@ func install_trait_toggles() -> void:
 		trait_button.custom_minimum_size.x = 0.0
 		trait_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		trait_button.release_press.connect(on_trait_toggle_pressed.bind(kind))
+		# The base circle is placed from the row size when drawn; grid rows get their size later.
+		trait_button.resized.connect(trait_button.bool_circles.queue_redraw)
 		traits_grid.add_child(trait_button)
 		trait_toggles[kind] = trait_button
 
@@ -781,6 +859,7 @@ func install_parameter_pages(list: Node, enum_model: SoboMenuButtonEnum, model: 
 	import_button.bool_circles.hide()
 	import_button.release_press.connect(open_import_dialog)
 	list.add_child(import_button)
+	keep_description_last(list)
 
 
 func install_parameter_rows(list: Node, model: SoboMenuButtonBool) -> void:
@@ -823,6 +902,16 @@ func install_parameter_rows(list: Node, model: SoboMenuButtonBool) -> void:
 		list.move_child(reset_button, list.get_child_count() - 3)
 		list.move_child(export_button, list.get_child_count() - 2)
 		list.move_child(import_button, list.get_child_count() - 1)
+		keep_description_last(list)
+
+
+# The base settings page has its description under the rows; keep ours there too.
+func keep_description_last(list: Node) -> void:
+	var holder: Node = settings_screen.description_label
+	while holder != null and holder.get_parent() != list:
+		holder = holder.get_parent()
+	if holder != null:
+		list.move_child(holder, -1)
 
 
 func parameter_active(key: String) -> bool:

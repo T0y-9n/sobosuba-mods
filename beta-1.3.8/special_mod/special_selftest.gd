@@ -109,14 +109,15 @@ func run() -> void:
 	finish()
 
 
-## 0.6.2 ships tornado, liquid and dark matter next to the four first kinds. The other kinds,
-## their settings, words, code paths and tests are taken out, not hidden.
+## 0.6.3 adds change, rock and Big Bang to the tornado, liquid and dark matter of 0.6.2.
+## Splitter, translucent and the old minus one stay out: their settings, words, code paths
+## and tests are taken out, not hidden.
 func check_release_kinds() -> void:
 	var effects: Node = mod.extra_effects
-	check(effects != null and ",".join(effects.KINDS) == "washer,liquid,darkmatter", "added kinds are tornado, liquid and dark matter only: %s" % [effects.KINDS if effects != null else "none"])
+	check(effects != null and ",".join(effects.KINDS) == "washer,liquid,darkmatter,shuffle,rock,bigbang", "added kinds are tornado, liquid, dark matter, change, rock and Big Bang: %s" % [effects.KINDS if effects != null else "none"])
 	if effects == null:
 		return
-	var removed: Array[String] = ["splitter", "shuffle", "rock", "translucent", "bigbang", "minus"]
+	var removed: Array[String] = ["splitter", "translucent", "minus"]
 	var left: PackedStringArray = []
 	for kind: String in removed:
 		if mod.settings.trait_kinds().has(kind) or mod.trait_weights.has(kind):
@@ -130,10 +131,10 @@ func check_release_kinds() -> void:
 	for key: String in ["extra_search_interval"]:
 		if effects.Parameters.VALUES.has(key):
 			left.append("setting " + key)
-	for method: String in ["split_touching", "spawn_half", "shuffle_pair", "set_number_only", "hold_rocks", "capture_rock", "settle_translucents", "bigbang_touch", "crack_sobo", "cancel_minuses", "settle_minuses"]:
+	for method: String in ["split_touching", "settle_translucents", "cancel_minuses", "settle_minuses", "minus_spawn_allowed"]:
 		if effects.has_method(method) or mod.has_method(method):
 			left.append("method " + method)
-	for file: String in ["shuffle_pulse.gd", "special_bigbang_selftest.gd", "special_bigbang_weight_selftest.gd", "special_minus_selftest.gd", "special_rock_selftest.gd", "special_shuffle_merge_selftest.gd", "special_shuffle_selftest.gd", "special_splitter_easy_selftest.gd", "special_splitter_selftest.gd", "special_translucent_look_selftest.gd", "special_translucent_selftest.gd"]:
+	for file: String in ["special_minus_selftest.gd", "special_splitter_easy_selftest.gd", "special_splitter_selftest.gd", "special_translucent_look_selftest.gd", "special_translucent_selftest.gd"]:
 		if FileAccess.file_exists(mod.mod_dir().path_join(file)):
 			left.append("file " + file)
 	check(left.is_empty(), "removed kinds leave nothing behind: %s" % ", ".join(left))

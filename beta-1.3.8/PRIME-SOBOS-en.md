@@ -1,6 +1,6 @@
 # Prime Sobos for sobosuba 1.3.11
 
-Mod version 1.3.11-1.0.7. Requires sobosuba 1.3.11, the current regular release.
+Mod version 1.3.11-1.0.8. Requires sobosuba 1.3.11, the current regular release.
 For the older game version 1.2.3, the mod version is 1.2.3-1.0.6.
 
 sobosuba by keepee

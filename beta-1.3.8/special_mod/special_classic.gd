@@ -7,6 +7,14 @@ func _physics_process(dt: float) -> void:
 	super._physics_process(dt)
 
 
+func enter_selectable(sobo: Sobo):
+	super.enter_selectable(sobo)
+	# The game allows merges again when the bar hands a sobo back to the player.
+	var mod: Node = get_node_or_null("/root/SpecialSobo")
+	if mod != null:
+		mod.block_negative_merge(sobo)
+
+
 func spawn_from_states(states: Array[SoboState]) -> Array[Sobo]:
 	var mod: Node = get_node("/root/SpecialSobo")
 	var _diagnostic: RefCounted = mod.diagnostic_scope("special_classic.restore")
