@@ -25,6 +25,10 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 - Sobos without an effect record no longer write errors to the log.
 - The mod now follows the load order set in the mod manager.
 
+### Prime Sobos 1.3.11-1.0.9, 2026-11-14
+
+- Primes that can merge with the prime sobos on the board are now a little more likely to appear. The chance that a prime sobo appears is unchanged.
+
 ### Prime Sobos 1.3.11-1.0.8, 2026-11-14
 
 - A sobo that receives a prime number from a Special Sobos change no longer turns gray. It keeps the original color left by the change.
@@ -174,6 +178,10 @@ MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では
 - 設定画面で、入切の丸がそれぞれの行の右端に出るようにしました。画面に収まり、説明は行の下に出るようにしました。
 - 効果の記録を持たないソボで、ログにエラーが出ないようにしました。
 - 管理アプリで決めた読み込みの順に従うようにしました。
+
+### Prime Sobos 1.3.11-1.0.9、2026-11-14
+
+- 盤面にある素数ソボを見て、合体できる相手の素数が少し出やすくなるようにしました。素数ソボが出る確率は変えていません。
 
 ### Prime Sobos 1.3.11-1.0.8、2026-11-14
 

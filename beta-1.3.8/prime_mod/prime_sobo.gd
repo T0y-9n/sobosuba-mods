@@ -13,6 +13,14 @@ const MOD_TAG:= preload("prime_diagnostics.gd").MOD_TAG
 const EXPECTED_POWER_OF_TWO_SIZES:= 20
 const PRIMES: Array[int] = [3, 5, 11, 13, 19, 7]
 const PRIME_WEIGHTS: Array[float] = [4.0, 6.0, 2.0, 2.0, 1.0, 4.0]
+const PRIME_PARTNERS := {
+	3: [5, 13],
+	5: [3, 11],
+	11: [5],
+	13: [3, 19],
+	19: [13],
+	7: [7],
+}
 const SEVEN_CHAIN_MAX := 458752
 const PRIME_COLOR:= Color(0.62, 0.62, 0.68)
 
@@ -534,13 +542,47 @@ func create_prime(p: int, pos: Vector2) -> Sobo:
 	return sobo
 
 
+func prime_weights_for(board_primes: Array[int]) -> Array[float]:
+	var weights: Array[float] = PRIME_WEIGHTS.duplicate()
+	var bonus: Array[float] = []
+	bonus.resize(PRIMES.size())
+	bonus.fill(0.0)
+	for value: int in board_primes:
+		if value > 7 and is_seven_chain(value):
+			continue
+		var partners: Array = PRIME_PARTNERS.get(value, [])
+		for partner: int in partners:
+			var partner_index: int = PRIMES.find(partner)
+			if partner_index < 0 or bonus[partner_index] >= 6.0:
+				continue
+			bonus[partner_index] = minf(bonus[partner_index] + 2.0, 6.0)
+	for i: int in weights.size():
+		weights[i] += bonus[i]
+	return weights
+
+
+func board_prime_sizes() -> Array[int]:
+	var sizes: Array[int] = []
+	for sobo: Sobo in SoboManager.all_sobos:
+		if not is_instance_valid(sobo) or not is_prime_sobo(sobo) or sobo.is_queued_for_deletion() or sobo.data == null:
+			continue
+		var size: int = int(sobo.data.size)
+		if size > 7 and is_seven_chain(size):
+			continue
+		sizes.append(size)
+	return sizes
+
+
 func pick_prime() -> int:
-	var total:= 0.0
-	for w: float in PRIME_WEIGHTS:
+	var weights: Array[float] = prime_weights_for(board_prime_sizes())
+	var total := 0.0
+	for w: float in weights:
 		total += w
-	var r:= randf() * total
+	if total <= 0.0:
+		return PRIMES[0]
+	var r := randf() * total
 	for i: int in PRIMES.size():
-		r -= PRIME_WEIGHTS[i]
+		r -= weights[i]
 		if r <= 0.0:
 			return PRIMES[i]
 	return PRIMES[0]
@@ -979,6 +1021,7 @@ func finish_seven(lines: PackedStringArray) -> void:
 
 func run_selftest() -> void:
 	var lines: PackedStringArray = []
+	selftest_board_weights(lines)
 	lines.append("loaded sobo_datas=%d primes=%s" % [SoboManager.sobo_datas.size(), PRIMES])
 	lines.append("leaderboard_upload_connected=%s" % SignalBus.on_game_over.is_connected(ScoreManager.on_game_over))
 	lines.append("score_manager_gain_connected=%s" % SignalBus.on_gain_score.is_connected(ScoreManager.gain_score))
@@ -1188,6 +1231,24 @@ func run_selftest() -> void:
 ## "absent" or the file's MD5, so an overwrite of an existing board is caught, not only creation.
 func board_fingerprint(path: String) -> String:
 	return FileAccess.get_md5(path) if FileAccess.file_exists(path) else "absent"
+
+
+func selftest_board_weights(lines: PackedStringArray) -> void:
+	var empty: Array[int] = []
+	check(lines, "empty board keeps the base weights", weights_close(prime_weights_for(empty), [4.0, 6.0, 2.0, 2.0, 1.0, 4.0]), str(prime_weights_for(empty)))
+	var one_five: Array[int] = [5]
+	check(lines, "one 5 adds 2 to 3 and 11", weights_close(prime_weights_for(one_five), [6.0, 6.0, 4.0, 2.0, 1.0, 4.0]), str(prime_weights_for(one_five)))
+	var four_13: Array[int] = [13, 13, 13, 13]
+	check(lines, "four 13s cap 3 and 19 at plus 6", weights_close(prime_weights_for(four_13), [10.0, 6.0, 2.0, 2.0, 7.0, 4.0]), str(prime_weights_for(four_13)))
+
+
+func weights_close(got: Array[float], want: Array) -> bool:
+	if got.size() != want.size():
+		return false
+	for i: int in got.size():
+		if not is_equal_approx(got[i], float(want[i])):
+			return false
+	return true
 
 
 func check(lines: PackedStringArray, what: String, ok: bool, detail: String) -> void:
