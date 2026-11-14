@@ -12,12 +12,12 @@
       "sha256": "83a1c8cd0296a7c20a272a95f963c9fba0ff519c958dc4817014aa6c803379fd",
       "variants": [
         {
-          "version": "1.3.11-1.0.7",
+          "version": "1.3.11-1.0.8",
           "game_versions": [
             "1.3.11"
           ],
-          "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.3.11-1.0.7/sobosuba-prime-balls-1.3.11-1.0.7.zip",
-          "sha256": "04a8768b750c6ab11632901017e84f817cc02c065e690d0ebd36b0bf611da0ea",
+          "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/1.3.11-1.0.8/sobosuba-prime-balls-1.3.11-1.0.8.zip",
+          "sha256": "bf9b4e960f14f0f94d052466e42a5f913ae418ed1e5c992309f69a8f1bb8f5f0",
           "game_credit": {
             "text": "sobosuba by keepee",
             "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
@@ -42,13 +42,13 @@
     {
       "id": "special_sobo",
       "name": "Special Sobos (beta)",
-      "version": "1.3.11-0.6.2",
+      "version": "1.3.11-0.6.5",
       "game_versions": [
         "1.3.11"
       ],
-      "summary": "Beta for sobosuba 1.3.11 with Small, Puffy, Magnet, Throwing, Tornado, Liquid and Dark matter sobos and numeric settings.",
-      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.6.2/Special-Sobos-1.3.11-0.6.2.zip",
-      "sha256": "7fa2a362b2d98b7edb6d682cd8b54d272cf1a8d3866e017c6f9676e54ed8302f",
+      "summary": "Beta for sobosuba 1.3.11 with Small, Puffy, Magnet, Throwing, Tornado, Liquid, Dark matter, Change, Rock and Big Bang sobos and numeric settings.",
+      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.6.5/Special-Sobos-1.3.11-0.6.5.zip",
+      "sha256": "388ac1f60637d9db421b2bb268d0039985b6477ebf54dd02c70d4b4fe6ed257a",
       "game_credit": {
         "text": "sobosuba by keepee",
         "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
@@ -78,6 +78,27 @@
         "github": "T0y-9n/sobosuba-mods",
         "tag_prefix": "crash-fix-1.3.11-",
         "asset": "Sobo-Crash-Fix-{version}.zip",
+        "prerelease": false
+      }
+    },
+    {
+      "id": "undo_sobo",
+      "name": "Undo",
+      "version": "1.3.11-1.0.0",
+      "game_versions": [
+        "1.3.11"
+      ],
+      "summary": "Press U to go back to the board from just before you launched a sobo, up to five times. While it is on, no score is sent to the leaderboard.",
+      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/undo-1.3.11-1.0.0/sobosuba-undo-1.3.11-1.0.0.zip",
+      "sha256": "6879642da2c790f975e4bd2fb532f2eb992cfe04c8826eb47309f36c4e110622",
+      "game_credit": {
+        "text": "sobosuba by keepee",
+        "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
+      },
+      "source": {
+        "github": "T0y-9n/sobosuba-mods",
+        "tag_prefix": "undo-1.3.11-",
+        "asset": "sobosuba-undo-{version}.zip",
         "prerelease": false
       }
     },

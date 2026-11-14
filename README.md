@@ -5,12 +5,13 @@ sobosuba by keepee. This mod requires the original game.
 
 ## Downloads by game version
 
-- Game 1.3.11. [1.3.11-1.0.7](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.7) and [Special Sobos 0.6.2 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.2).
+- Game 1.3.11. [1.3.11-1.0.8](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.8) and [Special Sobos 0.6.5 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.5).
 - Game 1.3.11. [Sobo Crash Fix 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/crash-fix-1.3.11-1.0.0). Stops a crash in the game itself when a sobo is removed by a merge or at the end of a run.
+- Game 1.3.11. [Undo 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/undo-1.3.11-1.0.0). Press U to go back to the board from just before you launched a sobo, up to five times. While it is on, no score is sent to the leaderboard.
 - Game 1.2.3. [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6).
 - [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) and [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0), by Typhe681.
 
-Special Sobos 0.6.2 adds tornado, liquid and dark matter sobos. Prime Sobos 1.3.11-1.0.7 adds 7. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+Special Sobos 0.6.5 adds change, rock and Big Bang sobos. Prime Sobos 1.3.11-1.0.8 no longer counts runs with Special Sobos or Undo as Prime records. Undo 1.3.11-1.0.0 is a new mod. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 Smartphone layout support: Prime Sobos and Special Sobos now adapt their settings and labels to portrait screens. Checked on Windows with phone-size layouts; real-device touch, safe areas and software keyboards still need verification.
 
@@ -28,7 +29,7 @@ These two releases keep separate installation locations and update settings; nei
 Earlier managers still read the original 1.2.3 catalog entry. Update the manager to select the 1.3.11 catalog release.
 For 1.3.11 installation, see [the package guide](beta-1.3.8/PRIME-SOBOS-en.md).
 From alpha.9, missing package credit or unverified GitHub README credit shows a warning and installation can continue.
-From alpha.10, you can change the load order of mods from the mod details. Sobo Crash Fix already supports it; other mods will support it from their next release.
+From alpha.10, you can change the load order of mods from the mod details. Sobo Crash Fix, Prime Sobos 1.3.11-1.0.8 and Special Sobos 0.6.5 support it.
 
 [English](#english) | [日本語](#日本語)
 
@@ -39,7 +40,7 @@ A mod that mixes prime numbers into [sobosuba](https://store.steampowered.com/ap
 You need the game. No game files are included here.
 keepee, the developer, said mods are fine as long as they need the game, that GitHub and streaming are fine, and that mod scores should go to our own server. Thanks, keepee!
 
-The current download is mod version `1.3.11-1.0.7`, made for sobosuba 1.3.11.
+The current download is mod version `1.3.11-1.0.8`, made for sobosuba 1.3.11.
 The manual installation steps below cover the older game version 1.2.3.
 Use the linked package guide for 1.3.11. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
@@ -165,8 +166,9 @@ sobosubaはkeepeeさんの作品です。このMODを使うには原作が必要
 
 ### ゲームの版ごとのダウンロード
 
-- ゲーム1.3.11用の [1.3.11-1.0.7](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.7) と [Special Sobos 0.6.2 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.2)。
+- ゲーム1.3.11用の [1.3.11-1.0.8](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.8) と [Special Sobos 0.6.5 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.5)。
 - ゲーム1.3.11用の [Sobo Crash Fix 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/crash-fix-1.3.11-1.0.0)。ソボが合体や回の終わりで消えるときの、本家のクラッシュを止める MOD です。
+- ゲーム1.3.11用の [Undo 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/undo-1.3.11-1.0.0)。U を押すと、ソボを放つ直前の盤面へ 5 回まで戻れる MOD です。有効にしている間は、本家のリーダーボードに点数は送信されません。
 - ゲーム1.2.3用の [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6)。
 - Typhe681さんの [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) と [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0)。
 
@@ -179,7 +181,7 @@ SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.
 ゲーム本体が必要です。このリポジトリにゲームのファイルは入っていません。
 作者の keepee さんから「ゲーム本体が要る作りならよい、GitHub と配信もよい、MOD の点数は自前のサーバで」と了承をもらっています。
 
-現在の配布版 `1.3.11-1.0.7` は、sobosuba 1.3.11向けのMOD 1.0.7です。以下の手動導入手順は前の版1.2.3を対象としています。1.3.11は上の導入案内を使ってください。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
+現在の配布版 `1.3.11-1.0.8` は、sobosuba 1.3.11向けのMOD 1.0.8です。以下の手動導入手順は前の版1.2.3を対象としています。1.3.11は上の導入案内を使ってください。変わったことは [CHANGELOG.md](CHANGELOG.md) にあります。
 
 ### 素数の玉
 
