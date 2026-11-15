@@ -8,6 +8,7 @@ const Words = preload("text.gd")
 const Versions = preload("versions.gd")
 const SelfUpdate = preload("self_update.gd")
 const UiTheme = preload("manager_theme.gd")
+const Platform = preload("platform.gd")
 var store := Store.new()
 var settings := Settings.new()
 var words := Words.new()
@@ -32,6 +33,8 @@ var rows: VBoxContainer
 var version_picker: OptionButton
 var show_older_mods_check: CheckBox
 var language_picker: OptionButton
+var appearance_picker: OptionButton
+var background: ColorRect
 var folder_dialog: FileDialog
 var zip_dialog: FileDialog
 var install_dialog: ConfirmationDialog
@@ -61,6 +64,13 @@ var notice_key := ""
 var notice_error := ""
 var notice_args: Array = []
 var notice_mod: Dictionary = {}
+var another_copy := false
+
+## The self-update helper of alpha.10 and earlier restarts the manager with a hidden window style.
+## Windows applies that style to the first show only, so showing the window again brings it up.
+func show_window() -> void:
+	if OS.get_name() == "Windows" and DisplayServer.get_name() != "headless":
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 
 func _ready() -> void:
 	get_window().min_size = Vector2i(1040, 680)
@@ -68,6 +78,7 @@ func _ready() -> void:
 	if "--update-probe" in OS.get_cmdline_user_args():
 		add_child(catalog)
 		add_child(self_update)
+		UiTheme.apply(settings.appearance, DisplayServer.is_dark_mode())
 		build_screen()
 		await get_tree().process_frame
 		var probe := FileAccess.open("user://update-probe.json", FileAccess.WRITE)
@@ -80,6 +91,8 @@ func _ready() -> void:
 		probe.close()
 		get_tree().quit(0 if error == OK else 1)
 		return
+	show_window()
+	another_copy = Platform.other_copies() > 0
 	settings.load_file()
 	if not settings.locale.is_empty():
 		words.set_locale(settings.locale)
@@ -93,6 +106,7 @@ func _ready() -> void:
 	add_child(catalog)
 	add_child(self_update)
 	self_update.load_state()
+	UiTheme.apply(settings.appearance, DisplayServer.is_dark_mode())
 	build_screen()
 	get_window().files_dropped.connect(drop_zips)
 	busy = false
@@ -123,7 +137,7 @@ func label(text: String = "", size: int = 16) -> Label:
 	var item := Label.new()
 	item.text = text
 	item.add_theme_font_size_override("font_size", size)
-	item.add_theme_color_override("font_color", UiTheme.MUTED if size < 16 else UiTheme.INK)
+	paint(item, "muted" if size < 16 else "ink")
 	if size >= 20:
 		item.add_theme_font_override("font", UiTheme.font(600))
 	item.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -159,8 +173,8 @@ func card(parent: Node) -> VBoxContainer:
 func build_screen() -> void:
 	theme = UiTheme.create()
 	get_window().theme = theme
-	var background := ColorRect.new()
-	background.color = UiTheme.PAPER
+	background = ColorRect.new()
+	background.color = UiTheme.tone("paper")
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
@@ -189,6 +203,16 @@ func build_screen() -> void:
 	language_picker.item_selected.connect(func(index): change_locale(str(language_picker.get_item_metadata(index))))
 	heading.add_child(language_picker)
 	controls.append(language_picker)
+	appearance_picker = OptionButton.new()
+	appearance_picker.custom_minimum_size = Vector2(160, 44)
+	for choice in ["system", "light", "dark"]:
+		appearance_picker.add_item(words.word("appearance_" + choice))
+		appearance_picker.set_item_metadata(appearance_picker.item_count - 1, choice)
+		if choice == settings.appearance:
+			appearance_picker.select(appearance_picker.item_count - 1)
+	appearance_picker.item_selected.connect(change_appearance)
+	heading.add_child(appearance_picker)
+	controls.append(appearance_picker)
 	caption(layout, "drop_hint", 14)
 	var location := card(layout)
 	var path_row := HBoxContainer.new()
@@ -400,7 +424,7 @@ func set_busy(value: bool) -> void:
 	search_box.editable = not value
 	if value:
 		notice.text = words.word("loading")
-		notice.add_theme_color_override("font_color", UiTheme.MUTED)
+		paint(notice, "muted")
 
 func invoke(operation: String, extra: Dictionary = {}) -> Dictionary:
 	var thread := Thread.new()
@@ -452,10 +476,10 @@ func status_badge(mod: Dictionary) -> PanelContainer:
 	var status := "manual" if mod.get("manual", false) else ("enabled" if mod.get("enabled", false) else "disabled")
 	var badge := PanelContainer.new()
 	var on := status == "enabled"
-	badge.add_theme_stylebox_override("panel", UiTheme.box(UiTheme.SUCCESS_SOFT if on else UiTheme.DISABLED, Color.TRANSPARENT, 0, 5, 8))
+	badge.add_theme_stylebox_override("panel", UiTheme.box(UiTheme.tone("success_soft") if on else UiTheme.tone("disabled"), Color.TRANSPARENT, 0, 5, 8))
 	var text := label(words.word(status), 13)
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
-	text.add_theme_color_override("font_color", UiTheme.SUCCESS if on else UiTheme.MUTED)
+	paint(text, "success" if on else "muted")
 	badge.add_child(text)
 	return badge
 
@@ -474,9 +498,9 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	button.toggle_mode = true
 	button.set_meta("mod_key", key)
 	button.button_pressed = key == selected_mod_key
-	button.add_theme_stylebox_override("normal", UiTheme.box(UiTheme.DISABLED if layout_blocked else UiTheme.SURFACE))
-	button.add_theme_stylebox_override("hover", UiTheme.box(UiTheme.ACCENT_SOFT, UiTheme.ACCENT))
-	button.add_theme_stylebox_override("pressed", UiTheme.box(UiTheme.ACCENT_SOFT, UiTheme.ACCENT))
+	button.add_theme_stylebox_override("normal", UiTheme.box(UiTheme.tone("disabled") if layout_blocked else UiTheme.tone("surface")))
+	button.add_theme_stylebox_override("hover", UiTheme.box(UiTheme.tone("accent_soft"), UiTheme.tone("accent")))
+	button.add_theme_stylebox_override("pressed", UiTheme.box(UiTheme.tone("accent_soft"), UiTheme.tone("accent")))
 	button.pressed.connect(select_mod.bind(key))
 	button.tooltip_text = words.word("legacy_layout_incompatible") if layout_blocked else str(mod.name)
 	rows.add_child(button)
@@ -489,6 +513,10 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	content.offset_bottom = -12
 	content.add_theme_constant_override("separation", UiTheme.SPACE_MD)
 	button.add_child(content)
+	var draggable := not is_catalog and orders_on_load(mod)
+	if draggable:
+		content.add_child(drag_handle())
+		button.set_drag_forwarding(row_drag_data.bind(mod), row_can_drop.bind(mod, button), row_drop.bind(mod, button))
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_child(text)
@@ -497,7 +525,7 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	name_label.clip_text = true
 	if layout_blocked:
-		name_label.add_theme_color_override("font_color", UiTheme.DISABLED_INK)
+		paint(name_label, "disabled_ink")
 	text.add_child(name_label)
 	var version_label := label("MOD " + str(mod.get("version", "")), 14)
 	var latest := catalog.find(mod.id, store.game_version)
@@ -514,15 +542,15 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	game_label.clip_text = true
 	text.add_child(game_label)
 	if layout_blocked:
-		version_label.add_theme_color_override("font_color", UiTheme.DISABLED_INK)
-		game_label.add_theme_color_override("font_color", UiTheme.DISABLED_INK)
+		paint(version_label, "disabled_ink")
+		paint(game_label, "disabled_ink")
 	else:
 		button.tooltip_text = str(mod.name) + "\n" + version_label.text + "\n" + game_label.text
 	var warning_text := compatibility_warning(mod)
 	if not warning_text.is_empty():
 		var warning := label(warning_text, 13)
 		warning.name = "CompatibilityWarning"
-		warning.add_theme_color_override("font_color", UiTheme.DANGER)
+		paint(warning, "danger")
 		text.add_child(warning)
 	var release_note := author_release_note(mod)
 	if not release_note.is_empty():
@@ -539,7 +567,21 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 		var badge := status_badge(mod)
 		badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		content.add_child(badge)
+	if draggable:
+		button.tooltip_text += "\n" + words.word("drag_to_reorder")
 	ignore_pointer(button)
+
+# Three short lines at the left of a row the loader orders.
+func drag_handle() -> Control:
+	var handle := Control.new()
+	handle.name = "DragHandle"
+	handle.custom_minimum_size = Vector2(20, 24)
+	handle.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	handle.draw.connect(func() -> void:
+		for line in 3:
+			var y := handle.size.y / 2.0 + (line - 1) * 6.0
+			handle.draw_line(Vector2(2, y), Vector2(handle.size.x - 2, y), UiTheme.MUTED, 2.0, true))
+	return handle
 
 func select_mod(key: String) -> void:
 	if busy:
@@ -650,7 +692,7 @@ func render_details() -> void:
 	details.add_child(label(words.word("supported", [", ".join(mod.get("game_versions", [])) if not mod.manual else "—"]), 14))
 	if not mod.compatible and not mod.manual:
 		var warning := caption(details, "incompatible", 14)
-		warning.add_theme_color_override("font_color", UiTheme.DANGER)
+		paint(warning, "danger")
 	detail_destination = label(words.word("destination", [str(mod.get("root", "—")).replace("\\", "/")]), 14)
 	detail_destination.tooltip_text = detail_destination.text
 	if mod.manual:
@@ -677,7 +719,23 @@ func render_details() -> void:
 	var remove := action(detail_actions, "uninstall", confirm_operation.bind("uninstall", mod), "danger")
 	remove.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-# The bootstraps add their mods in the saved order; mods not in it follow in the order the game finds them.
+# The manager loader adds the mods in the saved order; mods not in it follow by name.
+# A mod always loads after the mods it requires.
+func requires(id: String, other: String) -> bool:
+	for mod: Dictionary in mods:
+		if orders_on_load(mod) and str(mod.id) == id:
+			for dependency: Variant in mod.get("dependencies", []):
+				if dependency is Dictionary and str(dependency.get("id", "")) == other:
+					return true
+	return false
+
+func swap_breaks_requirement(ids: Array, place: int, step: int) -> bool:
+	if place + step < 0 or place + step >= ids.size():
+		return false
+	var first: String = ids[min(place, place + step)]
+	var second: String = ids[max(place, place + step)]
+	return requires(second, first)
+
 func orders_on_load(mod: Dictionary) -> bool:
 	return mod.get("layout", "") == "user-data-styles" and not mod.get("manual", false)
 
@@ -703,7 +761,7 @@ func add_load_order_row(mod: Dictionary) -> void:
 	for step: int in [-1, 1]:
 		var move := action(row, "load_earlier" if step < 0 else "load_later", move_load_order.bind(mod, step))
 		move.set_meta("order_step", step)
-		move.set_meta("blocked", place + step < 0 or place + step >= ids.size())
+		move.set_meta("blocked", place + step < 0 or place + step >= ids.size() or swap_breaks_requirement(ids, place, step))
 		move.disabled = busy or bool(move.get_meta("blocked"))
 
 func move_load_order(mod: Dictionary, step: int) -> void:
@@ -711,10 +769,59 @@ func move_load_order(mod: Dictionary, step: int) -> void:
 		return
 	var ids := load_order_ids()
 	var place := ids.find(str(mod.id))
-	if place < 0 or place + step < 0 or place + step >= ids.size():
+	if place < 0 or place + step < 0 or place + step >= ids.size() or swap_breaks_requirement(ids, place, step):
 		return
 	ids[place] = ids[place + step]
 	ids[place + step] = str(mod.id)
+	await apply_load_order(ids)
+
+# Rows of ordered mods can be dropped onto each other: above the middle of a row puts the
+# dragged mod before it, below puts it after. A drop that puts a mod before a mod it requires is refused.
+func row_drag_data(_at_position: Vector2, mod: Dictionary) -> Variant:
+	if busy:
+		return null
+	var preview := PanelContainer.new()
+	preview.add_theme_stylebox_override("panel", UiTheme.box(UiTheme.ACCENT_SOFT, UiTheme.ACCENT))
+	preview.add_child(label(str(mod.name), 16))
+	set_drag_preview(preview)
+	return {"load_order_id": str(mod.id)}
+
+func order_after_drop(at_position: Vector2, data: Variant, target: Dictionary, row: Control) -> Array:
+	if busy or not data is Dictionary or not data.has("load_order_id"):
+		return []
+	var current := load_order_ids()
+	var moving := str(data.load_order_id)
+	if moving == str(target.id) or moving not in current:
+		return []
+	var ids := current.duplicate()
+	ids.erase(moving)
+	var place := ids.find(str(target.id))
+	if place < 0:
+		return []
+	if at_position.y >= row.size.y / 2.0:
+		place += 1
+	ids.insert(place, moving)
+	if ids == current:
+		return []
+	for first in ids.size():
+		for second in range(first + 1, ids.size()):
+			if requires(ids[first], ids[second]):
+				return []
+	return ids
+
+func row_can_drop(at_position: Vector2, data: Variant, target: Dictionary, row: Control) -> bool:
+	return not order_after_drop(at_position, data, target, row).is_empty()
+
+func row_drop(at_position: Vector2, data: Variant, target: Dictionary, row: Control) -> void:
+	var ids := order_after_drop(at_position, data, target, row)
+	if ids.is_empty():
+		return
+	for mod: Dictionary in mods:
+		if orders_on_load(mod) and str(mod.id) == str(data.load_order_id):
+			selected_mod_key = mod_key(mod)
+	await apply_load_order(ids)
+
+func apply_load_order(ids: Array) -> void:
 	set_busy(true)
 	var result := await invoke("set_order", {"order": ids})
 	notice_key = ""
@@ -737,8 +844,12 @@ func render_notice() -> void:
 			if change.get("credit_warning", false) and change.get("id") != notice_mod.get("id"):
 				warning = words.word("credit_warning")
 				notice.text += "\n" + str(change.name) + "\n" + warning
+	if another_copy:
+		warning = words.word("another_copy")
+		notice.text += "\n" + warning
 	notice.tooltip_text = notice.text
-	notice.add_theme_color_override("font_color", UiTheme.DANGER if not notice_error.is_empty() or not warning.is_empty() else UiTheme.SUCCESS if notice_key == "changed" else UiTheme.MUTED)
+	var tone_key := "danger" if not notice_error.is_empty() or not warning.is_empty() else "success" if notice_key == "changed" else "muted"
+	paint(notice, tone_key)
 	recovery_button.visible = notice_error == "recovery_needed"
 
 func translate_dialogs() -> void:
@@ -828,6 +939,32 @@ func description_note(value: Variant) -> String:
 				break
 	return words.word("description_language", [Words.LANGUAGES.get(language, language)]) + "\n" + str(value[language])
 
+func paint(node: CanvasItem, key: String) -> void:
+	node.set_meta("paint", key)
+	node.add_theme_color_override("font_color", UiTheme.tone(key))
+
+func change_appearance(index: int) -> void:
+	var choice := str(appearance_picker.get_item_metadata(index))
+	if choice not in ["system", "light", "dark"]:
+		choice = "system"
+	settings.appearance = choice
+	settings.save()
+	UiTheme.apply(choice, DisplayServer.is_dark_mode())
+	theme = UiTheme.create()
+	get_window().theme = theme
+	background.color = UiTheme.tone("paper")
+	render_notice()
+	render_rows()
+	restyle(self)
+
+func restyle(node: Node) -> void:
+	if node is Label and node.has_meta("paint"):
+		node.add_theme_color_override("font_color", UiTheme.tone(str(node.get_meta("paint"))))
+	if node is Button and str(node.get_meta("variant", "")) != "":
+		UiTheme.style_button(node, str(node.get_meta("variant")))
+	for child in node.get_children():
+		restyle(child)
+
 func change_locale(locale: String) -> void:
 	if busy:
 		return
@@ -840,6 +977,9 @@ func change_locale(locale: String) -> void:
 	for index in language_picker.item_count:
 		if language_picker.get_item_metadata(index) == words.locale:
 			language_picker.select(index)
+	for index in appearance_picker.item_count:
+		var choice := str(appearance_picker.get_item_metadata(index))
+		appearance_picker.set_item_text(index, words.word("appearance_" + choice))
 	translate_filters()
 	render_rows()
 	translate_dialogs()

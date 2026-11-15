@@ -1,4 +1,4 @@
-﻿param([string]$RequestPath='')
+param([string]$RequestPath='')
 $ErrorActionPreference='Stop'
 $env:PSModulePath=Join-Path $PSHOME 'Modules'
 . (Join-Path $PSScriptRoot 'package.ps1')
@@ -168,7 +168,9 @@ function Get-PackageOperations($Target,$Package,$Request,$Context) {
         $data=$Package.contents[$relative];$hash=Bytes-Hash $data;$current=Current-Hash $path
         $mutable=$relative -match '\.(cfg|json)$' -and -not $relative.EndsWith('/mod.json')
         if($current -and $mutable){continue}
-        if($current -and -not ($old -and ($old.hashes.ContainsKey($relative) -or $relative -eq $old.bootstrap))) {
+        # A copy of this mod's own bootstrap in styles/ is replaced by the one in mod_bootstraps/ below.
+        $ownCopy=$old -and $relative -eq $Package.bootstrap -and ($current -eq $hash -or $current -eq $old.bootstrap_hash)
+        if($current -and -not $ownCopy -and -not ($old -and ($old.hashes.ContainsKey($relative) -or $relative -eq $old.bootstrap))) {
             if($current -ne $hash){Stop-Manager 'file_conflict' @($path)}
             $hadUnowned=$true
         }
@@ -180,14 +182,18 @@ function Get-PackageOperations($Target,$Package,$Request,$Context) {
     $receipt=@{format=1;id=$Package.id;name=$Package.name;version=$Package.version;game_versions=@($Package.game_versions);layout=$Package.layout;entry=$Package.entry;autoload=$Package.autoload;hashes=$hashes;source_sha256=$Package.sha256}
     foreach($field in @('description','author','readme','readme_text','readme_unavailable','dependencies','game_credit','credit_warning')){$receipt[$field]=$Package[$field]}
     if($Package.layout -eq 'user-data-styles') {
-        $receipt.bootstrap=$Package.bootstrap;$receipt.bootstrap_bytes=[Convert]::ToBase64String($Package.contents[$Package.bootstrap]);$receipt.bootstrap_hash=Bytes-Hash $Package.contents[$Package.bootstrap]
-        $boot=Guard-Path (Join-Path $root $Package.bootstrap) $root
+        $place=Bootstrap-Place $Package.id
+        $receipt.bootstrap=$place;$receipt.bootstrap_bytes=[Convert]::ToBase64String($Package.contents[$Package.bootstrap]);$receipt.bootstrap_hash=Bytes-Hash $Package.contents[$Package.bootstrap]
+        $boot=Guard-Path (Join-Path $root $place) $root
         $current=Current-Hash $boot
         if($current -and $current -ne $receipt.bootstrap_hash -and (-not $old -or $current -ne $old.bootstrap_hash)){Stop-Manager 'file_conflict' @($boot)}
-        if($old -and $old.bootstrap -and $old.bootstrap -ne $Package.bootstrap) {
-            $oldBoot=Guard-Path (Join-Path $root $old.bootstrap) $root
+        # The zip names its bootstrap in styles/; a copy left there by an earlier manager or by hand would load twice.
+        $left=@($Package.bootstrap);if($old -and $old.bootstrap){$left+=$old.bootstrap}
+        foreach($relative in ($left|Select-Object -Unique)) {
+            if($relative -eq $place){continue}
+            $oldBoot=Guard-Path (Join-Path $root $relative) $root
             $oldHash=Current-Hash $oldBoot
-            if($oldHash -and $oldHash -ne $old.bootstrap_hash){Stop-Manager 'file_conflict' @($oldBoot)}
+            if($oldHash -and $oldHash -ne $receipt.bootstrap_hash -and (-not $old -or $oldHash -ne $old.bootstrap_hash)){Stop-Manager 'file_conflict' @($oldBoot)}
             if($oldHash){$operations+=,@{path=$oldBoot;bytes=$null}}
         }
         $operations+=,@{path=$boot;bytes=$(if($enabled){$Package.contents[$Package.bootstrap]}else{$null})}
@@ -198,7 +204,98 @@ function Get-PackageOperations($Target,$Package,$Request,$Context) {
     $operations+=,@{path=$receiptPath;bytes=(Json-Bytes $receipt)}
     return ,$operations
 }
-# The bootstraps add their mods in this order (user://mod_load_order.json). Game 1.2.3 has no bootstraps.
+# The game loads every .tres in user://styles/ in the order the file system lists them, which differs
+# between platforms. The manager keeps the bootstraps it installs in user://mod_bootstraps/ and puts one
+# loader in user://styles/ that runs them in the saved order. Mods queued by their bootstrap
+# (sobosuba_mod_queue) are added right after their own bootstrap runs, so they keep the same order.
+$script:loaderPath='styles/sobosuba_mod_loader.tres'
+$script:loaderText=@'
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="1"]
+script/source = "extends Resource
+
+# Sobosuba Mod Manager: runs the bootstraps in user://mod_bootstraps/ in the saved load order.
+func _init() -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null or Engine.has_meta(\"sobosuba_mod_loader\"):
+		return
+	Engine.set_meta(\"sobosuba_mod_loader\", true)
+	if not DirAccess.dir_exists_absolute(\"user://mod_bootstraps\"):
+		return
+	var order: Array = []
+	if FileAccess.file_exists(\"user://mod_load_order.json\"):
+		var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(\"user://mod_load_order.json\"))
+		if saved is Dictionary and saved.get(\"order\") is Array:
+			order = saved.order
+	var ranked: Array = []
+	for file: String in DirAccess.get_files_at(\"user://mod_bootstraps\"):
+		if file.get_extension() != \"tres\":
+			continue
+		var rank: int = order.find(file.get_basename())
+		ranked.append([rank if rank >= 0 else order.size(), file])
+	ranked.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+	for item: Array in ranked:
+		ResourceLoader.load(\"user://mod_bootstraps/\" + item[1], \"\", ResourceLoader.CACHE_MODE_IGNORE)
+		if Engine.has_meta(\"sobosuba_mod_queue\"):
+			var waiting: Array = Engine.get_meta(\"sobosuba_mod_queue\")
+			Engine.remove_meta(\"sobosuba_mod_queue\")
+			for queued: Array in waiting:
+				tree.root.add_child.call_deferred(queued[1])
+"
+
+[resource]
+script = SubResource("1")
+'@
+function Bootstrap-Place([string]$Id) {return 'mod_bootstraps/'+$Id+'.tres'}
+function Loader-Operation($Target) {
+    return @{path=(Guard-Path (Join-Path $Target.user $script:loaderPath) $Target.user);bytes=[Text.Encoding]::UTF8.GetBytes($script:loaderText.Replace("`r`n","`n"))}
+}
+function Receipt-Bytes($Mod,[string]$Place) {
+    $receipt=$Mod.Clone()
+    foreach($field in @('root','enabled','compatible','manual')){$receipt.Remove($field)}
+    $receipt.bootstrap=$Place
+    return Json-Bytes $receipt
+}
+# Move a bootstrap that an earlier manager left in styles/ to its place in mod_bootstraps/.
+function Bootstrap-Operations($Mod,[string]$Operation) {
+    $place=Bootstrap-Place $Mod.id;$ops=@()
+    if($Operation -eq 'move' -and $Mod.bootstrap -eq $place){return ,$ops}
+    $boot=Guard-Path (Join-Path $Mod.root $place) $Mod.root;$current=Current-Hash $boot
+    if($current -and $current -ne $Mod.bootstrap_hash){Stop-Manager 'file_conflict' @($boot)}
+    $enable=$Operation -eq 'enable' -or ($Operation -eq 'move' -and $Mod.enabled)
+    if($Mod.bootstrap -ne $place) {
+        $old=Guard-Path (Join-Path $Mod.root $Mod.bootstrap) $Mod.root;$oldHash=Current-Hash $old
+        if($oldHash -and $oldHash -ne $Mod.bootstrap_hash){Stop-Manager 'file_conflict' @($old)}
+        if($oldHash){$ops+=,@{path=$old;bytes=$null}}
+        if($Operation -ne 'uninstall'){$ops+=,@{path=(Receipt-Path $Mod.root $Mod.id);bytes=(Receipt-Bytes $Mod $place)}}
+    }
+    $ops+=,@{path=$boot;bytes=$(if($enable){[Convert]::FromBase64String($Mod.bootstrap_bytes)}else{$null})}
+    return ,$ops
+}
+function Migration-Operations($Target,[string[]]$Skip=@()) {
+    $ops=@()
+    foreach($mod in (All-Mods $Target)) {
+        if($mod.manual -or $mod.layout -ne 'user-data-styles' -or $mod.id -in $Skip){continue}
+        $ops+=Bootstrap-Operations $mod 'move'
+    }
+    return ,$ops
+}
+# A mod is saved after the installed mods it requires.
+function Dependency-Order($Target,[object[]]$Ids) {
+    $byId=@{}
+    foreach($mod in (All-Mods $Target)){if(-not $mod.manual -and $mod.layout -eq 'user-data-styles'){$byId[$mod.id]=$mod}}
+    $result=[Collections.Generic.List[string]]::new();$state=@{}
+    function Place-Id([string]$Id) {
+        if($state.ContainsKey($Id)){return}
+        $state[$Id]=$true
+        if($byId.ContainsKey($Id)){foreach($dependency in @($byId[$Id].dependencies)){if($null -ne $dependency -and $byId.ContainsKey($dependency.id)){Place-Id $dependency.id}}}
+        $result.Add($Id)
+    }
+    foreach($id in $Ids){Place-Id $id}
+    return ,@($result)
+}
+# The loader reads this order (user://mod_load_order.json). Game 1.2.3 has no bootstraps.
 function Order-Path($Target) {return Guard-Path (Join-Path $Target.user 'mod_load_order.json') $Target.user}
 function Read-Order($Target) {
     if($Target.version -eq '1.2.3'){return ,@()}
@@ -215,7 +312,12 @@ function Save-Order($Target,$Order) {
         if($id -isnot [string] -or -not (Valid-Id $id) -or $seen.ContainsKey($id)){Stop-Manager 'invalid_request'}
         $seen[$id]=$true
     }
-    Write-Transaction $Target.user @(@{path=(Order-Path $Target);bytes=(Json-Bytes @{order=[object[]]$ids})})
+    $ids=Dependency-Order $Target $ids
+    if($ids.Count -gt 64){Stop-Manager 'invalid_request'}
+    $ops=@(@{path=(Order-Path $Target);bytes=(Json-Bytes @{order=[object[]]$ids})})
+    $ops+=Migration-Operations $Target
+    $ops+=,(Loader-Operation $Target)
+    Write-Transaction $Target.user $ops
 }
 function Invoke-Manager($Request) {
     $mutex=[Threading.Mutex]::new($false,'Local\SoboModManager-FileOperations')
@@ -257,6 +359,7 @@ function Invoke-Manager($Request) {
         Assert-DependencyRemoval $mods $m $Request.action
         $context=@{config_text=$null;config_changed=$false}
         $ops=Get-StateOperations $target $m $Request.action $context
+        if($m.layout -eq 'user-data-styles'){$ops+=Migration-Operations $target @($m.id);$ops+=,(Loader-Operation $target)}
         if($context.config_changed){$ops+=,@{path=(Join-Path $target.game 'override.cfg');bytes=[Text.Encoding]::UTF8.GetBytes($context.config_text)}}
         Write-Transaction $m.root $ops
         return @{ok=$true;data=@{}}

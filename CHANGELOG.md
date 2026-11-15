@@ -35,6 +35,26 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 - The mod now follows the load order set in the mod manager.
 - Runs with Special Sobos and runs with Undo turned on no longer count as Prime records. They are not added to your local top 10, do not change the best score your Steam friends see, and are not sent to the world ranking (since the first version).
 
+### Mod Manager 0.3.0-alpha.14, 2026-11-15
+
+- Choose System, Light or Dark. System follows the operating system. The choice is saved and applies immediately.
+
+### Mod Manager 0.3.0-alpha.13, 2026-11-14
+
+- Drag an installed mod by its handle (three lines) to change the load order. Drop it on the upper half of another mod to load it before that mod, or on the lower half to load it after. A mod can't be dropped before a mod it requires. The Load earlier and Load later buttons still work.
+
+### Mod Manager 0.3.0-alpha.12, 2026-11-13
+
+- Fix updates from 0.3.0-alpha.10 and earlier on Windows: the updated manager started with no window, because those versions restart it hidden. The manager now brings its window up when it starts.
+- Fix Windows Setup reporting a failure after it had installed, when another copy of the manager was still running. "Update and restart" then did not restart. Setup now finishes and removes its leftover temporary folder the next time it runs.
+- The manager now tells you when another copy of it is running on Windows, including one you cannot see, and how to close it.
+
+### Mod Manager 0.3.0-alpha.11, 2026-11-13
+
+- The load order now applies to every mod the manager installs, on every system, with no change to the mods. The manager keeps their bootstraps in `mod_bootstraps` in the game's user data folder, and one loader in `styles` runs them in the saved order. Bootstraps installed by earlier versions move there the next time you install, update, enable, disable or reorder a mod. Mods you copied into `styles` yourself still load the way the game finds them.
+- A mod always loads after the mods it requires. Saving an order moves required mods first, and the details no longer let a mod move before a mod it requires.
+- Fix "Update and restart" on Windows: the updated manager started with no window. It now opens as usual.
+
 ### Mod Manager 0.3.0-alpha.10, 2026-11-13
 
 - Set the mod load order from the mod details: move a mod earlier or later. The order is saved as `mod_load_order.json` in the game's user data folder. Mods released with the new loader follow it, starting with Sobo Crash Fix 1.3.11-1.0.0. Other mods keep their current order until their next release.
@@ -188,6 +208,26 @@ MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では
 - Special Sobos のチェンジで素数を受け取ったソボが、灰色に塗り替わらないようにしました。チェンジで残した元の色のまま出ます。
 - 管理アプリで決めた読み込みの順に従うようにしました。
 - Special Sobos の回と、Undo を入にした回は、Prime の記録に入らないようにしました。手元の上位 10 に載らず、Steam のフレンドに見える最高点も変わらず、世界の順位へも送られません（最初のバージョンから）
+
+### 管理アプリ0.3.0-alpha.14、2026-11-15
+
+- システム、明、暗を選べるようにした。システムは OS に合わせる。選んだものは保存され、すぐに切り替わる。
+
+### 管理アプリ0.3.0-alpha.13、2026-11-14
+
+- 入っている MOD の行に三本線の取っ手を付け、ドラッグで読み込みの順を変えられるようにした。ほかの MOD の上半分に落とすとその前、下半分に落とすとその後に読む。前提の MOD より前には落とせない。「先に読む」「後に読む」のボタンもそのまま使える。
+
+### 管理アプリ0.3.0-alpha.12、2026-11-13
+
+- Windows で 0.3.0-alpha.10 までの版から更新すると、更新した管理アプリが窓の無いまま起きていた（前の版が窓を隠して起こすため）。起きたときに自分で窓を出すようにした。
+- Windows で管理アプリがもう 1 つ動いていると、セットアップが入れ終えた後に失敗を返し、「更新して再起動」が再起動しなかった。セットアップは最後まで終え、残った一時フォルダは次のセットアップで消すようにした。
+- Windows で管理アプリがもう 1 つ動いているとき（見えていない物も）、知らせの欄でそう伝え、閉じ方を示すようにした。
+
+### 管理アプリ0.3.0-alpha.11、2026-11-13
+
+- 管理アプリで入れた MOD は、どの OS でも、MOD を変えずに読み込みの順に従うようにした。起動部品はゲームのユーザーデータの `mod_bootstraps` に置き、`styles` に置いた管理アプリの読み込み口 1 つが、保存した順に読む。前の版で入れた起動部品は、次に MOD を入れる・更新する・有効や無効にする・順を変えるときに、そこへ移す。自分で `styles` に写した MOD は、今までどおりゲームが見つけた順に読まれる。
+- MOD は必ず、前提にする MOD の後に読むようにした。順を保存すると前提の MOD を先に並べ、説明欄でも前提の MOD より前へは動かせないようにした。
+- Windows で「更新して再起動」を押すと、更新した管理アプリが窓の無いまま起きていた。いつもどおり窓が開くようにした。
 
 ### 管理アプリ0.3.0-alpha.10、2026-11-13
 

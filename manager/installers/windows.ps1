@@ -85,6 +85,23 @@ function Test-InstalledManager([string]$Binary) {
     }
 }
 
+function Remove-SetupStage([string]$Path, [string]$Root) {
+    Assert-RegularPath $Path
+    if ([IO.Path]::GetDirectoryName($Path) -ne $Root -or [IO.Path]::GetFileName($Path) -notmatch '^\.sobosuba-setup-[a-f0-9]{32}$') {
+        throw 'Unexpected setup temporary folder.'
+    }
+    # The old manager file stays locked while another copy of the old manager still runs.
+    # The install is done by then, so keep the folder and let a later setup remove it.
+    try { Remove-Item -LiteralPath $Path -Recurse; return $true }
+    catch { if (Test-Path -LiteralPath $Path) { return $false }; throw }
+}
+
+function Clear-OldSetupStages([string]$Root) {
+    foreach ($folder in @(Get-ChildItem -LiteralPath $Root -Directory -Force | Where-Object { $_.Name -match '^\.sobosuba-setup-[a-f0-9]{32}$' })) {
+        try { [void](Remove-SetupStage $folder.FullName $Root) } catch { Write-Warning "Setup could not remove $($folder.FullName)" }
+    }
+}
+
 function Protect-InstallDirectory {
     $acl = New-Object Security.AccessControl.DirectorySecurity
     $acl.SetAccessRuleProtection($true, $false)
@@ -181,6 +198,7 @@ try {
     }
     New-Item -ItemType Directory -Force -Path $Prefix | Out-Null
     Protect-InstallDirectory
+    Clear-OldSetupStages $programRoot
     $stage = Join-Path $programRoot ('.sobosuba-setup-' + [Guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Path $stage | Out-Null
     foreach ($name in @('SobosubaModManager.exe', 'Uninstall.exe')) {
@@ -251,11 +269,9 @@ try {
     exit 1
 } finally {
     if ($stage -and (Test-Path -LiteralPath $stage)) {
-        Assert-RegularPath $stage
-        if ([IO.Path]::GetDirectoryName($stage) -ne $programRoot -or [IO.Path]::GetFileName($stage) -notmatch '^\.sobosuba-setup-[a-f0-9]{32}$') {
-            throw 'Unexpected setup temporary folder.'
+        if (-not (Remove-SetupStage $stage $programRoot)) {
+            Write-Output "Setup left files that are still in use in $stage. The next setup removes them."
         }
-        Remove-Item -LiteralPath $stage -Recurse
     }
     if ($locked) { $mutex.ReleaseMutex() }
     $mutex.Dispose()

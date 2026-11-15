@@ -87,13 +87,17 @@ script = SubResource("1")
 ```
 
 This uses the loading sequence from Special Sobos' `special_bootstrap.tres`.
-The end of the template sets the load order. Each mod joins one queue, and the
-first bootstrap adds every queued mod after all of them have run, in the order
-the manager saved in `user://mod_load_order.json` (`{"order": ["id", ...]}`).
-Mods that are not in that list, or the whole queue when there is no list, keep
-the order in which the game found them. Keep this part as it is: the first
-bootstrap in the queue does the work for every mod.
-The template was checked on Windows 1.3.11, build 26465074.
+The manager sets the load order; your bootstrap needs nothing extra for it. The
+manager installs your bootstrap as `user://mod_bootstraps/<id>.tres`, not in
+`styles/`, and puts one loader, `styles/sobosuba_mod_loader.tres`, in `styles/`.
+The loader runs the bootstraps in the order saved in `user://mod_load_order.json`
+(`{"order": ["id", ...]}`), then the others by name. A mod always loads after
+the mods listed in its `dependencies`. A bootstrap that adds its node with
+`tree.root.add_child.call_deferred(node)` keeps that order. The queue at the end
+of the template also keeps it, and lets the template order the mods by itself
+when it is copied into `styles/` by hand.
+The template was checked on Windows 1.3.11, build 26465074. The loader was
+checked on the same game with five released mods in two orders.
 The manager copies the files to the game's user-data folder. For a manual check,
 put `my_mod/main.gd` and `styles/my_mod_bootstrap.tres` under that folder yourself.
 

@@ -18,6 +18,12 @@ $script:updateAppRoot=[IO.Path]::GetDirectoryName($helperParent)
 
 function Write-UpdateJson($Path,$Value){Atomic-Write $Path ([Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $Value -Depth 8)))}
 
+# Start the updated manager the way the user starts it. A hidden start style also hides the
+# manager's own window on Windows, so the manager would run with nothing on screen.
+function Start-Manager([string]$Path,[string]$Folder){
+    Start-Process -FilePath $Path -WorkingDirectory $Folder|Out-Null
+}
+
 function Read-UpdateRequest {
 
     $jobs=Join-Path $script:updateAppRoot 'self-update/jobs'
@@ -263,7 +269,7 @@ try{
             # The setup restores the old version if its isolated startup probe fails.
             Probe-Update $updatedHash
             Write-UpdateJson (Join-Path $jobPath 'result.json') @{ok=$true;version=$request.version}
-            if($request.restart -eq $true){Start-Process -FilePath $target -WorkingDirectory $targetRoot -WindowStyle Hidden|Out-Null}
+            if($request.restart -eq $true){Start-Manager $target $targetRoot}
             [Console]::WriteLine('{"ok":true}')
             exit 0
         }
@@ -300,11 +306,7 @@ try{
 
         Write-UpdateJson (Join-Path $jobPath 'result.json') @{ok=$true;version=$request.version}
 
-        if($request.restart -eq $true){
-            $options=@{FilePath=$target;WorkingDirectory=$targetRoot}
-            if($script:managerWindows){$options.WindowStyle='Hidden'}
-            Start-Process @options|Out-Null
-        }
+        if($request.restart -eq $true){Start-Manager $target $targetRoot}
 
     }
 

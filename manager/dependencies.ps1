@@ -4,9 +4,7 @@ function Get-StateOperations($Target,$Mod,[string]$Operation,$Context) {
     $ops=@();if($Operation -ne 'disable'){$ops=Owned-Operations $Mod ($Operation -eq 'uninstall')}
     if($enable){foreach($relative in $Mod.hashes.Keys){if(-not [IO.File]::Exists((Join-Path $Mod.root $relative))){Stop-Manager 'file_conflict' @($relative)}}}
     if($Mod.layout -eq 'user-data-styles'){
-        $boot=Guard-Path (Join-Path $Mod.root $Mod.bootstrap) $Mod.root;$current=Current-Hash $boot
-        if($current -and $current -ne $Mod.bootstrap_hash){Stop-Manager 'file_conflict' @($boot)}
-        $ops+=,@{path=$boot;bytes=$(if($enable){[Convert]::FromBase64String($Mod.bootstrap_bytes)}else{$null})}
+        $ops+=Bootstrap-Operations $Mod $Operation
     }else{
         $config=Public-Config $Target $Mod $enable $Context.config_text
         $Context.config_text=[Text.Encoding]::UTF8.GetString($config.bytes);$Context.config_changed=$true
@@ -129,6 +127,10 @@ function Get-DependencyPlan($Target,$Request) {
         $tokenLines.Add($node.id+'|'+$node.version+'|'+[string]$next.source_sha256+'|'+[string]$enabled)
     }
     Assert-FinalDependencies @($final.Values)
+    if($layout -eq 'user-data-styles'){
+        $operations+=Migration-Operations $Target @($walk.states.Keys)
+        $operations+=,(Loader-Operation $Target)
+    }
     if($context.config_changed){$operations+=,@{path=(Join-Path $Target.game 'override.cfg');bytes=[Text.Encoding]::UTF8.GetBytes($context.config_text)}}
     if($operations.Count -gt 1024){Stop-Manager 'dependency_limit'}
     $seen=@{}

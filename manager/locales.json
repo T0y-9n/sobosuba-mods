@@ -42,6 +42,7 @@
     "err_adopt": "Confirm that matching manually installed files can be managed.",
     "err_other": "A mod for another game version is enabled. Disable it first.",
     "offline": "The catalog is unavailable. Local ZIP operations still work.",
+    "another_copy": "Another copy of the manager is running. Close it before updating. If you cannot see it, end Sobosuba Mod Manager in Task Manager.",
     "choose_zip": "Select a mod ZIP",
     "choose_folder": "Select the sobosuba game folder",
     "library": "Installed mods",
@@ -107,7 +108,11 @@
     "credit_readme_warning": "Warning: the GitHub README credit or purchase link could not be verified. You can continue installing.",
     "load_order": "Load order: {0} of {1}",
     "load_earlier": "Load earlier",
-    "load_later": "Load later"
+    "load_later": "Load later",
+    "appearance_system": "System",
+    "appearance_light": "Light",
+    "appearance_dark": "Dark",
+    "drag_to_reorder": "Drag to change the load order"
   },
   "ja": {
     "title": "Sobosuba MOD管理",
@@ -152,6 +157,7 @@
     "err_adopt": "手動導入のファイルです。同じ内容のファイルを管理することを確認してください。",
     "err_other": "別のゲーム版用のMODが有効です。先に無効にしてください。",
     "offline": "カタログを取得できません。手元のZIPからの操作は使えます。",
+    "another_copy": "管理アプリがもう1つ動いています。更新の前に閉じてください。見当たらないときは、タスクマネージャーで Sobosuba Mod Manager を終了してください。",
     "choose_zip": "MODのZIPを選んでください",
     "choose_folder": "sobosubaのゲームフォルダを選んでください",
     "library": "導入済みMOD",
@@ -217,7 +223,11 @@
     "credit_readme_warning": "警告。GitHubのREADMEで原作の作者表示または購入先を確認できませんでした。導入は続けられます。",
     "load_order": "読み込みの順: {1} 個中 {0} 番目",
     "load_earlier": "先に読む",
-    "load_later": "後に読む"
+    "load_later": "後に読む",
+    "appearance_system": "システム",
+    "appearance_light": "明",
+    "appearance_dark": "暗",
+    "drag_to_reorder": "ドラッグで読み込みの順を変えられます"
   },
   "de": {
     "title": "Sobosuba-Modverwaltung",
@@ -262,6 +272,7 @@
     "err_adopt": "Bestätige die Verwaltung identischer, manuell installierter Dateien.",
     "err_other": "Eine Mod für eine andere Spielversion ist aktiv. Deaktiviere sie zuerst.",
     "offline": "Katalog nicht verfügbar. Lokale ZIP-Dateien lassen sich weiterhin verwalten.",
+    "another_copy": "Eine weitere Kopie des Managers läuft. Schließe sie vor dem Update. Ist sie nicht sichtbar, beende Sobosuba Mod Manager im Task-Manager.",
     "choose_zip": "Mod-ZIP auswählen",
     "choose_folder": "sobosuba-Spielordner auswählen",
     "library": "Installierte Mods",
@@ -327,7 +338,11 @@
     "credit_readme_warning": "Warnung. Urheberangabe oder Kauflink in der GitHub-README konnten nicht geprüft werden. Die Installation kann fortgesetzt werden.",
     "load_order": "Ladereihenfolge: {0} von {1}",
     "load_earlier": "Früher laden",
-    "load_later": "Später laden"
+    "load_later": "Später laden",
+    "appearance_system": "System",
+    "appearance_light": "Hell",
+    "appearance_dark": "Dunkel",
+    "drag_to_reorder": "Ziehen, um die Ladereihenfolge zu ändern"
   },
   "es": {
     "title": "Gestor de mods de Sobosuba",
@@ -372,6 +387,7 @@
     "err_adopt": "Confirma la gestión de archivos idénticos instalados manualmente.",
     "err_other": "Hay un mod de otra versión activado. Desactívalo primero.",
     "offline": "Catálogo no disponible. Las operaciones con ZIP locales siguen funcionando.",
+    "another_copy": "Hay otra copia del gestor en ejecución. Ciérrala antes de actualizar. Si no la ves, finaliza Sobosuba Mod Manager en el Administrador de tareas.",
     "choose_zip": "Selecciona un ZIP de mod",
     "choose_folder": "Selecciona la carpeta de sobosuba",
     "library": "Mods instalados",
@@ -437,7 +453,11 @@
     "credit_readme_warning": "Advertencia. No se pudo verificar el autor o el enlace de compra en el README de GitHub. Puedes continuar la instalación.",
     "load_order": "Orden de carga: {0} de {1}",
     "load_earlier": "Cargar antes",
-    "load_later": "Cargar después"
+    "load_later": "Cargar después",
+    "appearance_system": "Sistema",
+    "appearance_light": "Claro",
+    "appearance_dark": "Oscuro",
+    "drag_to_reorder": "Arrastra para cambiar el orden de carga"
   },
   "es_MX": {
     "title": "Administrador de mods de Sobosuba",
@@ -482,6 +502,7 @@
     "err_adopt": "Confirma la administración de archivos idénticos instalados manualmente.",
     "err_other": "Hay un mod de otra versión activado. Desactívalo primero.",
     "offline": "Catálogo no disponible. Las operaciones con ZIP locales siguen funcionando.",
+    "another_copy": "Hay otra copia del gestor en ejecución. Ciérrala antes de actualizar. Si no la ves, finaliza Sobosuba Mod Manager en el Administrador de tareas.",
     "choose_zip": "Selecciona un ZIP de mod",
     "choose_folder": "Selecciona la carpeta de sobosuba",
     "library": "Mods instalados",
@@ -547,7 +568,11 @@
     "credit_readme_warning": "Advertencia. No se pudo verificar el autor o el enlace de compra en el README de GitHub. Puedes continuar la instalación.",
     "load_order": "Orden de carga: {0} de {1}",
     "load_earlier": "Cargar antes",
-    "load_later": "Cargar después"
+    "load_later": "Cargar después",
+    "appearance_system": "Sistema",
+    "appearance_light": "Claro",
+    "appearance_dark": "Oscuro",
+    "drag_to_reorder": "Arrastra para cambiar el orden de carga"
   },
   "fr": {
     "title": "Gestionnaire de mods Sobosuba",
@@ -592,6 +617,7 @@
     "err_adopt": "Confirmez la gestion des fichiers identiques installés manuellement.",
     "err_other": "Un mod pour une autre version est activé. Désactivez-le d’abord.",
     "offline": "Catalogue indisponible. Les ZIP locaux restent utilisables.",
+    "another_copy": "Une autre copie du gestionnaire est ouverte. Fermez-la avant la mise à jour. Si elle n'est pas visible, terminez Sobosuba Mod Manager dans le Gestionnaire des tâches.",
     "choose_zip": "Choisir un ZIP de mod",
     "choose_folder": "Choisir le dossier de sobosuba",
     "library": "Mods installés",
@@ -657,7 +683,11 @@
     "credit_readme_warning": "Attention. Le nom du créateur ou le lien d’achat du README GitHub n’a pas pu être vérifié. Vous pouvez poursuivre l’installation.",
     "load_order": "Ordre de chargement : {0} sur {1}",
     "load_earlier": "Charger plus tôt",
-    "load_later": "Charger plus tard"
+    "load_later": "Charger plus tard",
+    "appearance_system": "Système",
+    "appearance_light": "Clair",
+    "appearance_dark": "Sombre",
+    "drag_to_reorder": "Faites glisser pour changer l'ordre de chargement"
   },
   "it": {
     "title": "Gestore mod Sobosuba",
@@ -702,6 +732,7 @@
     "err_adopt": "Conferma la gestione dei file identici installati manualmente.",
     "err_other": "È attiva una mod per un’altra versione. Disattivala prima.",
     "offline": "Catalogo non disponibile. I ZIP locali restano utilizzabili.",
+    "another_copy": "È aperta un'altra copia del gestore. Chiudila prima dell'aggiornamento. Se non la vedi, termina Sobosuba Mod Manager in Gestione attività.",
     "choose_zip": "Seleziona uno ZIP di mod",
     "choose_folder": "Seleziona la cartella di sobosuba",
     "library": "Mod installate",
@@ -767,7 +798,11 @@
     "credit_readme_warning": "Avviso. Impossibile verificare il creatore o il link di acquisto nel README di GitHub. Puoi continuare l’installazione.",
     "load_order": "Ordine di caricamento: {0} di {1}",
     "load_earlier": "Carica prima",
-    "load_later": "Carica dopo"
+    "load_later": "Carica dopo",
+    "appearance_system": "Sistema",
+    "appearance_light": "Chiaro",
+    "appearance_dark": "Scuro",
+    "drag_to_reorder": "Trascina per cambiare l'ordine di caricamento"
   },
   "pt_BR": {
     "title": "Gerenciador de mods Sobosuba",
@@ -812,6 +847,7 @@
     "err_adopt": "Confirme o gerenciamento de arquivos idênticos instalados manualmente.",
     "err_other": "Um mod de outra versão está ativado. Desative-o primeiro.",
     "offline": "Catálogo indisponível. ZIPs locais continuam disponíveis.",
+    "another_copy": "Outra cópia do gerenciador está aberta. Feche-a antes de atualizar. Se não a encontrar, finalize o Sobosuba Mod Manager no Gerenciador de Tarefas.",
     "choose_zip": "Selecione um ZIP de mod",
     "choose_folder": "Selecione a pasta do sobosuba",
     "library": "Mods instalados",
@@ -877,7 +913,11 @@
     "credit_readme_warning": "Aviso. Não foi possível verificar o criador ou o link de compra no README do GitHub. Você pode continuar a instalação.",
     "load_order": "Ordem de carregamento: {0} de {1}",
     "load_earlier": "Carregar antes",
-    "load_later": "Carregar depois"
+    "load_later": "Carregar depois",
+    "appearance_system": "Sistema",
+    "appearance_light": "Claro",
+    "appearance_dark": "Escuro",
+    "drag_to_reorder": "Arraste para mudar a ordem de carregamento"
   },
   "cs": {
     "title": "Správce modů Sobosuba",
@@ -922,6 +962,7 @@
     "err_adopt": "Potvrďte správu shodných souborů instalovaných ručně.",
     "err_other": "Je zapnutý mod pro jinou verzi hry. Nejprve jej vypněte.",
     "offline": "Katalog není dostupný. Místní ZIPy lze nadále spravovat.",
+    "another_copy": "Běží další kopie správce. Před aktualizací ji zavřete. Pokud ji nevidíte, ukončete Sobosuba Mod Manager ve Správci úloh.",
     "choose_zip": "Vyberte ZIP s modem",
     "choose_folder": "Vyberte složku hry sobosuba",
     "library": "Nainstalované mody",
@@ -987,7 +1028,11 @@
     "credit_readme_warning": "Upozornění. Autora nebo odkaz na nákup v README na GitHubu nelze ověřit. V instalaci lze pokračovat.",
     "load_order": "Pořadí načítání: {0} z {1}",
     "load_earlier": "Načíst dříve",
-    "load_later": "Načíst později"
+    "load_later": "Načíst později",
+    "appearance_system": "Systém",
+    "appearance_light": "Světlý",
+    "appearance_dark": "Tmavý",
+    "drag_to_reorder": "Přetažením změníte pořadí načítání"
   },
   "pl": {
     "title": "Menedżer modów Sobosuba",
@@ -1032,6 +1077,7 @@
     "err_adopt": "Potwierdź zarządzanie identycznymi plikami zainstalowanymi ręcznie.",
     "err_other": "Mod do innej wersji jest włączony. Najpierw go wyłącz.",
     "offline": "Katalog niedostępny. Obsługa lokalnych ZIPów nadal działa.",
+    "another_copy": "Działa inna kopia menedżera. Zamknij ją przed aktualizacją. Jeśli jej nie widać, zakończ Sobosuba Mod Manager w Menedżerze zadań.",
     "choose_zip": "Wybierz ZIP z modem",
     "choose_folder": "Wybierz folder gry sobosuba",
     "library": "Zainstalowane mody",
@@ -1097,7 +1143,11 @@
     "credit_readme_warning": "Ostrzeżenie. Nie udało się sprawdzić autora lub odnośnika do zakupu w README na GitHubie. Możesz kontynuować instalację.",
     "load_order": "Kolejność wczytywania: {0} z {1}",
     "load_earlier": "Wczytaj wcześniej",
-    "load_later": "Wczytaj później"
+    "load_later": "Wczytaj później",
+    "appearance_system": "System",
+    "appearance_light": "Jasny",
+    "appearance_dark": "Ciemny",
+    "drag_to_reorder": "Przeciągnij, aby zmienić kolejność wczytywania"
   },
   "ru": {
     "title": "Менеджер модов Sobosuba",
@@ -1142,6 +1192,7 @@
     "err_adopt": "Подтвердите управление совпадающими файлами, установленными вручную.",
     "err_other": "Включён мод для другой версии игры. Сначала выключите его.",
     "offline": "Каталог недоступен. Локальные ZIP работают.",
+    "another_copy": "Запущена ещё одна копия менеджера. Закройте её перед обновлением. Если её не видно, завершите Sobosuba Mod Manager в диспетчере задач.",
     "choose_zip": "Выберите ZIP с модом",
     "choose_folder": "Выберите папку игры sobosuba",
     "library": "Установленные моды",
@@ -1207,7 +1258,11 @@
     "credit_readme_warning": "Предупреждение. Не удалось проверить автора или ссылку на покупку в README GitHub. Установку можно продолжить.",
     "load_order": "Порядок загрузки: {0} из {1}",
     "load_earlier": "Загружать раньше",
-    "load_later": "Загружать позже"
+    "load_later": "Загружать позже",
+    "appearance_system": "Система",
+    "appearance_light": "Светлая",
+    "appearance_dark": "Тёмная",
+    "drag_to_reorder": "Перетащите, чтобы изменить порядок загрузки"
   },
   "sr": {
     "title": "Управљање Sobosuba модовима",
@@ -1252,6 +1307,7 @@
     "err_adopt": "Потврдите управљање истоветним ручно инсталираним датотекама.",
     "err_other": "Укључен је мод за другу верзију игре. Прво га искључите.",
     "offline": "Каталог није доступан. Локални ZIP-ови су доступни.",
+    "another_copy": "Покренута је још једна копија менаџера. Затворите је пре ажурирања. Ако је не видите, завршите Sobosuba Mod Manager у Менаџеру задатака.",
     "choose_zip": "Изаберите ZIP са модом",
     "choose_folder": "Изаберите фасциклу игре sobosuba",
     "library": "Инсталирани модови",
@@ -1317,7 +1373,11 @@
     "credit_readme_warning": "Упозорење. Није могуће проверити аутора или везу за куповину у GitHub README датотеци. Можете наставити инсталацију.",
     "load_order": "Редослед учитавања: {0} од {1}",
     "load_earlier": "Учитај раније",
-    "load_later": "Учитај касније"
+    "load_later": "Учитај касније",
+    "appearance_system": "Систем",
+    "appearance_light": "Светло",
+    "appearance_dark": "Тамно",
+    "drag_to_reorder": "Превуците да промените редослед учитавања"
   },
   "zh_CN": {
     "title": "Sobosuba 模组管理器",
@@ -1362,6 +1422,7 @@
     "err_adopt": "请确认允许管理手动安装且内容一致的文件。",
     "err_other": "另一个游戏版本的模组已启用，请先停用。",
     "offline": "无法获取目录，本地 ZIP 操作仍可使用。",
+    "another_copy": "另一个管理器副本正在运行。请在更新前将其关闭。如果看不到它，请在任务管理器中结束 Sobosuba Mod Manager。",
     "choose_zip": "选择模组 ZIP",
     "choose_folder": "选择 sobosuba 游戏文件夹",
     "library": "已安装的模组",
@@ -1427,7 +1488,11 @@
     "credit_readme_warning": "警告。无法确认 GitHub README 中的原作作者署名或购买链接。您可以继续安装。",
     "load_order": "加载顺序：第 {0} 个，共 {1} 个",
     "load_earlier": "提前加载",
-    "load_later": "延后加载"
+    "load_later": "延后加载",
+    "appearance_system": "跟随系统",
+    "appearance_light": "浅色",
+    "appearance_dark": "深色",
+    "drag_to_reorder": "拖动以更改加载顺序"
   },
   "zh_TW": {
     "title": "Sobosuba 模組管理員",
@@ -1472,6 +1537,7 @@
     "err_adopt": "請確認允許管理手動安裝且內容相同的檔案。",
     "err_other": "其他遊戲版本的模組已啟用，請先停用。",
     "offline": "無法取得目錄，本機 ZIP 操作仍可使用。",
+    "another_copy": "另一個管理員副本正在執行。請在更新前將其關閉。如果看不到它，請在工作管理員中結束 Sobosuba Mod Manager。",
     "choose_zip": "選擇模組 ZIP",
     "choose_folder": "選擇 sobosuba 遊戲資料夾",
     "library": "已安裝的模組",
@@ -1537,7 +1603,11 @@
     "credit_readme_warning": "警告。無法確認 GitHub README 中的原作作者署名或購買連結。您可以繼續安裝。",
     "load_order": "載入順序：第 {0} 個，共 {1} 個",
     "load_earlier": "提前載入",
-    "load_later": "延後載入"
+    "load_later": "延後載入",
+    "appearance_system": "跟隨系統",
+    "appearance_light": "淺色",
+    "appearance_dark": "深色",
+    "drag_to_reorder": "拖曳以變更載入順序"
   },
   "ko": {
     "title": "Sobosuba 모드 관리자",
@@ -1582,6 +1652,7 @@
     "err_adopt": "수동 설치된 동일한 파일을 관리하도록 허용해 주세요.",
     "err_other": "다른 게임 버전의 모드가 활성화되어 있습니다. 먼저 비활성화해 주세요.",
     "offline": "목록을 가져올 수 없습니다. 로컬 ZIP 작업은 사용할 수 있습니다.",
+    "another_copy": "관리 앱이 하나 더 실행 중입니다. 업데이트하기 전에 닫아 주세요. 보이지 않으면 작업 관리자에서 Sobosuba Mod Manager를 종료하세요.",
     "choose_zip": "모드 ZIP 선택",
     "choose_folder": "sobosuba 게임 폴더 선택",
     "library": "설치된 모드",
@@ -1647,7 +1718,11 @@
     "credit_readme_warning": "경고. GitHub README의 원작자 표시 또는 구매 링크를 확인하지 못했습니다. 설치를 계속할 수 있습니다.",
     "load_order": "불러오기 순서: {1}개 중 {0}번째",
     "load_earlier": "먼저 불러오기",
-    "load_later": "나중에 불러오기"
+    "load_later": "나중에 불러오기",
+    "appearance_system": "시스템",
+    "appearance_light": "밝게",
+    "appearance_dark": "어둡게",
+    "drag_to_reorder": "끌어서 불러오는 순서를 바꿀 수 있습니다"
   },
   "tr": {
     "title": "Sobosuba Mod Yöneticisi",
@@ -1692,6 +1767,7 @@
     "err_adopt": "Elle kurulmuş aynı dosyaların yönetimini onaylayın.",
     "err_other": "Başka bir oyun sürümünün modu etkin. Önce devre dışı bırakın.",
     "offline": "Katalog kullanılamıyor. Yerel ZIP işlemleri kullanılabilir.",
+    "another_copy": "Yöneticinin başka bir kopyası çalışıyor. Güncellemeden önce kapatın. Göremiyorsanız Görev Yöneticisi'nde Sobosuba Mod Manager'ı sonlandırın.",
     "choose_zip": "Mod ZIP’i seçin",
     "choose_folder": "sobosuba oyun klasörünü seçin",
     "library": "Kurulu modlar",
@@ -1757,7 +1833,11 @@
     "credit_readme_warning": "Uyarı. GitHub README dosyasındaki geliştirici veya satın alma bağlantısı doğrulanamadı. Kuruluma devam edebilirsiniz.",
     "load_order": "Yükleme sırası: {1} içinde {0}",
     "load_earlier": "Daha önce yükle",
-    "load_later": "Daha sonra yükle"
+    "load_later": "Daha sonra yükle",
+    "appearance_system": "Sistem",
+    "appearance_light": "Açık",
+    "appearance_dark": "Koyu",
+    "drag_to_reorder": "Yükleme sırasını değiştirmek için sürükleyin"
   },
   "uk": {
     "title": "Менеджер модів Sobosuba",
@@ -1802,6 +1882,7 @@
     "err_adopt": "Підтвердьте керування однаковими файлами, встановленими вручну.",
     "err_other": "Увімкнено мод для іншої версії гри. Спершу вимкніть його.",
     "offline": "Каталог недоступний. Локальні ZIP працюють.",
+    "another_copy": "Запущено ще одну копію менеджера. Закрийте її перед оновленням. Якщо її не видно, завершіть Sobosuba Mod Manager у диспетчері завдань.",
     "choose_zip": "Виберіть ZIP з модом",
     "choose_folder": "Виберіть папку гри sobosuba",
     "library": "Встановлені моди",
@@ -1867,7 +1948,11 @@
     "credit_readme_warning": "Попередження. Не вдалося перевірити автора або посилання на придбання в README GitHub. Можна продовжити встановлення.",
     "load_order": "Порядок завантаження: {0} з {1}",
     "load_earlier": "Завантажувати раніше",
-    "load_later": "Завантажувати пізніше"
+    "load_later": "Завантажувати пізніше",
+    "appearance_system": "Система",
+    "appearance_light": "Світла",
+    "appearance_dark": "Темна",
+    "drag_to_reorder": "Перетягніть, щоб змінити порядок завантаження"
   },
   "id": {
     "title": "Pengelola Mod Sobosuba",
@@ -1912,6 +1997,7 @@
     "err_adopt": "Konfirmasikan pengelolaan berkas identik yang dipasang manual.",
     "err_other": "Mod untuk versi gim lain sedang aktif. Nonaktifkan dahulu.",
     "offline": "Katalog tidak tersedia. Operasi ZIP lokal tetap dapat digunakan.",
+    "another_copy": "Salinan lain pengelola sedang berjalan. Tutup sebelum memperbarui. Jika tidak terlihat, akhiri Sobosuba Mod Manager di Task Manager.",
     "choose_zip": "Pilih ZIP mod",
     "choose_folder": "Pilih folder gim sobosuba",
     "library": "Mod terpasang",
@@ -1977,7 +2063,11 @@
     "credit_readme_warning": "Peringatan. Kredit pembuat atau tautan pembelian di README GitHub tidak dapat diverifikasi. Anda dapat melanjutkan pemasangan.",
     "load_order": "Urutan muat: {0} dari {1}",
     "load_earlier": "Muat lebih awal",
-    "load_later": "Muat lebih akhir"
+    "load_later": "Muat lebih akhir",
+    "appearance_system": "Sistem",
+    "appearance_light": "Terang",
+    "appearance_dark": "Gelap",
+    "drag_to_reorder": "Seret untuk mengubah urutan muat"
   },
   "vi": {
     "title": "Trình quản lý mod Sobosuba",
@@ -2022,6 +2112,7 @@
     "err_adopt": "Xác nhận quản lý các tệp giống hệt đã cài thủ công.",
     "err_other": "Mod cho phiên bản khác đang bật. Hãy tắt trước.",
     "offline": "Không thể tải danh mục. Vẫn có thể thao tác với ZIP cục bộ.",
+    "another_copy": "Một bản khác của trình quản lý đang chạy. Hãy đóng nó trước khi cập nhật. Nếu không thấy, hãy kết thúc Sobosuba Mod Manager trong Trình quản lý tác vụ.",
     "choose_zip": "Chọn ZIP của mod",
     "choose_folder": "Chọn thư mục trò chơi sobosuba",
     "library": "Mod đã cài đặt",
@@ -2087,7 +2178,11 @@
     "credit_readme_warning": "Cảnh báo. Không thể xác minh tên tác giả hoặc liên kết mua trong README trên GitHub. Bạn có thể tiếp tục cài đặt.",
     "load_order": "Thứ tự tải: {0} trên {1}",
     "load_earlier": "Tải sớm hơn",
-    "load_later": "Tải muộn hơn"
+    "load_later": "Tải muộn hơn",
+    "appearance_system": "Hệ thống",
+    "appearance_light": "Sáng",
+    "appearance_dark": "Tối",
+    "drag_to_reorder": "Kéo để đổi thứ tự tải"
   },
   "nl": {
     "title": "Sobosuba-modbeheer",
@@ -2132,6 +2227,7 @@
     "err_adopt": "Bevestig het beheer van identieke, handmatig geïnstalleerde bestanden.",
     "err_other": "Een mod voor een andere spelversie is ingeschakeld. Schakel die eerst uit.",
     "offline": "Catalogus niet beschikbaar. Lokale ZIP-bewerkingen blijven werken.",
+    "another_copy": "Er draait nog een kopie van de beheerder. Sluit die voor het bijwerken. Zie je hem niet, beëindig Sobosuba Mod Manager dan in Taakbeheer.",
     "choose_zip": "Kies een mod-ZIP",
     "choose_folder": "Kies de spelmap van sobosuba",
     "library": "Geïnstalleerde mods",
@@ -2197,7 +2293,11 @@
     "credit_readme_warning": "Waarschuwing. De maker of kooplink in de GitHub-README kon niet worden gecontroleerd. Je kunt doorgaan met installeren.",
     "load_order": "Laadvolgorde: {0} van {1}",
     "load_earlier": "Eerder laden",
-    "load_later": "Later laden"
+    "load_later": "Later laden",
+    "appearance_system": "Systeem",
+    "appearance_light": "Licht",
+    "appearance_dark": "Donker",
+    "drag_to_reorder": "Sleep om de laadvolgorde te wijzigen"
   },
   "hu": {
     "title": "Sobosuba modkezelő",
@@ -2242,6 +2342,7 @@
     "err_adopt": "Erősítsd meg a kézzel telepített, azonos fájlok kezelését.",
     "err_other": "Más játékverzióhoz tartozó mod aktív. Előbb kapcsold ki.",
     "offline": "A katalógus nem érhető el. A helyi ZIP-ek kezelése továbbra is működik.",
+    "another_copy": "A kezelő egy másik példánya is fut. Frissítés előtt zárd be. Ha nem látod, állítsd le a Sobosuba Mod Managert a Feladatkezelőben.",
     "choose_zip": "Válassz mod-ZIP-et",
     "choose_folder": "Válaszd ki a sobosuba játék mappáját",
     "library": "Telepített modok",
@@ -2307,7 +2408,11 @@
     "credit_readme_warning": "Figyelem. A GitHub README készítői adata vagy vásárlási hivatkozása nem ellenőrizhető. A telepítés folytatható.",
     "load_order": "Betöltési sorrend: {0} / {1}",
     "load_earlier": "Betöltés korábban",
-    "load_later": "Betöltés később"
+    "load_later": "Betöltés később",
+    "appearance_system": "Rendszer",
+    "appearance_light": "Világos",
+    "appearance_dark": "Sötét",
+    "drag_to_reorder": "Húzza el a betöltési sorrend módosításához"
   },
   "ro": {
     "title": "Manager de moduri Sobosuba",
@@ -2352,6 +2457,7 @@
     "err_adopt": "Confirmă gestionarea fișierelor identice instalate manual.",
     "err_other": "Un mod pentru altă versiune este activat. Dezactivează-l mai întâi.",
     "offline": "Catalogul nu este disponibil. Operațiunile ZIP locale funcționează în continuare.",
+    "another_copy": "Rulează o altă copie a managerului. Închide-o înainte de actualizare. Dacă nu o vezi, oprește Sobosuba Mod Manager din Managerul de activități.",
     "choose_zip": "Selectează un ZIP cu mod",
     "choose_folder": "Selectează dosarul jocului sobosuba",
     "library": "Moduri instalate",
@@ -2417,6 +2523,10 @@
     "credit_readme_warning": "Avertisment. Autorul sau linkul de cumpărare din README de pe GitHub nu a putut fi verificat. Puteți continua instalarea.",
     "load_order": "Ordinea de încărcare: {0} din {1}",
     "load_earlier": "Încarcă mai devreme",
-    "load_later": "Încarcă mai târziu"
+    "load_later": "Încarcă mai târziu",
+    "appearance_system": "Sistem",
+    "appearance_light": "Luminos",
+    "appearance_dark": "Întunecat",
+    "drag_to_reorder": "Trageți pentru a schimba ordinea de încărcare"
   }
 }
