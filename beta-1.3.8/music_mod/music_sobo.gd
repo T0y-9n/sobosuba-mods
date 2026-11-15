@@ -1,6 +1,6 @@
 extends Node
 
-const MOD_VERSION := "1.3.11-0.1.0"
+const MOD_VERSION := "1.3.11-1.0.0"
 const IMPULSE_CAP := 3400.0
 
 var settings: RefCounted

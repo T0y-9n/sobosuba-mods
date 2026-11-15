@@ -2,6 +2,10 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Music Sobos 1.3.11-1.0.0, 2026-11-15
+
+- Now numbered 1.0.0, like the other mods. The mod is the same as 0.1.0.
+
 ### Music Sobos 1.3.11-0.1.0, 2026-11-15
 
 - Play one song from your computer. Every sobo shakes with the song.
@@ -188,6 +192,10 @@ Changed: 5s now appear more often.
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### Music Sobos 1.3.11-1.0.0、2026-11-15
+
+- ほかの MOD と同じく 1.0.0 の版にした。中身は 0.1.0 と同じ。
 
 ### Music Sobos 1.3.11-0.1.0、2026-11-15
 
