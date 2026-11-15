@@ -1,0 +1,58 @@
+"""Build the Music Sobos package for sobosuba 1.3.11."""
+import argparse
+import hashlib
+import json
+import re
+from pathlib import Path
+import zipfile
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--output", type=Path, required=True)
+args = parser.parse_args()
+source = Path(__file__).resolve().parent
+version = re.search(
+    r'^const MOD_VERSION := "([^"]+)"',
+    (source / "music_mod" / "music_sobo.gd").read_text(encoding="utf-8"),
+    re.MULTILINE,
+).group(1)
+payload = {
+    f"music_mod/{path.name}": path.read_bytes()
+    for path in sorted((source / "music_mod").iterdir())
+    if path.suffix == ".gd" and path.name != "music_selftest.gd"
+}
+bootstrap = "styles/music_bootstrap.tres"
+payload[bootstrap] = (source / bootstrap).read_bytes()
+metadata = {
+    "format_version": 1,
+    "id": "music_sobo",
+    "name": "Music Sobos",
+    "version": version,
+    "game_versions": ["1.3.11"],
+    "install_layout": "user-data-styles",
+    "payload_root": "music_mod",
+    "entry": "music_sobo.gd",
+    "autoload": "MusicSobo",
+    "bootstrap": bootstrap,
+    "dependencies": [],
+    "files": sorted(payload),
+    "description": {
+        "en": "Play one song from your computer and shake every sobo with it. A heavier number moves less. The song is not included."
+    },
+    "author": "T0y-9n",
+    "readme": "README-en.md",
+    "game_credit": {
+        "text": "sobosuba by keepee",
+        "store_url": "https://store.steampowered.com/app/1946560/sobosuba",
+    },
+}
+args.output.mkdir(parents=True, exist_ok=True)
+path = args.output / f"Music-Sobos-{version}.zip"
+with zipfile.ZipFile(path, "x", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+    for name, data in payload.items():
+        archive.writestr(name, data)
+    archive.writestr("mod-package.json", json.dumps(metadata, indent=2) + "\n")
+    archive.writestr("README-en.md", (source / "music_mod" / "README-en.md").read_bytes())
+    archive.writestr("LICENSE", (source.parent / "LICENSE").read_bytes())
+digest = hashlib.sha256(path.read_bytes()).hexdigest()
+path.with_suffix(".zip.sha256").write_text(f"{digest}  {path.name}\n", encoding="ascii")
+print(path.name, path.stat().st_size, digest)

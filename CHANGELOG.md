@@ -2,6 +2,12 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Music Sobos 1.3.11-0.1.0, 2026-11-15
+
+- Play one song from your computer. Every sobo shakes with the song.
+- Choose an mp3, ogg or wav file in the settings. Play stays off until you turn it on.
+- A heavier number moves less. The song is not included in this mod.
+
 ### Undo 1.3.11-1.0.0, 2026-11-14
 
 - First release.
@@ -182,6 +188,12 @@ Changed: 5s now appear more often.
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### Music Sobos 1.3.11-0.1.0、2026-11-15
+
+- 自分の曲を 1 曲流すと、ソボが曲に合わせて揺れる。
+- 設定で mp3、ogg、wav を選ぶ。再生は、自分で入れるまで止まっている。
+- 重い数字ほど揺れは小さい。曲そのものはこの MOD に入っていない。
 
 ### Undo 1.3.11-1.0.0、2026-11-14
 
