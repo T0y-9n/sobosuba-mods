@@ -8,11 +8,11 @@ sobosuba by keepee. This mod requires the original game.
 - Game 1.3.11. [1.3.11-1.0.9](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.9) and [Special Sobos 0.6.5 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.5).
 - Game 1.3.11. [Sobo Crash Fix 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/crash-fix-1.3.11-1.0.0). Stops a crash in the game itself when a sobo is removed by a merge or at the end of a run.
 - Game 1.3.11. [Undo 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/undo-1.3.11-1.0.0). Press U to go back to the board from just before you launched a sobo, up to five times. While it is on, no score is sent to the leaderboard.
-- Game 1.3.11. [Music Sobos 1.3.11-0.1.0 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/music-1.3.11-0.1.0). Play one song from your computer and every sobo shakes with it. A heavier number moves less. The song is not included.
+- Game 1.3.11. [Music Sobos 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/music-1.3.11-1.0.0). Play one song from your computer and every sobo shakes with it. A heavier number moves less. The song is not included.
 - Game 1.2.3. [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6).
 - [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) and [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0), by Typhe681.
 
-Prime Sobos 1.3.11-1.0.9 makes primes that can merge with the prime sobos on the board a little more likely to appear. Special Sobos 0.6.5 adds change, rock and Big Bang sobos. Undo 1.3.11-1.0.0 and Music Sobos 1.3.11-0.1.0 are new mods. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+Prime Sobos 1.3.11-1.0.9 makes primes that can merge with the prime sobos on the board a little more likely to appear. Special Sobos 0.6.5 adds change, rock and Big Bang sobos. Undo 1.3.11-1.0.0 and Music Sobos 1.3.11-1.0.0 are new mods. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 Smartphone layout support: Prime Sobos and Special Sobos now adapt their settings and labels to portrait screens. Checked on Windows with phone-size layouts; real-device touch, safe areas and software keyboards still need verification.
 
@@ -170,7 +170,7 @@ sobosubaはkeepeeさんの作品です。このMODを使うには原作が必要
 - ゲーム1.3.11用の [1.3.11-1.0.9](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.3.11-1.0.9) と [Special Sobos 0.6.5 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/special-1.3.11-0.6.5)。
 - ゲーム1.3.11用の [Sobo Crash Fix 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/crash-fix-1.3.11-1.0.0)。ソボが合体や回の終わりで消えるときの、本家のクラッシュを止める MOD です。
 - ゲーム1.3.11用の [Undo 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/undo-1.3.11-1.0.0)。U を押すと、ソボを放つ直前の盤面へ 5 回まで戻れる MOD です。有効にしている間は、本家のリーダーボードに点数は送信されません。
-- ゲーム1.3.11用の [Music Sobos 1.3.11-0.1.0 beta](https://github.com/T0y-9n/sobosuba-mods/releases/tag/music-1.3.11-0.1.0)。自分の曲を 1 曲流すと、ソボが曲に合わせて揺れる MOD です。重い数字ほど揺れは小さくなります。曲そのものは入っていません。
+- ゲーム1.3.11用の [Music Sobos 1.3.11-1.0.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/music-1.3.11-1.0.0)。自分の曲を 1 曲流すと、ソボが曲に合わせて揺れる MOD です。重い数字ほど揺れは小さくなります。曲そのものは入っていません。
 - ゲーム1.2.3用の [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6)。
 - Typhe681さんの [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) と [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0)。
 
