@@ -42,13 +42,13 @@
     {
       "id": "special_sobo",
       "name": "Special Sobos (beta)",
-      "version": "1.3.11-0.6.5",
+      "version": "1.3.11-0.6.7",
       "game_versions": [
         "1.3.11"
       ],
-      "summary": "Beta for sobosuba 1.3.11 with Small, Puffy, Magnet, Throwing, Tornado, Liquid, Dark matter, Change, Rock and Big Bang sobos and numeric settings.",
-      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.6.5/Special-Sobos-1.3.11-0.6.5.zip",
-      "sha256": "388ac1f60637d9db421b2bb268d0039985b6477ebf54dd02c70d4b4fe6ed257a",
+      "summary": "Beta for sobosuba 1.3.11 with Small, Puffy, Magnet, Throwing, Tornado, Liquid, Dark matter, Change and Big Bang sobos and numeric settings.",
+      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.6.7/Special-Sobos-1.3.11-0.6.7.zip",
+      "sha256": "c055cca4fb4840858dce8e46298e2341c57f17f4bfd142310b73f38511dc3343",
       "game_credit": {
         "text": "sobosuba by keepee",
         "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
@@ -105,13 +105,13 @@
     {
       "id": "music_sobo",
       "name": "Music Sobos",
-      "version": "1.3.11-1.0.0",
+      "version": "1.3.11-1.2.0",
       "game_versions": [
         "1.3.11"
       ],
       "summary": "Play one song from your computer and shake every sobo with it. A heavier number moves less. The song is not included.",
-      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/music-1.3.11-1.0.0/Music-Sobos-1.3.11-1.0.0.zip",
-      "sha256": "2e9f8511b1fb4d880f56736d78f08bd3f99dd23d4ade38a86596c3488629dfb3",
+      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/music-1.3.11-1.2.0/Music-Sobos-1.3.11-1.2.0.zip",
+      "sha256": "874594cd2ae3a104cfe47780250ebdfe95991735aeaa7496d30c65f55c95cb12",
       "game_credit": {
         "text": "sobosuba by keepee",
         "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
