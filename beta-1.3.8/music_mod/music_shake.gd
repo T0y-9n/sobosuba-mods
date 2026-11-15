@@ -4,7 +4,7 @@ const WEIGHTS := {"low": 1.0, "mid": 0.6, "high": 0.35}
 const BEAT_GAIN := 450.0
 const TONE_GAIN := 3000.0
 
-static func step(bands: Dictionary, previous: Dictionary, average: float, since_beat: float, beat_scale: float, tone_scale: float, cap: float, beat_level: float = -1.0) -> Dictionary:
+static func step(bands: Dictionary, previous: Dictionary, average: float, since_beat: float, beat_scale: float, tone_scale: float, cap: float, beat_level: float = -1.0, range_scale: float = 1.0) -> Dictionary:
 	var rise := 0.0
 	for key: String in WEIGHTS:
 		var delta := float(bands.get(key, 0.0)) - float(previous.get(key, 0.0))
@@ -15,5 +15,7 @@ static func step(bands: Dictionary, previous: Dictionary, average: float, since_
 	var impulse := rise * tone_scale * TONE_GAIN
 	if beat and average > 0.0:
 		impulse += (level / average) * beat_scale * BEAT_GAIN
-	impulse = clampf(impulse, 0.0, cap)
+	var scale := clampf(range_scale, 0.0, 3.0)
+	impulse *= scale
+	impulse = clampf(impulse, 0.0, cap * scale)
 	return {"impulse": impulse, "beat": beat}

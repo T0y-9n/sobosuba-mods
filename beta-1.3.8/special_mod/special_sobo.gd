@@ -75,7 +75,7 @@ func _ready() -> void:
 		trait_weights = tuning.WEIGHTS.duplicate()
 	else:
 		settings.base_traits.clear()
-	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado.flag")) or FileAccess.file_exists(mod_dir().path_join("darkmatter.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado_settings.flag")) or FileAccess.file_exists(mod_dir().path_join("bigbang.flag")) or FileAccess.file_exists(mod_dir().path_join("weight_bigbang.flag")) or FileAccess.file_exists(mod_dir().path_join("marker.flag")) or FileAccess.file_exists(mod_dir().path_join("shuffle_merge.flag")) or FileAccess.file_exists(mod_dir().path_join("contacts.flag")) or FileAccess.file_exists(mod_dir().path_join("shuffle_touch.flag")) or FileAccess.file_exists(mod_dir().path_join("rock_repair.flag")) or FileAccess.file_exists(mod_dir().path_join("settings_layout.flag")) or FileAccess.file_exists(mod_dir().path_join("prime_record.flag")):
+	if FileAccess.file_exists(mod_dir().path_join("selftest.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado.flag")) or FileAccess.file_exists(mod_dir().path_join("darkmatter.flag")) or FileAccess.file_exists(mod_dir().path_join("tornado_settings.flag")) or FileAccess.file_exists(mod_dir().path_join("bigbang.flag")) or FileAccess.file_exists(mod_dir().path_join("weight_bigbang.flag")) or FileAccess.file_exists(mod_dir().path_join("marker.flag")) or FileAccess.file_exists(mod_dir().path_join("shuffle_merge.flag")) or FileAccess.file_exists(mod_dir().path_join("contacts.flag")) or FileAccess.file_exists(mod_dir().path_join("shuffle_touch.flag")) or FileAccess.file_exists(mod_dir().path_join("settings_layout.flag")) or FileAccess.file_exists(mod_dir().path_join("prime_record.flag")):
 		settings.path = settings.SELFTEST_PATH
 	settings.load_file()
 	magnet_pull_multiplier = settings.magnet_pull_multiplier
@@ -227,10 +227,6 @@ func finish_setup() -> void:
 		var shuffle_touch: Node = load(mod_dir().path_join("special_shuffle_touch_selftest.gd")).new()
 		shuffle_touch.mod = self
 		add_child(shuffle_touch)
-	elif FileAccess.file_exists(mod_dir().path_join("rock_repair.flag")):
-		var rock_repair: Node = load(mod_dir().path_join("special_rock_repair_selftest.gd")).new()
-		rock_repair.mod = self
-		add_child(rock_repair)
 	elif FileAccess.file_exists(mod_dir().path_join("settings_layout.flag")):
 		var settings_layout: Node = load(mod_dir().path_join("special_settings_layout_selftest.gd")).new()
 		settings_layout.mod = self
@@ -552,8 +548,6 @@ func on_sobo_merge(old0: Sobo, old1: Sobo, result: Sobo) -> void:
 		var extra: Dictionary = capture_extra_state(old0 if trait0 != "" else old1)
 		extra.erase("shape_size")
 		restore_extra_state(result, extra)
-		if kind == "rock" and is_instance_valid(extra_effects):
-			extra_effects.capture_rock(result)
 
 
 func finish_small_merge(reference: WeakRef, serial: int) -> void:

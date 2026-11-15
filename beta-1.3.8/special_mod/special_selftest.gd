@@ -109,15 +109,17 @@ func run() -> void:
 	finish()
 
 
-## 0.6.3 adds change, rock and Big Bang to the tornado, liquid and dark matter of 0.6.2.
-## Splitter, translucent and the old minus one stay out: their settings, words, code paths
-## and tests are taken out, not hidden.
+## 0.6.3 adds change and Big Bang to the tornado, liquid and dark matter of 0.6.2.
+## Splitter, translucent, the old minus one and rock (taken out in 0.6.7) stay out: their
+## settings, words, code paths and tests are taken out, not hidden.
+## special_rock_repair_selftest.gd is still in the repository until its deletion is
+## approved. Nothing loads it and the package leaves selftests out, so it is not listed here.
 func check_release_kinds() -> void:
 	var effects: Node = mod.extra_effects
-	check(effects != null and ",".join(effects.KINDS) == "washer,liquid,darkmatter,shuffle,rock,bigbang", "added kinds are tornado, liquid, dark matter, change, rock and Big Bang: %s" % [effects.KINDS if effects != null else "none"])
+	check(effects != null and ",".join(effects.KINDS) == "washer,liquid,darkmatter,shuffle,bigbang", "added kinds are tornado, liquid, dark matter, change and Big Bang: %s" % [effects.KINDS if effects != null else "none"])
 	if effects == null:
 		return
-	var removed: Array[String] = ["splitter", "translucent", "minus"]
+	var removed: Array[String] = ["splitter", "translucent", "minus", "rock"]
 	var left: PackedStringArray = []
 	for kind: String in removed:
 		if mod.settings.trait_kinds().has(kind) or mod.trait_weights.has(kind):
@@ -137,6 +139,12 @@ func check_release_kinds() -> void:
 	for file: String in ["special_minus_selftest.gd", "special_splitter_easy_selftest.gd", "special_splitter_selftest.gd", "special_translucent_look_selftest.gd", "special_translucent_selftest.gd"]:
 		if FileAccess.file_exists(mod.mod_dir().path_join(file)):
 			left.append("file " + file)
+	for file: String in DirAccess.get_files_at(mod.mod_dir()):
+		if not file.ends_with(".gd") or file.ends_with("_selftest.gd"):
+			continue
+		var source: String = FileAccess.get_file_as_string(mod.mod_dir().path_join(file))
+		if source.to_lower().contains("rock") or source.contains("岩"):
+			left.append("rock in " + file)
 	check(left.is_empty(), "removed kinds leave nothing behind: %s" % ", ".join(left))
 
 

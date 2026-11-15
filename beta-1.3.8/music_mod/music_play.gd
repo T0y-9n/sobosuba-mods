@@ -4,6 +4,8 @@ var reason := ""
 var player: AudioStreamPlayer
 var stopped_bgm: AudioStreamPlayer
 var resume_bgm := false
+# Master reverb effects this mod turned off while a song plays.
+var muted_reverbs: Array[int] = []
 
 func prepare(parent: Node) -> void:
 	_ensure_bus()
@@ -20,11 +22,14 @@ func load_song(path: String) -> String:
 		if player != null:
 			player.stop()
 			player.stream = null
+		restore_reverb()
 		print("music sobo: %s" % reason)
 		return reason
 	if "loop" in stream:
 		stream.set("loop", true)
 	player.stream = stream
+	if not player.playing:
+		restore_reverb()
 	reason = ""
 	return ""
 
@@ -41,12 +46,30 @@ func set_playing(on: bool) -> void:
 			resume_bgm = true
 		if not player.playing:
 			player.play()
+		_mute_reverb()
 		return
 	player.stop()
+	restore_reverb()
 	if resume_bgm and stopped_bgm != null and is_instance_valid(stopped_bgm):
 		stopped_bgm.play()
 	resume_bgm = false
 	stopped_bgm = null
+
+# The game's Master bus has a reverb, and every bus ends on Master.
+# Turn the enabled ones off while a song plays; leave ones that were off alone.
+func _mute_reverb() -> void:
+	if not muted_reverbs.is_empty():
+		return
+	for index: int in AudioServer.get_bus_effect_count(0):
+		if AudioServer.get_bus_effect(0, index) is AudioEffectReverb and AudioServer.is_bus_effect_enabled(0, index):
+			AudioServer.set_bus_effect_enabled(0, index, false)
+			muted_reverbs.append(index)
+
+func restore_reverb() -> void:
+	for index: int in muted_reverbs:
+		if index < AudioServer.get_bus_effect_count(0) and AudioServer.get_bus_effect(0, index) is AudioEffectReverb:
+			AudioServer.set_bus_effect_enabled(0, index, true)
+	muted_reverbs.clear()
 
 func is_playing() -> bool:
 	return player != null and player.playing

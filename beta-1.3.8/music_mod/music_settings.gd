@@ -5,6 +5,7 @@ var song := ""
 var playing := false
 var beat := 1.0
 var tone := 0.5
+var shake_range := 1.0
 
 func load_file() -> void:
 	if path.is_empty() or not FileAccess.file_exists(path):
@@ -18,11 +19,12 @@ func load_file() -> void:
 	playing = data.get("playing") == true
 	beat = clampf(float(data.get("beat", beat)), 0.0, 2.0)
 	tone = clampf(float(data.get("tone", tone)), 0.0, 2.0)
+	shake_range = clampf(float(data.get("shake_range", shake_range)), 0.0, 3.0)
 
 func save_file() -> void:
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		print("music sobo: settings were not saved")
 		return
-	file.store_string(JSON.stringify({"song": song, "playing": playing, "beat": beat, "tone": tone}))
+	file.store_string(JSON.stringify({"song": song, "playing": playing, "beat": beat, "tone": tone, "shake_range": shake_range}))
 	file.close()

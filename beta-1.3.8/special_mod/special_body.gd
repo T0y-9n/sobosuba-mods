@@ -34,8 +34,6 @@ func fix_shape() -> void:
 	set_meta("special_sobo_shape_repairs", int(get_meta("special_sobo_shape_repairs", 0)) + 1)
 	mod.shape_repairs += 1
 	super.fix_shape()
-	if str(get_meta("special_sobo_trait", "")) == "rock" and is_instance_valid(mod.extra_effects):
-		mod.extra_effects.restore_rock(self)
 
 
 func capture_sobo_state() -> SoboState:

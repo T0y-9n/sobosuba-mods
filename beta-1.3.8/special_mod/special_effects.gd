@@ -11,14 +11,12 @@ const WORDS: Dictionary = {
 	"trait shuffle": {"en":"change sobos", "ja":"チェンジソボ"},
 	"description washer": {"en":"Stirs the sobos around it. A larger number reaches farther and pushes harder. At 64 it covers the whole board, and a larger number stays at that reach.", "ja":"周りのソボをかき混ぜる。数が大きいほど遠く、強く押す。64 で盤面の全体に届き、それより大きくても同じ届き。"},
 	"description shuffle": {"en":"Swaps numbers with the first sobo it touches, once, as soon as they touch. Only the number moves, with the merge rule that goes with it. Shapes, colors and the other sobo's own effect stay.", "ja":"最初に触れたソボと、触れた時に 1 回だけ数字を入れ替える。入れ替わるのは数字（と、その数字の合体の決まり）だけで、形・色・相手の効果はそのまま。"},
-	"trait rock": {"en":"rock sobos", "ja":"岩のソボ"},
-	"description rock": {"en":"Keeps the shape it had when thrown, or when it was merged. It can still roll as a whole. Its weight stays the same.", "ja":"投げた瞬間、または合体した瞬間の形を保つ。体ごと転がる。重さは変えない"},
 	"trait darkmatter": {"en":"dark matter sobos", "ja":"ダークマターソボ"},
 	"description darkmatter": {"en":"Black, with no number and no mark. Its size is random, from the smallest sobo this match can spawn up to the largest one on the board. It keeps its real number, and merges only with that number. Merging with an ordinary sobo stays dark matter and draws a new size. Two of the same number become an ordinary sobo.", "ja":"真っ黒で、数字も印も出ない。大きさはランダムで、その試合に出る一番小さいソボから盤面の一番大きいソボまで。本当の数字を内側に持ち、その数字とだけ合体する。普通のソボと合体するとダークマターのまま大きさを引き直す。同じ数字どうしは普通のソボに戻る。"},
 	"extra sobos": {"en":"extra sobos", "ja":"追加ソボ"},
 }
 
-const KINDS: Array[String] = ["washer", "liquid", "darkmatter", "shuffle", "rock", "bigbang"]
+const KINDS: Array[String] = ["washer", "liquid", "darkmatter", "shuffle", "bigbang"]
 const STATE_META := "special_extra_state"
 const SHAPE_META := "special_extra_shape_size"
 const KEEP_COLOR_META := "special_shuffle_color"
@@ -138,7 +136,6 @@ func tick(mode: SceneClassic, delta: float, gravity: float) -> void:
 		return
 	settle_liquids(mode)
 	bigbang_touch(mode, delta, gravity)
-	hold_rocks(mode)
 	var stack: Array[Sobo] = mod.live_stack(mode)
 	for sobo: Sobo in stack:
 		if mod.trait_of(sobo) == "liquid":
@@ -146,7 +143,7 @@ func tick(mode: SceneClassic, delta: float, gravity: float) -> void:
 	hold_bang_merges()
 	for owner: Sobo in stack:
 		var kind: String = mod.trait_of(owner)
-		if kind == "liquid" or kind == "bigbang" or kind == "rock" or kind not in KINDS or not eligible(owner, mode):
+		if kind == "liquid" or kind == "bigbang" or kind not in KINDS or not eligible(owner, mode):
 			continue
 		var data := state(owner)
 		if data.spent:
@@ -160,84 +157,6 @@ func tick(mode: SceneClassic, delta: float, gravity: float) -> void:
 			continue
 		if kind == "washer" and data.elapsed >= number("extra_delay"):
 			wash(owner, mode, gravity)
-
-
-func hold_rocks(mode: SceneClassic) -> void:
-	for owner: Sobo in mod.live_stack(mode):
-		if mod.trait_of(owner) != "rock" or owner.subas.is_empty() or owner.is_queued_for_deletion():
-			continue
-		var locals: Array = state(owner).get("rock_local", [])
-		if locals.size() != owner.subas.size():
-			capture_rock(owner)
-			continue
-		var currents: Array = []
-		var velocities: Array = []
-		for suba: Suba in owner.subas:
-			currents.append(suba.global_position)
-			velocities.append(suba.linear_velocity)
-		var body_velocity: Vector2 = Parameters.rock_body_velocity(velocities)
-		var pose: Dictionary = Parameters.rock_alignment(locals, currents)
-		var angle: float = pose.angle
-		var center: Vector2 = pose.center
-		var offsets: Array = []
-		for local: Variant in locals:
-			offsets.append(Parameters.rock_vector(local).rotated(angle))
-		var spin: float = Parameters.rock_spin(offsets, velocities, body_velocity)
-		for index: int in owner.subas.size():
-			var offset: Vector2 = offsets[index]
-			owner.subas[index].global_position = center + offset
-			owner.subas[index].linear_velocity = Parameters.rock_point_velocity(body_velocity, spin, offset)
-			owner.subas[index].angular_velocity = spin
-		owner.extra_mass_ball.global_position = center
-		owner.extra_mass_ball.linear_velocity = body_velocity
-		owner.read_body_states()
-		owner.update_polygon_points()
-
-
-# from_server: read the positions the physics server holds. The base fix_shape
-# writes the repaired shape there; the nodes keep the broken shape until the next step.
-func capture_rock(owner: Sobo, from_server: bool = false) -> void:
-	if owner.subas.is_empty():
-		return
-	var points: Array[Vector2] = []
-	for suba: Suba in owner.subas:
-		if from_server:
-			var placed: Transform2D = PhysicsServer2D.body_get_state(suba.get_rid(), PhysicsServer2D.BODY_STATE_TRANSFORM)
-			points.append(placed.origin)
-		else:
-			points.append(suba.global_position)
-	var center := Vector2.ZERO
-	for point: Vector2 in points:
-		center += point
-	center /= float(points.size())
-	var locals: Array = []
-	for point: Vector2 in points:
-		locals.append(point - center)
-	state(owner)["rock_local"] = locals
-
-
-# After the base fix_shape: put the rock back on the shape it holds, at rest,
-# where the base found it. The base repair draws a small ring; a rock keeps its own shape.
-func restore_rock(owner: Sobo) -> void:
-	var locals: Array = state(owner).get("rock_local", [])
-	if owner.subas.is_empty() or locals.size() != owner.subas.size():
-		capture_rock(owner, true)
-		return
-	var currents: Array = []
-	for suba: Suba in owner.subas:
-		currents.append(suba.global_position)
-	var pose: Dictionary = Parameters.rock_alignment(locals, currents)
-	var center: Vector2 = pose.center
-	for index: int in owner.subas.size():
-		var suba: Suba = owner.subas[index]
-		suba.global_position = center + Parameters.rock_vector(locals[index]).rotated(pose.angle)
-		suba.linear_velocity = Vector2.ZERO
-		suba.angular_velocity = 0.0
-	owner.extra_mass_ball.global_position = center
-	owner.extra_mass_ball.linear_velocity = Vector2.ZERO
-	owner.read_body_states()
-	owner.update_polygon_points()
-	owner.snap_interpolation()
 
 
 func nearby(owner: Sobo, mode: SceneClassic, reach: float = -1.0) -> Array[Sobo]:
@@ -438,8 +357,6 @@ func draw_marker(marker: Node2D, sobo: Sobo, kind: String, offset: Vector2, size
 	if kind == "liquid":
 		marker.draw_colored_polygon(PackedVector2Array([offset + Vector2(0.0, -size * 0.45), offset + Vector2(-size * 0.24, size * 0.02), offset + Vector2(size * 0.24, size * 0.02)]), color)
 		marker.draw_circle(offset + Vector2(0.0, size * 0.1), size * 0.26, color)
-	elif kind == "rock":
-		marker.draw_rect(Rect2(offset + Vector2(-size, -size) * 0.28, Vector2.ONE * size * 0.56), color, false, size * 0.12)
 	elif kind == "washer":
 		marker.draw_arc(offset, size * 0.4, 0.2, TAU - 0.4, 20, color, size * 0.14, true)
 		marker.draw_line(offset + Vector2(size * 0.4, -size * 0.15), offset + Vector2(size * 0.1, -size * 0.25), color, size * 0.14, true)

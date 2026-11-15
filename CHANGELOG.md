@@ -2,6 +2,14 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Music Sobos 1.3.11-1.2.0, 2026-11-15
+
+- Add Shake range in the settings. 100% is the same shake as 1.0.0. 0% does not shake. 300% is the maximum. It scales the impulse and the per-frame cap together. Beat and pitch balance are unchanged.
+
+### Music Sobos 1.3.11-1.1.0, 2026-11-15
+
+- The song no longer sounds like it is played in a hall. The game's own reverb is turned off while your song plays, and turned back on when it stops.
+
 ### Music Sobos 1.3.11-1.0.0, 2026-11-15
 
 - Now numbered 1.0.0, like the other mods. The mod is the same as 0.1.0.
@@ -25,6 +33,10 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 - Add bilingual GitHub contribution instructions, a PR template, an issue form and read-only catalog validation using trusted base code.
 - Add a separate GitHub PR sender with explicit submission, duplicate-update checks and required up-to-date validation. Deployment requires operator-approved credentials and GitHub repository settings.
 
+### Special Sobos 1.3.11-0.6.7, 2026-11-15
+
+- Rock sobos are taken out. A rock kept the shape it took mid-merge, and the game kept pulling it back to round, so it could spin on its own and be repaired every frame. Its setting and frequency are gone too.
+
 ### Special Sobos 1.3.11-0.6.5, 2026-11-14
 
 - Change, rock and Big Bang sobos have been added to tornado, liquid and dark matter. Each one has a switch and a spawn rate in the settings.
@@ -44,6 +56,13 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 - A sobo that receives a prime number from a Special Sobos change no longer turns gray. It keeps the original color left by the change.
 - The mod now follows the load order set in the mod manager.
 - Runs with Special Sobos and runs with Undo turned on no longer count as Prime records. They are not added to your local top 10, do not change the best score your Steam friends see, and are not sent to the world ranking (since the first version).
+
+### Mod Manager 0.3.0-alpha.15, 2026-11-15
+
+- The manager writes `manager.log` next to `manager.json`. A line records an install, update, enable, disable, uninstall, saved load order, recovery, update check, or the manager's own update, with the local time and offset, the mod, the versions, and whether it finished or stopped. A home folder is written as `~`. After 1 MB the file rolls to `manager.log.1`, and only those two files are kept. If the log cannot be written, the bottom line says so and the operation still runs.
+- Open log opens that file. Copy diagnostics copies the manager version, the game version, the game folder, the installed mods, and the last 50 log lines.
+- The window title and the heading show the manager's own version from the moment it opens, as "Sobosuba Mod Manager" plus the version. The text is the version the app is running, in every language.
+- A mod can stay on its current version. A pinned mod is not offered an update and is not updated automatically, and its update button cannot be pressed. Turning the pin off brings the offer back. If another mod needs a newer version of a pinned mod, the install stops and names that mod. Disable, uninstall and load order still work. The manager's own update is separate.
 
 ### Mod Manager 0.3.0-alpha.14, 2026-11-15
 
@@ -193,6 +212,14 @@ Changed: 5s now appear more often.
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
 
+### Music Sobos 1.3.11-1.2.0、2026-11-15
+
+- 設定に「揺れの幅」を足した。100% は 1.0.0 と同じ揺れ。0% は揺れない。300% まで。最後の衝撃と、1 フレームの上限を、同じ倍率で掛ける。拍と高さの釣り合いは変えていない。
+
+### Music Sobos 1.3.11-1.1.0、2026-11-15
+
+- 曲がホールで聞いているような響きにならないようにした。曲を流している間だけ本家の残響を切り、止めたら元に戻す。
+
 ### Music Sobos 1.3.11-1.0.0、2026-11-15
 
 - ほかの MOD と同じく 1.0.0 の版にした。中身は 0.1.0 と同じ。
@@ -208,6 +235,10 @@ MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では
 - 初めての公開。
 - U を押すと、ソボを放つ直前の盤面へ戻れるようになります。5 回まで戻せます。
 - このMODを有効にしている間は、どのモードでも本家のリーダーボードに点数は送信されません。手元の順位表・Steam・フレンドに見える点のどれにも残らないようにしています。
+
+### Special Sobos 1.3.11-0.6.7、2026-11-15
+
+- 岩のソボを外した。合体の途中の形を覚えた岩を本家が丸へ引き戻し続け、ひとりでに回り続けたり、毎フレーム形を直されたりしたため。岩の切り替えと出現比率も外した。
 
 ### Special Sobos 1.3.11-0.6.5、2026-11-14
 
@@ -228,6 +259,13 @@ MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では
 - Special Sobos のチェンジで素数を受け取ったソボが、灰色に塗り替わらないようにしました。チェンジで残した元の色のまま出ます。
 - 管理アプリで決めた読み込みの順に従うようにしました。
 - Special Sobos の回と、Undo を入にした回は、Prime の記録に入らないようにしました。手元の上位 10 に載らず、Steam のフレンドに見える最高点も変わらず、世界の順位へも送られません（最初のバージョンから）
+
+### 管理アプリ0.3.0-alpha.15、2026-11-15
+
+- `manager.json` の隣に `manager.log` を書く。導入、更新、有効、無効、削除、読み込み順の保存、復旧、更新の確認、管理アプリ自身の更新を、その PC の時刻と時差、MOD、版、済みか止めたかで 1 行ずつ残す。ホームの道は `~` にする。1 MB を超えたら `manager.log.1` へ回し、残すのは 2 本まで。ログが書けないときは下の 1 行に出し、操作は止めない。
+- 「ログを開く」はそのファイルを開く。「診断を写す」は、管理アプリの版、ゲームの版、ゲームのフォルダ、入っている MOD、ログの最後の 50 行を写す。
+- 起動した直後から、窓の題と画面の上の見出しに、動いている管理アプリ自身の版を「Sobosuba Mod Manager」に続けて出す。言語を変えてもこの文字は同じ。
+- MOD ごとに「この版のまま」を入れられる。固定中は更新を勧めず、自動でも上がらず、更新のボタンは押せない。外せば次の確認から勧める。別の MOD が固定中より新しい版を前提にするときは、黙って上げずに止め、「固定中の名前が要る版より古い」と出す。無効、削除、読み込み順はそのまま。管理アプリ自身の更新はこの固定の外。
 
 ### 管理アプリ0.3.0-alpha.14、2026-11-15
 

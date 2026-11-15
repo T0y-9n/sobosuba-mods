@@ -1,6 +1,6 @@
 extends Node
 
-const MOD_VERSION := "1.3.11-1.0.0"
+const MOD_VERSION := "1.3.11-1.2.0"
 const IMPULSE_CAP := 3400.0
 
 var settings: RefCounted
@@ -10,6 +10,7 @@ var play_button: SoboMenuButtonBool
 var file_button: SoboMenuButtonBool
 var beat_button: SoboMenuButtonFloat
 var tone_button: SoboMenuButtonFloat
+var range_button: SoboMenuButtonFloat
 var dialog: FileDialog
 var installing := false
 var controls_ready := false
@@ -34,6 +35,10 @@ func _ready() -> void:
 	install_controls()
 	print("[Music Sobos %s] loaded" % MOD_VERSION)
 
+func _exit_tree() -> void:
+	if play != null:
+		play.restore_reverb()
+
 func _process(delta: float) -> void:
 	since_beat += delta
 	if shake == null or play == null or not play.is_playing():
@@ -52,7 +57,7 @@ func _process(delta: float) -> void:
 	}
 	var average := _average(beat_level)
 	var heard := beat_level if average >= 0.001 else 0.0
-	var result: Dictionary = shake.step(bands, previous, average, since_beat, float(settings.beat), float(settings.tone), IMPULSE_CAP, heard)
+	var result: Dictionary = shake.step(bands, previous, average, since_beat, float(settings.beat), float(settings.tone), IMPULSE_CAP, heard, float(settings.shake_range))
 	previous = bands
 	if result.get("beat") == true:
 		since_beat = 0.0
@@ -112,6 +117,10 @@ func install_controls() -> void:
 		tone_button.min_value = 0.0
 		tone_button.max_value = 2.0
 		tone_button.on_value_changed.connect(_on_tone)
+		range_button = _copy_float(volume, "MusicRange")
+		range_button.min_value = 0.0
+		range_button.max_value = 3.0
+		range_button.on_value_changed.connect(_on_range)
 	dialog = FileDialog.new()
 	dialog.name = "MusicFileDialog"
 	dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
@@ -190,6 +199,10 @@ func _on_tone(value: float) -> void:
 	settings.tone = clampf(value, 0.0, 2.0)
 	settings.save_file()
 
+func _on_range(value: float) -> void:
+	settings.shake_range = clampf(value, 0.0, 3.0)
+	settings.save_file()
+
 func _refresh() -> void:
 	if play_button != null:
 		play_button.set_value(settings.playing)
@@ -202,6 +215,9 @@ func _refresh() -> void:
 	if tone_button != null:
 		tone_button.set_value(float(settings.tone))
 		tone_button.label.text = _tone_label()
+	if range_button != null:
+		range_button.set_value(float(settings.shake_range))
+		range_button.label.text = _range_label()
 
 func _file_label() -> String:
 	if str(play.reason) != "":
@@ -242,6 +258,11 @@ func _tone_label() -> String:
 	if TranslationServer.get_locale().begins_with("ja"):
 		return "音の高さの揺れ"
 	return "Pitch shake"
+
+func _range_label() -> String:
+	if TranslationServer.get_locale().begins_with("ja"):
+		return "揺れの幅"
+	return "Shake range"
 
 func _level(instance: AudioEffectSpectrumAnalyzerInstance, from_hz: float, to_hz: float) -> float:
 	return instance.get_magnitude_for_frequency_range(from_hz, to_hz).y
