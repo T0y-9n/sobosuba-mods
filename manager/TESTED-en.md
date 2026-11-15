@@ -1,6 +1,13 @@
-# Sobosuba Mod Manager 0.3.0-alpha.14
+# Sobosuba Mod Manager 0.3.0-alpha.15
 
 Checked on Windows with dedicated test game and user-data folders.
+
+- Version: from the start, the window title and the heading at the top both show "Sobosuba Mod Manager 0.3.0-alpha.15". 4 checks, 0 failures. Before the change the same test had 2 failures.
+- Log: installs, updates, refused installs and disabling write timed lines to `manager.log`, and the screen has "Open log" and "Copy diagnostics". Above 1 MB the log keeps one older file, `manager.log.1`. The home folder is written as `~`, so the account name is not in the log. When the log cannot be written, disabling still goes ahead. 22 checks, 0 failures. Before the change the same test had 8 failures.
+- Keep this version: a pinned mod is not offered the newer catalog version and stays on its version with automatic updates on. Unpinning offers the newer version again. Installing a mod that needs a newer version of a pinned mod stops and leaves the pinned files unchanged. 20 checks, 0 failures. Before the change the same test had 8 failures.
+- Light and Dark screens were captured with the Pinned label, "Open log" and "Copy diagnostics" in place.
+
+The checks below were run for 0.3.0-alpha.14.
 
 - Appearance: System follows a dark OS and a light OS, Light and Dark stay fixed, an unknown choice is light, dark ink on paper is 15.38 to 1 and dark muted on paper is 8.91 to 1, the light colors match the previous Cobalt set, and a real manager.json stores dark and reads an unknown value back as system. 14 checks, 0 failures. Before the choice existed the same test had 2 failures.
 

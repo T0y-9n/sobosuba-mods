@@ -7,6 +7,7 @@ const Catalog = preload("catalog.gd")
 const Words = preload("text.gd")
 const Versions = preload("versions.gd")
 const SelfUpdate = preload("self_update.gd")
+const ManagerLog = preload("manager_log.gd")
 const UiTheme = preload("manager_theme.gd")
 const Platform = preload("platform.gd")
 var store := Store.new()
@@ -21,6 +22,7 @@ var update_status: Label
 var restart_button: Button
 var mod_update_check: CheckBox
 var busy := false
+var log_unwritable := false
 var mods: Array = []
 var load_order: Array = []
 var target: Dictionary = {}
@@ -68,6 +70,14 @@ var another_copy := false
 
 ## The self-update helper of alpha.10 and earlier restarts the manager with a hidden window style.
 ## Windows applies that style to the first show only, so showing the window again brings it up.
+func manager_heading() -> String:
+	return "Sobosuba Mod Manager " + SelfUpdate.current_version()
+
+func show_manager_version() -> void:
+	var shown := manager_heading()
+	DisplayServer.window_set_title(shown)
+	get_window().title = shown
+
 func show_window() -> void:
 	if OS.get_name() == "Windows" and DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
@@ -92,6 +102,7 @@ func _ready() -> void:
 		get_tree().quit(0 if error == OK else 1)
 		return
 	show_window()
+	show_manager_version()
 	another_copy = Platform.other_copies() > 0
 	settings.load_file()
 	if not settings.locale.is_empty():
@@ -190,7 +201,10 @@ func build_screen() -> void:
 	var heading := HBoxContainer.new()
 	heading.add_theme_constant_override("separation", UiTheme.SPACE_MD)
 	layout.add_child(heading)
-	caption(heading, "title", 26)
+	show_manager_version()
+	var title := label(manager_heading(), 26)
+	title.name = "ManagerTitle"
+	heading.add_child(title)
 	action(heading, "install_zip", choose_zip, "primary")
 	language_picker = OptionButton.new()
 	language_picker.custom_minimum_size = Vector2(180, 44)
@@ -332,6 +346,8 @@ func build_screen() -> void:
 	tools.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	result_row.add_child(tools)
 	action(tools, "check_updates", reload_catalog)
+	action(tools, "open_log", open_log)
+	action(tools, "copy_diagnostics", copy_diagnostics)
 	update_status = label("", 14)
 	tools.add_child(update_status)
 	update_status.custom_minimum_size.x = 190
@@ -433,7 +449,10 @@ func invoke(operation: String, extra: Dictionary = {}) -> Dictionary:
 		return {"ok": false, "error": "io_error"}
 	while thread.is_alive():
 		await get_tree().create_timer(0.03).timeout
-	return thread.wait_to_finish()
+	var result: Dictionary = thread.wait_to_finish()
+	if operation in ["install", "enable", "disable", "uninstall", "set_order", "recover"]:
+		note_operation(operation, extra, result)
+	return result
 
 func refresh() -> void:
 	if busy:
@@ -529,7 +548,7 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	text.add_child(name_label)
 	var version_label := label("MOD " + str(mod.get("version", "")), 14)
 	var latest := catalog.find(mod.id, store.game_version)
-	if not is_catalog and catalog.has_update(mod, store.game_version) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
+	if not is_catalog and not settings.is_pinned(str(mod.id)) and catalog.has_update(mod, store.game_version) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
 		version_label.text += " → " + str(latest.version)
 	version_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	version_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -541,6 +560,10 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	game_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	game_label.clip_text = true
 	text.add_child(game_label)
+	if not is_catalog and settings.is_pinned(str(mod.id)):
+		var pinned_label := label(words.word("pinned"), 14)
+		pinned_label.name = "Pinned"
+		text.add_child(pinned_label)
 	if layout_blocked:
 		paint(version_label, "disabled_ink")
 		paint(game_label, "disabled_ink")
@@ -701,9 +724,15 @@ func render_details() -> void:
 		action(detail_actions, "install_zip", choose_zip, "primary")
 		return
 	var latest := catalog.find(mod.id, store.game_version)
-	if catalog.has_update(mod, store.game_version) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
+	var offered := catalog.has_update(mod, store.game_version) and Versions.supports_game(latest.get("game_versions", []), store.game_version)
+	if offered and settings.is_pinned(str(mod.id)):
+		details.add_child(label(words.word("pinned"), 14))
+		var held := action(details, "plan_update", download_mod.bind(latest), "primary")
+		held.disabled = true
+	elif offered:
 		details.add_child(label(words.word("plan_update") + " " + str(latest.version), 14))
 		action(details, "plan_update", download_mod.bind(latest), "primary")
+	update_checkbox(details, "pin_version", settings.is_pinned(str(mod.id)), set_pinned.bind(mod))
 	mod_update_check = update_checkbox(details, "mod_auto_update", settings.mod_updates_enabled(mod_key(mod)), set_mod_updates.bind(mod_key(mod)))
 	if not notes.is_empty():
 		details.add_child(label(notes, 14))
@@ -847,6 +876,8 @@ func render_notice() -> void:
 	if another_copy:
 		warning = words.word("another_copy")
 		notice.text += "\n" + warning
+	if log_unwritable:
+		notice.text += "\n" + words.word("log_unwritable")
 	notice.tooltip_text = notice.text
 	var tone_key := "danger" if not notice_error.is_empty() or not warning.is_empty() else "success" if notice_key == "changed" else "muted"
 	paint(notice, tone_key)
@@ -1100,7 +1131,7 @@ func install_selected() -> void:
 	set_busy(true)
 	var request := pending_apply.duplicate(true)
 	request.adopt = adopt_check.button_pressed
-	var result := await invoke(pending_mode, request)
+	var result: Dictionary = await install_if_unpinned(request, pending_package) if pending_mode == "install" else await invoke(pending_mode, request)
 	if result.ok:
 		search_box.text = ""
 		status_picker.select(0)
@@ -1194,7 +1225,7 @@ func check_updates() -> void:
 	var selected := mods.duplicate(true)
 	var update_changes: Array = []
 	for mod in selected:
-		if mod.manual or not mod.compatible or not settings.mod_updates_enabled(mod_key(mod)) or not catalog.has_update(mod, store.game_version):
+		if mod.manual or not mod.compatible or settings.is_pinned(str(mod.id)) or not settings.mod_updates_enabled(mod_key(mod)) or not catalog.has_update(mod, store.game_version):
 			continue
 		var latest := catalog.find(mod.id, store.game_version)
 		if not Versions.supports_game(latest.get("game_versions", []), store.game_version):
@@ -1217,6 +1248,12 @@ func check_updates() -> void:
 			if notice_error.is_empty():
 				notice_key = "offline"
 	await read_state()
+	var check_ok := notice_error.is_empty() and notice_key != "offline"
+	if not ManagerLog.record("check_updates", "", "", "", check_ok, notice_error if not notice_error.is_empty() else ("offline" if notice_key == "offline" else ""), [], store.game_version):
+		log_unwritable = true
+	if settings.manager_auto_update and not self_update.pending.is_empty():
+		if not ManagerLog.record("self_update", "manager", str(ProjectSettings.get_setting("application/config/version")), str(self_update.pending.get("version", "")), true, "", [], store.game_version):
+			log_unwritable = true
 	set_busy(false)
 	render_rows()
 	render_notice()
@@ -1237,6 +1274,10 @@ func auto_update_mod(mod: Dictionary, entry: Dictionary) -> Dictionary:
 	result = await prepare_plan(request, false)
 	if not result.ok:
 		return result
+	var blocked := pinned_stop(result.data)
+	if not blocked.is_empty():
+		note_pin(blocked)
+		return blocked
 	for change in result.data.changes:
 		var previous := str(change.get("previous_version", ""))
 		if not previous.is_empty() and change.version != previous and not Versions.newer(change.version, previous):
@@ -1341,3 +1382,88 @@ func download_mod(mod: Dictionary) -> void:
 		notice_error = error.error
 		notice_args = error.args
 		render_notice()
+
+func set_pinned(enabled: bool, mod: Dictionary) -> void:
+	var id := str(mod.get("id", ""))
+	var old := settings.pinned.duplicate()
+	if enabled:
+		settings.pinned[id] = str(mod.get("version", ""))
+	else:
+		settings.pinned.erase(id)
+	if settings.save() != OK:
+		settings.pinned = old
+		notice_error = "io_error"
+		render_notice()
+		return
+	render_rows()
+
+func pinned_name(id: String) -> String:
+	for mod in mods:
+		if str(mod.get("id", "")) == id:
+			return str(mod.get("name", id))
+	return id
+
+func pinned_stop(package: Dictionary) -> Dictionary:
+	for change in package.get("changes", []):
+		if not change is Dictionary:
+			continue
+		var id := str(change.get("id", ""))
+		var version := str(change.get("version", ""))
+		if not settings.is_pinned(id):
+			continue
+		var pinned := settings.pinned_version(id)
+		if version != pinned and Versions.newer(version, pinned):
+			return {"ok": false, "error": "pinned_older", "args": [str(change.get("name", pinned_name(id)))], "id": id, "before": pinned, "after": version}
+	for dependency in package.get("dependencies", []):
+		if not dependency is Dictionary:
+			continue
+		var id := str(dependency.get("id", ""))
+		var version := str(dependency.get("version", ""))
+		if not settings.is_pinned(id):
+			continue
+		var pinned := settings.pinned_version(id)
+		if Versions.newer(version, pinned):
+			return {"ok": false, "error": "pinned_older", "args": [pinned_name(id)], "id": id, "before": pinned, "after": version}
+	return {}
+
+func note_pin(blocked: Dictionary) -> void:
+	if not ManagerLog.record("install", str(blocked.get("id", "")), str(blocked.get("before", "")), str(blocked.get("after", "")), false, "pinned_older", blocked.get("args", []), store.game_version):
+		log_unwritable = true
+
+func install_if_unpinned(request: Dictionary, package: Dictionary) -> Dictionary:
+	var blocked := pinned_stop(package)
+	if not blocked.is_empty():
+		note_pin(blocked)
+		return blocked
+	return await invoke("install", request)
+
+func open_log() -> void:
+	OS.shell_open(ManagerLog.file_path())
+
+func copy_diagnostics() -> void:
+	var text := ManagerLog.diagnostics(str(ProjectSettings.get_setting("application/config/version")), store.game_version, store.game_folder, mods, load_order)
+	DisplayServer.clipboard_set(text)
+
+func note_operation(operation: String, extra: Dictionary, result: Dictionary) -> void:
+	var entries: Array = []
+	var data: Dictionary = result.get("data", {}) if result.get("data", {}) is Dictionary else {}
+	var changes: Array = data.get("changes", []) if data.get("changes", []) is Array else []
+	for change in changes:
+		if not change is Dictionary:
+			continue
+		var kind := operation
+		var previous := str(change.get("previous_version", ""))
+		var version := str(change.get("version", ""))
+		if operation == "install" and not previous.is_empty() and previous != version:
+			kind = "update"
+		entries.append([kind, str(change.get("id", "")), previous, version])
+	if entries.is_empty():
+		var id := str(extra.get("id", ""))
+		var before := ""
+		for mod in mods:
+			if str(mod.get("id", "")) == id:
+				before = str(mod.get("version", ""))
+		entries.append([operation, id, before, str(data.get("version", ""))])
+	for entry in entries:
+		if not ManagerLog.record(entry[0], entry[1], entry[2], entry[3], result.get("ok", false), str(result.get("error", "")), result.get("args", []), store.game_version):
+			log_unwritable = true

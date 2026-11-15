@@ -10,11 +10,18 @@ var locale := ""
 var user_data := ""
 var catalog_url := DEFAULT_CATALOG
 var mod_auto_updates: Dictionary = {}
+var pinned: Dictionary = {}
 var manager_auto_update := true
 var appearance := "system"
 
 func mod_updates_enabled(key: String) -> bool:
 	return mod_auto_updates.get(key, false) == true
+
+func is_pinned(id: String) -> bool:
+	return pinned.has(id) and pinned[id] is String and not str(pinned[id]).is_empty()
+
+func pinned_version(id: String) -> String:
+	return str(pinned.get(id, ""))
 
 func load_file() -> void:
 	if not FileAccess.file_exists(path) and path == "user://manager.json":
@@ -31,6 +38,11 @@ func load_file() -> void:
 		var saved_appearance := str(parsed.get("appearance", ""))
 		if saved_appearance in ["system", "light", "dark"]:
 			appearance = saved_appearance
+		pinned = {}
+		if parsed.get("pinned") is Dictionary:
+			for key in parsed.pinned:
+				if parsed.pinned[key] is String:
+					pinned[key] = parsed.pinned[key]
 		if parsed.get("mod_auto_updates") is Dictionary:
 			for key in parsed.mod_auto_updates:
 				if parsed.mod_auto_updates[key] is bool:
@@ -55,7 +67,7 @@ func save() -> int:
 	var file := FileAccess.open(temporary, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"mod_auto_updates":mod_auto_updates, "manager_auto_update":manager_auto_update, "mod_folder":mod_folder, "game_folder": game_folder, "catalog_url": catalog_url, "game_version": game_version, "locale": locale, "user_data": user_data, "appearance": appearance}, "  "))
+	file.store_string(JSON.stringify({"mod_auto_updates":mod_auto_updates, "pinned":pinned, "manager_auto_update":manager_auto_update, "mod_folder":mod_folder, "game_folder": game_folder, "catalog_url": catalog_url, "game_version": game_version, "locale": locale, "user_data": user_data, "appearance": appearance}, "  "))
 	file.flush()
 	var error := file.get_error()
 	file.close()
