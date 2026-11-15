@@ -13,6 +13,7 @@ var mod_auto_updates: Dictionary = {}
 var pinned: Dictionary = {}
 var manager_auto_update := true
 var appearance := "system"
+var noted_game_version := ""
 
 func mod_updates_enabled(key: String) -> bool:
 	return mod_auto_updates.get(key, false) == true
@@ -55,6 +56,8 @@ func load_file() -> void:
 			game_folder = parsed.game_folder
 		if parsed.get("game_version") is String and parsed.game_version in ["1.2.3", "1.3.10", "1.3.11"]:
 			game_version = parsed.game_version
+		if parsed.get("noted_game_version") is String and parsed.noted_game_version in ["", "1.2.3", "1.3.10", "1.3.11"]:
+			noted_game_version = parsed.noted_game_version
 		if parsed.get("locale") is String:
 			locale = parsed.locale
 		if parsed.get("user_data") is String:
@@ -67,7 +70,7 @@ func save() -> int:
 	var file := FileAccess.open(temporary, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"mod_auto_updates":mod_auto_updates, "pinned":pinned, "manager_auto_update":manager_auto_update, "mod_folder":mod_folder, "game_folder": game_folder, "catalog_url": catalog_url, "game_version": game_version, "locale": locale, "user_data": user_data, "appearance": appearance}, "  "))
+	file.store_string(JSON.stringify({"mod_auto_updates":mod_auto_updates, "pinned":pinned, "manager_auto_update":manager_auto_update, "mod_folder":mod_folder, "game_folder": game_folder, "catalog_url": catalog_url, "game_version": game_version, "noted_game_version": noted_game_version, "locale": locale, "user_data": user_data, "appearance": appearance}, "  "))
 	file.flush()
 	var error := file.get_error()
 	file.close()

@@ -50,6 +50,9 @@ var selected_mod: Dictionary = {}
 var detail_toggle_button: Button
 var library_count: Label
 var recovery_button: Button
+var play_button: Button
+var disable_unmatched_button: Button
+var keep_game_button: Button
 var search_box: LineEdit
 var status_picker: OptionButton
 var detail_destination: Label
@@ -345,7 +348,12 @@ func build_screen() -> void:
 	var tools := VBoxContainer.new()
 	tools.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	result_row.add_child(tools)
+	play_button = action(tools, "play_game", play_game)
 	action(tools, "check_updates", reload_catalog)
+	disable_unmatched_button = action(tools, "disable_unmatched", disable_unmatched)
+	disable_unmatched_button.visible = false
+	keep_game_button = action(tools, "keep_game_mods", keep_game_mods)
+	keep_game_button.visible = false
 	action(tools, "open_log", open_log)
 	action(tools, "copy_diagnostics", copy_diagnostics)
 	update_status = label("", 14)
@@ -443,14 +451,17 @@ func set_busy(value: bool) -> void:
 		paint(notice, "muted")
 
 func invoke(operation: String, extra: Dictionary = {}) -> Dictionary:
+	var payload := extra.duplicate(true)
+	if catalog != null and not catalog.game_builds.is_empty():
+		payload["game_builds"] = catalog.game_builds
 	var thread := Thread.new()
-	var error := thread.start(store.request.bind(operation, extra))
+	var error := thread.start(store.request.bind(operation, payload))
 	if error != OK:
 		return {"ok": false, "error": "io_error"}
 	while thread.is_alive():
 		await get_tree().create_timer(0.03).timeout
 	var result: Dictionary = thread.wait_to_finish()
-	if operation in ["install", "enable", "disable", "uninstall", "set_order", "recover"]:
+	if operation in ["install", "enable", "disable", "uninstall", "set_order", "recover", "revert"]:
 		note_operation(operation, extra, result)
 	return result
 
@@ -463,6 +474,7 @@ func refresh() -> void:
 	notice_mod = {}
 	set_busy(true)
 	await read_state()
+	consider_game_change()
 	set_busy(false)
 	render_notice()
 
@@ -734,12 +746,19 @@ func render_details() -> void:
 		action(details, "plan_update", download_mod.bind(latest), "primary")
 	update_checkbox(details, "pin_version", settings.is_pinned(str(mod.id)), set_pinned.bind(mod))
 	mod_update_check = update_checkbox(details, "mod_auto_update", settings.mod_updates_enabled(mod_key(mod)), set_mod_updates.bind(mod_key(mod)))
+	for item in mod.get("overlaps", []):
+		if item is Dictionary:
+			var overlap := label(words.word("overlap_line", [mod.name, item.get("mod_name", ""), item.get("file", "")]), 14)
+			paint(overlap, "danger")
+			details.add_child(overlap)
 	if not notes.is_empty():
 		details.add_child(label(notes, 14))
 	details.add_child(detail_destination)
 	caption(details, "preserve", 14)
 	if orders_on_load(mod):
 		add_load_order_row(mod)
+	if mod.get("has_previous", false):
+		action(detail_actions, "revert_version", revert_mod.bind(mod))
 	detail_toggle_button = action(detail_actions, "disable" if mod.enabled else "enable", toggle_enabled.bind(mod), "secondary" if mod.enabled else "primary")
 	var blocked: bool = not mod.enabled and not mod.compatible
 	detail_toggle_button.set_meta("blocked", blocked)
@@ -861,7 +880,7 @@ func apply_load_order(ids: Array) -> void:
 	render_notice()
 
 func render_notice() -> void:
-	notice.text = words.error_word(notice_error, notice_args) if not notice_error.is_empty() else words.word(notice_key) if not notice_key.is_empty() else words.word("ready")
+	notice.text = words.error_word(notice_error, notice_args) if not notice_error.is_empty() else words.word(notice_key, notice_args) if notice_key == "game_changed" else words.word(notice_key) if not notice_key.is_empty() else words.word("ready")
 	var warning := compatibility_warning(notice_mod) if notice_key == "changed" and notice_error.is_empty() else ""
 	if not warning.is_empty():
 		notice.text += "\n" + warning
@@ -882,6 +901,11 @@ func render_notice() -> void:
 	var tone_key := "danger" if not notice_error.is_empty() or not warning.is_empty() else "success" if notice_key == "changed" else "muted"
 	paint(notice, tone_key)
 	recovery_button.visible = notice_error == "recovery_needed"
+	var asking := notice_key == "game_changed" and notice_error.is_empty()
+	if disable_unmatched_button != null:
+		disable_unmatched_button.visible = asking
+	if keep_game_button != null:
+		keep_game_button.visible = asking
 
 func translate_dialogs() -> void:
 	folder_dialog.title = words.word("choose_folder")
@@ -899,7 +923,14 @@ func translate_dialogs() -> void:
 			if change.get("credit_warning", false):
 				changes.append(words.word("credit_warning"))
 		var summary := words.word("dependency_plan") + "\n" + "\n".join(changes) + "\n\n" if not changes.is_empty() else ""
-		preview_label.text = question + "\n\n" + summary + words.word("supported", [", ".join(pending_package.game_versions)]) + "\n" + words.word("destination", [target.get("root", "—")]) + "\n\n" + words.word("preserve") + "\n\n" + mod_notes(pending_package)
+		var overlaps := PackedStringArray()
+		for item in pending_package.get("overlaps", []):
+			if item is Dictionary:
+				overlaps.append(words.word("overlap_line", [pending_package.name, item.get("mod_name", ""), item.get("file", "")]))
+		var overlap_text := "\n".join(overlaps)
+		if not overlap_text.is_empty():
+			overlap_text += "\n\n"
+		preview_label.text = question + "\n\n" + summary + overlap_text + words.word("supported", [", ".join(pending_package.game_versions)]) + "\n" + words.word("destination", [target.get("root", "—")]) + "\n\n" + words.word("preserve") + "\n\n" + mod_notes(pending_package)
 	if not pending_mod.is_empty():
 		operation_dialog.ok_button_text = words.word("uninstall" if pending_operation == "uninstall" else "disable")
 		operation_dialog.dialog_text = words.word("remove_question" if pending_operation == "uninstall" else "disable_question", [pending_mod.name]) + "\n\n" + words.word("preserve")
@@ -1114,6 +1145,9 @@ func inspect_zip(path: String) -> void:
 		notice_error = ""
 		notice_key = ""
 		pending_package = result.data
+		var overlap_result := await invoke("overlaps", {"zip": path})
+		if overlap_result.ok:
+			pending_package["overlaps"] = overlap_result.data.get("overlaps", [])
 		pending_zip = path
 		adopt_check.button_pressed = false
 		preview_scroll.scroll_vertical = 0
@@ -1194,6 +1228,92 @@ func finish_operation(result: Dictionary) -> void:
 	await read_state()
 	set_busy(false)
 	render_rows()
+	render_notice()
+
+func play_game() -> void:
+	if busy:
+		return
+	set_busy(true)
+	var ids: Array = load_order.duplicate()
+	if not ids.is_empty():
+		var saved: Dictionary = await invoke("set_order", {"order": ids})
+		if not saved.ok:
+			set_busy(false)
+			notice_error = str(saved.get("error", "invalid_request"))
+			notice_args = saved.get("args", [])
+			notice_key = ""
+			render_notice()
+			return
+	var started: Dictionary = await invoke("launch")
+	set_busy(false)
+	if started.ok:
+		notice_error = ""
+		notice_args = []
+		notice_key = "game_started"
+	else:
+		notice_error = str(started.get("error", "invalid_request"))
+		notice_args = started.get("args", [])
+		notice_key = ""
+	render_notice()
+
+func revert_mod(mod: Dictionary) -> void:
+	if busy:
+		return
+	set_busy(true)
+	await finish_operation(await invoke("revert", {"id": mod.id, "layout": mod.get("layout", "")}))
+
+func consider_game_change() -> void:
+	if not notice_error.is_empty():
+		return
+	if settings.noted_game_version.is_empty():
+		settings.noted_game_version = store.game_version
+		settings.save()
+		return
+	if settings.noted_game_version == store.game_version:
+		return
+	var names := PackedStringArray()
+	for mod: Dictionary in mods:
+		if mod.get("manual", false):
+			continue
+		if not Versions.supports_game(mod.get("game_versions", []), store.game_version):
+			names.append(str(mod.get("name", mod.get("id", ""))))
+	if names.is_empty():
+		settings.noted_game_version = store.game_version
+		settings.save()
+		return
+	notice_key = "game_changed"
+	notice_args = [", ".join(names), settings.noted_game_version]
+
+func disable_unmatched() -> void:
+	if busy:
+		return
+	set_busy(true)
+	for mod: Dictionary in mods:
+		if mod.get("manual", false) or not mod.get("enabled", false):
+			continue
+		if Versions.supports_game(mod.get("game_versions", []), store.game_version):
+			continue
+		var result: Dictionary = await invoke("disable", {"id": mod.id, "layout": mod.get("layout", "")})
+		if not result.ok:
+			set_busy(false)
+			notice_error = str(result.get("error", "invalid_request"))
+			notice_args = result.get("args", [])
+			notice_key = ""
+			render_notice()
+			return
+	settings.noted_game_version = store.game_version
+	settings.save()
+	notice_key = ""
+	notice_error = ""
+	await read_state()
+	set_busy(false)
+	render_rows()
+	render_notice()
+
+func keep_game_mods() -> void:
+	settings.noted_game_version = store.game_version
+	settings.save()
+	notice_key = ""
 	render_notice()
 
 func recover() -> void:

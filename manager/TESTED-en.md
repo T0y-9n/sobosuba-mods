@@ -1,6 +1,14 @@
-# Sobosuba Mod Manager 0.3.0-alpha.15
+# Sobosuba Mod Manager 0.3.0-alpha.16
 
-Checked on Windows with dedicated test game and user-data folders.
+Checked on Windows with dedicated test game and user-data folders, using Prime Sobos 1.0.7 and 1.0.9.
+
+- Previous version: after updating Prime Sobos from 1.0.7 to 1.0.9, "Restore the previous version" puts the 1.0.7 files back. A second restore says there is no previous version.
+- Overlaps: a mod that writes the same file as Prime Sobos shows the other mod's name and the file, before install and in the details.
+- Game version: an unknown Steam build is not taken as a version, and a build named in the catalog's `game_builds` is. With the game set to 1.2.3, the notice says Prime Sobos was checked for 1.3.11 and offers to disable it.
+- Play sobosuba saves the order and starts sobosuba.exe from the game folder. This was checked with a stand-in sobosuba.exe, not the real game.
+- 16 checks, 0 failures. Before the change the same test had 10 failures.
+
+The checks below were run for 0.3.0-alpha.15.
 
 - Version: from the start, the window title and the heading at the top both show "Sobosuba Mod Manager 0.3.0-alpha.15". 4 checks, 0 failures. Before the change the same test had 2 failures.
 - Log: installs, updates, refused installs and disabling write timed lines to `manager.log`, and the screen has "Open log" and "Copy diagnostics". Above 1 MB the log keeps one older file, `manager.log.1`. The home folder is written as `~`, so the account name is not in the log. When the log cannot be written, disabling still goes ahead. 22 checks, 0 failures. Before the change the same test had 8 failures.

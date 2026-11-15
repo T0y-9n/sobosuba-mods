@@ -2,6 +2,13 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Sobosuba Mod Manager 0.3.0-alpha.16, 2026-11-15
+
+- Keep the previous copy of a mod when you update it, and restore that version in one step.
+- Before you install, and in the mod details, show which other mod uses the same file.
+- When the selected game version changes, say which installed mods were checked for the previous version and ask whether to disable them. Extra Steam build ids can be named in the catalog as `game_builds`.
+- Play starts sobosuba from the game folder after saving the current mod order.
+
 ### Music Sobos 1.3.11-1.2.0, 2026-11-15
 
 - Add Shake range in the settings. 100% is the same shake as 1.0.0. 0% does not shake. 300% is the maximum. It scales the impulse and the per-frame cap together. Beat and pitch balance are unchanged.
@@ -211,6 +218,13 @@ Changed: 5s now appear more often.
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### Sobosuba Mod Manager 0.3.0-alpha.16、2026-11-15
+
+- 更新する前の MOD を控え、1 回でその版へ戻せる。
+- 導入の前と、MOD の詳細に、同じファイルを使っている別の MOD を出す。
+- 選んだゲームの版が変わったら、前の版で確かめた MOD を示し、無効にするか聞く。カタログの `game_builds` で、知っている Steam の build を増やせる。
+- 「sobosuba を起動」は、今の並びを保存してから、ゲームのフォルダの sobosuba を起動する。
 
 ### Music Sobos 1.3.11-1.2.0、2026-11-15
 

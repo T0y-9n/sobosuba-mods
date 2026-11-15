@@ -118,7 +118,15 @@
     "log_unwritable": "The log could not be written. The operation was not stopped.",
     "pin_version": "Keep this version",
     "pinned": "Pinned",
-    "pinned_older": "Pinned {0} is older than the required version."
+    "pinned_older": "Pinned {0} is older than the required version.",
+    "play_game": "Play sobosuba",
+    "revert_version": "Restore the previous version",
+    "game_changed": "The game changed. {0} was checked for {1}. Disable it?",
+    "disable_unmatched": "Disable these mods",
+    "keep_game_mods": "Leave them enabled",
+    "overlap_line": "{0} overlaps {1}: {2}",
+    "game_started": "sobosuba was started with the saved mod order.",
+    "err_no_previous": "There is no previous version to restore."
   },
   "ja": {
     "title": "Sobosuba MOD管理",
@@ -239,7 +247,15 @@
     "log_unwritable": "ログが書けません。操作は止めていません。",
     "pin_version": "この版のまま",
     "pinned": "固定中",
-    "pinned_older": "固定中の {0} が要る版より古い"
+    "pinned_older": "固定中の {0} が要る版より古い",
+    "play_game": "sobosuba を起動",
+    "revert_version": "前の版に戻す",
+    "game_changed": "ゲームが変わった。{0} は {1} で確かめた物。無効にするか",
+    "disable_unmatched": "これらの MOD を無効にする",
+    "keep_game_mods": "無効にしない",
+    "overlap_line": "{0} が {1} と重なる: {2}",
+    "game_started": "保存した並びで sobosuba を起動した。",
+    "err_no_previous": "戻す前の版がありません。"
   },
   "de": {
     "title": "Sobosuba-Modverwaltung",
@@ -360,7 +376,15 @@
     "log_unwritable": "Das Protokoll konnte nicht geschrieben werden. Der Vorgang wurde nicht angehalten.",
     "pin_version": "Diese Version behalten",
     "pinned": "Angeheftet",
-    "pinned_older": "Angeheftetes {0} ist älter als die benötigte Version."
+    "pinned_older": "Angeheftetes {0} ist älter als die benötigte Version.",
+    "play_game": "sobosuba starten",
+    "revert_version": "Vorherige Version wiederherstellen",
+    "game_changed": "Das Spiel hat sich geändert. {0} wurde für {1} geprüft. Deaktivieren?",
+    "disable_unmatched": "Diese Mods deaktivieren",
+    "keep_game_mods": "Aktiviert lassen",
+    "overlap_line": "{0} überschneidet {1}: {2}",
+    "game_started": "sobosuba wurde mit der gespeicherten Reihenfolge gestartet.",
+    "err_no_previous": "Es gibt keine vorherige Version."
   },
   "es": {
     "title": "Gestor de mods de Sobosuba",
@@ -481,7 +505,15 @@
     "log_unwritable": "No se pudo escribir el registro. La operación no se detuvo.",
     "pin_version": "Mantener esta versión",
     "pinned": "Fijado",
-    "pinned_older": "{0} está fijado y es más antiguo que la versión necesaria."
+    "pinned_older": "{0} está fijado y es más antiguo que la versión necesaria.",
+    "play_game": "Iniciar sobosuba",
+    "revert_version": "Volver a la version anterior",
+    "game_changed": "El juego cambio. {0} se comprobo para {1}. Desactivarlo?",
+    "disable_unmatched": "Desactivar estos mods",
+    "keep_game_mods": "Dejarlos activos",
+    "overlap_line": "{0} se solapa con {1}: {2}",
+    "game_started": "sobosuba se inicio con el orden guardado.",
+    "err_no_previous": "No hay una version anterior."
   },
   "es_MX": {
     "title": "Administrador de mods de Sobosuba",
@@ -602,7 +634,15 @@
     "log_unwritable": "No se pudo escribir el registro. La operación no se detuvo.",
     "pin_version": "Mantener esta versión",
     "pinned": "Fijado",
-    "pinned_older": "{0} está fijado y es más antiguo que la versión necesaria."
+    "pinned_older": "{0} está fijado y es más antiguo que la versión necesaria.",
+    "play_game": "Iniciar sobosuba",
+    "revert_version": "Volver a la version anterior",
+    "game_changed": "El juego cambio. {0} se comprobo para {1}. Desactivarlo?",
+    "disable_unmatched": "Desactivar estos mods",
+    "keep_game_mods": "Dejarlos activos",
+    "overlap_line": "{0} se solapa con {1}: {2}",
+    "game_started": "sobosuba se inicio con el orden guardado.",
+    "err_no_previous": "No hay una version anterior."
   },
   "fr": {
     "title": "Gestionnaire de mods Sobosuba",
@@ -723,7 +763,15 @@
     "log_unwritable": "Le journal n'a pas pu être écrit. L'opération n'a pas été arrêtée.",
     "pin_version": "Garder cette version",
     "pinned": "Figé",
-    "pinned_older": "{0} est figé et plus ancien que la version demandée."
+    "pinned_older": "{0} est figé et plus ancien que la version demandée.",
+    "play_game": "Lancer sobosuba",
+    "revert_version": "Revenir a la version precedente",
+    "game_changed": "Le jeu a change. {0} a ete verifie pour {1}. Le desactiver ?",
+    "disable_unmatched": "Desactiver ces mods",
+    "keep_game_mods": "Les laisser actifs",
+    "overlap_line": "{0} chevauche {1} : {2}",
+    "game_started": "sobosuba a demarre avec l ordre enregistre.",
+    "err_no_previous": "Il n y a pas de version precedente."
   },
   "it": {
     "title": "Gestore mod Sobosuba",
@@ -844,7 +892,15 @@
     "log_unwritable": "Impossibile scrivere il registro. L'operazione non è stata interrotta.",
     "pin_version": "Tieni questa versione",
     "pinned": "Bloccato",
-    "pinned_older": "{0} è bloccato ed è più vecchio della versione richiesta."
+    "pinned_older": "{0} è bloccato ed è più vecchio della versione richiesta.",
+    "play_game": "Avvia sobosuba",
+    "revert_version": "Ripristina la versione precedente",
+    "game_changed": "Il gioco e cambiato. {0} e stato verificato per {1}. Disattivarlo?",
+    "disable_unmatched": "Disattiva questi mod",
+    "keep_game_mods": "Lasciali attivi",
+    "overlap_line": "{0} si sovrappone a {1}: {2}",
+    "game_started": "sobosuba e stato avviato con l ordine salvato.",
+    "err_no_previous": "Non c e una versione precedente."
   },
   "pt_BR": {
     "title": "Gerenciador de mods Sobosuba",
@@ -965,7 +1021,15 @@
     "log_unwritable": "Não foi possível gravar o registro. A operação não foi interrompida.",
     "pin_version": "Manter esta versão",
     "pinned": "Fixado",
-    "pinned_older": "{0} está fixado e é mais antigo que a versão exigida."
+    "pinned_older": "{0} está fixado e é mais antigo que a versão exigida.",
+    "play_game": "Iniciar sobosuba",
+    "revert_version": "Voltar para a versao anterior",
+    "game_changed": "O jogo mudou. {0} foi verificado para {1}. Desativar?",
+    "disable_unmatched": "Desativar estes mods",
+    "keep_game_mods": "Deixar ativos",
+    "overlap_line": "{0} conflita com {1}: {2}",
+    "game_started": "sobosuba foi iniciado com a ordem salva.",
+    "err_no_previous": "Nao ha uma versao anterior."
   },
   "cs": {
     "title": "Správce modů Sobosuba",
@@ -1086,7 +1150,15 @@
     "log_unwritable": "Protokol se nepodařilo zapsat. Operace nebyla zastavena.",
     "pin_version": "Ponechat tuto verzi",
     "pinned": "Připnuto",
-    "pinned_older": "Připnuté {0} je starší než požadovaná verze."
+    "pinned_older": "Připnuté {0} je starší než požadovaná verze.",
+    "play_game": "Spustit sobosuba",
+    "revert_version": "Vratit predchozi verzi",
+    "game_changed": "Hra se zmenila. {0} bylo overeno pro {1}. Vypnout?",
+    "disable_unmatched": "Vypnout tyto mody",
+    "keep_game_mods": "Nechat zapnute",
+    "overlap_line": "{0} se prekryva s {1}: {2}",
+    "game_started": "sobosuba bylo spusteno s ulozenym poradim.",
+    "err_no_previous": "Predchozi verze neni."
   },
   "pl": {
     "title": "Menedżer modów Sobosuba",
@@ -1207,7 +1279,15 @@
     "log_unwritable": "Nie udało się zapisać dziennika. Operacja nie została zatrzymana.",
     "pin_version": "Zostaw tę wersję",
     "pinned": "Przypięte",
-    "pinned_older": "Przypięte {0} jest starsze niż wymagana wersja."
+    "pinned_older": "Przypięte {0} jest starsze niż wymagana wersja.",
+    "play_game": "Uruchom sobosuba",
+    "revert_version": "Przywroc poprzednia wersje",
+    "game_changed": "Gra sie zmienila. {0} sprawdzono dla {1}. Wylaczyc?",
+    "disable_unmatched": "Wylacz te mody",
+    "keep_game_mods": "Zostaw wlaczone",
+    "overlap_line": "{0} nachodzi na {1}: {2}",
+    "game_started": "sobosuba uruchomiono z zapisanym ukladem.",
+    "err_no_previous": "Nie ma poprzedniej wersji."
   },
   "ru": {
     "title": "Менеджер модов Sobosuba",
@@ -1328,7 +1408,15 @@
     "log_unwritable": "Журнал не записан. Операция не остановлена.",
     "pin_version": "Оставить эту версию",
     "pinned": "Закреплено",
-    "pinned_older": "Закреплённый {0} старше нужной версии."
+    "pinned_older": "Закреплённый {0} старше нужной версии.",
+    "play_game": "Запустить sobosuba",
+    "revert_version": "Вернуть предыдущую версию",
+    "game_changed": "Игра изменилась. {0} проверяли для {1}. Отключить?",
+    "disable_unmatched": "Отключить эти моды",
+    "keep_game_mods": "Оставить включёнными",
+    "overlap_line": "{0} пересекается с {1}: {2}",
+    "game_started": "sobosuba запущен с сохранённым порядком.",
+    "err_no_previous": "Предыдущей версии нет."
   },
   "sr": {
     "title": "Управљање Sobosuba модовима",
@@ -1449,7 +1537,15 @@
     "log_unwritable": "Дневник није уписан. Радња није заустављена.",
     "pin_version": "Задржи ову верзију",
     "pinned": "Заковано",
-    "pinned_older": "Заковани {0} је старији од потребне верзије."
+    "pinned_older": "Заковани {0} је старији од потребне верзије.",
+    "play_game": "Покрени sobosuba",
+    "revert_version": "Врати претходно издање",
+    "game_changed": "Игра се променила. {0} је проверен за {1}. Искључити?",
+    "disable_unmatched": "Искључи ове модове",
+    "keep_game_mods": "Остави укључене",
+    "overlap_line": "{0} се преклапа са {1}: {2}",
+    "game_started": "sobosuba је покренут сачуваним редом.",
+    "err_no_previous": "Нема претходног издања."
   },
   "zh_CN": {
     "title": "Sobosuba 模组管理器",
@@ -1570,7 +1666,15 @@
     "log_unwritable": "日志没能写下。操作没有停下。",
     "pin_version": "保持这个版本",
     "pinned": "已固定",
-    "pinned_older": "已固定的 {0} 比需要的版本旧。"
+    "pinned_older": "已固定的 {0} 比需要的版本旧。",
+    "play_game": "启动 sobosuba",
+    "revert_version": "回到上一版",
+    "game_changed": "游戏变了。{0} 是在 {1} 上确认的。要停用吗",
+    "disable_unmatched": "停用这些 MOD",
+    "keep_game_mods": "不停用",
+    "overlap_line": "{0} 与 {1} 重叠：{2}",
+    "game_started": "已按保存的顺序启动 sobosuba。",
+    "err_no_previous": "没有可回到的上一版。"
   },
   "zh_TW": {
     "title": "Sobosuba 模組管理員",
@@ -1691,7 +1795,15 @@
     "log_unwritable": "日誌沒能寫下。操作沒有停下。",
     "pin_version": "保持這個版本",
     "pinned": "已固定",
-    "pinned_older": "已固定的 {0} 比需要的版本舊。"
+    "pinned_older": "已固定的 {0} 比需要的版本舊。",
+    "play_game": "啟動 sobosuba",
+    "revert_version": "回到上一版",
+    "game_changed": "遊戲變了。{0} 是在 {1} 上確認的。要停用嗎",
+    "disable_unmatched": "停用這些 MOD",
+    "keep_game_mods": "不停用",
+    "overlap_line": "{0} 與 {1} 重疊：{2}",
+    "game_started": "已依儲存的順序啟動 sobosuba。",
+    "err_no_previous": "沒有可回到的上一版。"
   },
   "ko": {
     "title": "Sobosuba 모드 관리자",
@@ -1812,7 +1924,15 @@
     "log_unwritable": "로그를 쓰지 못했습니다. 작업은 멈추지 않았습니다.",
     "pin_version": "이 버전 유지",
     "pinned": "고정됨",
-    "pinned_older": "고정된 {0}이 필요한 버전보다 오래되었습니다."
+    "pinned_older": "고정된 {0}이 필요한 버전보다 오래되었습니다.",
+    "play_game": "sobosuba 실행",
+    "revert_version": "이전 판으로 되돌리기",
+    "game_changed": "게임이 바뀌었습니다. {0} 은 {1} 에서 확인한 것입니다. 끌까요",
+    "disable_unmatched": "이 MOD를 끄기",
+    "keep_game_mods": "끄지 않기",
+    "overlap_line": "{0} 이 {1} 와 겹칩니다: {2}",
+    "game_started": "저장한 순서로 sobosuba 를 실행했습니다.",
+    "err_no_previous": "되돌릴 이전 판이 없습니다."
   },
   "tr": {
     "title": "Sobosuba Mod Yöneticisi",
@@ -1933,7 +2053,15 @@
     "log_unwritable": "Günlük yazılamadı. İşlem durdurulmadı.",
     "pin_version": "Bu sürümde kalsın",
     "pinned": "Sabitlendi",
-    "pinned_older": "Sabitlenen {0} gereken sürümden eski."
+    "pinned_older": "Sabitlenen {0} gereken sürümden eski.",
+    "play_game": "sobosuba yu baslat",
+    "revert_version": "Onceki surume don",
+    "game_changed": "Oyun degisti. {0}, {1} icin kontrol edildi. Kapatilsin mi?",
+    "disable_unmatched": "Bu modlari kapat",
+    "keep_game_mods": "Acik birak",
+    "overlap_line": "{0}, {1} ile cakisiyor: {2}",
+    "game_started": "sobosuba kayitli sirayla baslatildi.",
+    "err_no_previous": "Donulecek onceki surum yok."
   },
   "uk": {
     "title": "Менеджер модів Sobosuba",
@@ -2054,7 +2182,15 @@
     "log_unwritable": "Журнал не записано. Дію не зупинено.",
     "pin_version": "Лишити цю версію",
     "pinned": "Закріплено",
-    "pinned_older": "Закріплений {0} старіший за потрібну версію."
+    "pinned_older": "Закріплений {0} старіший за потрібну версію.",
+    "play_game": "Запустити sobosuba",
+    "revert_version": "Повернути попередню версію",
+    "game_changed": "Гра змінилася. {0} перевіряли для {1}. Вимкнути?",
+    "disable_unmatched": "Вимкнути ці моди",
+    "keep_game_mods": "Залишити увімкненими",
+    "overlap_line": "{0} перекриває {1}: {2}",
+    "game_started": "sobosuba запущено зі збереженим порядком.",
+    "err_no_previous": "Попередньої версії немає."
   },
   "id": {
     "title": "Pengelola Mod Sobosuba",
@@ -2175,7 +2311,15 @@
     "log_unwritable": "Log tidak bisa ditulis. Operasinya tidak dihentikan.",
     "pin_version": "Tahan versi ini",
     "pinned": "Disematkan",
-    "pinned_older": "{0} yang disematkan lebih lama dari versi yang diminta."
+    "pinned_older": "{0} yang disematkan lebih lama dari versi yang diminta.",
+    "play_game": "Jalankan sobosuba",
+    "revert_version": "Kembali ke versi sebelumnya",
+    "game_changed": "Game berubah. {0} dicek untuk {1}. Nonaktifkan?",
+    "disable_unmatched": "Nonaktifkan mod ini",
+    "keep_game_mods": "Biarkan aktif",
+    "overlap_line": "{0} bertumpuk dengan {1}: {2}",
+    "game_started": "sobosuba dijalankan dengan urutan yang tersimpan.",
+    "err_no_previous": "Tidak ada versi sebelumnya."
   },
   "vi": {
     "title": "Trình quản lý mod Sobosuba",
@@ -2296,7 +2440,15 @@
     "log_unwritable": "Không ghi được nhật ký. Thao tác không bị dừng.",
     "pin_version": "Giữ phiên bản này",
     "pinned": "Đã ghim",
-    "pinned_older": "{0} đang ghim cũ hơn phiên bản cần thiết."
+    "pinned_older": "{0} đang ghim cũ hơn phiên bản cần thiết.",
+    "play_game": "Mo sobosuba",
+    "revert_version": "Tro ve ban truoc",
+    "game_changed": "Game da doi. {0} duoc kiem tra cho {1}. Tat?",
+    "disable_unmatched": "Tat cac mod nay",
+    "keep_game_mods": "De chung bat",
+    "overlap_line": "{0} trung {1}: {2}",
+    "game_started": "sobosuba da mo voi thu tu da luu.",
+    "err_no_previous": "Khong co ban truoc de tro ve."
   },
   "nl": {
     "title": "Sobosuba-modbeheer",
@@ -2417,7 +2569,15 @@
     "log_unwritable": "Het log kon niet worden geschreven. De handeling is niet gestopt.",
     "pin_version": "Deze versie houden",
     "pinned": "Vastgezet",
-    "pinned_older": "Vastgezet {0} is ouder dan de vereiste versie."
+    "pinned_older": "Vastgezet {0} is ouder dan de vereiste versie.",
+    "play_game": "sobosuba starten",
+    "revert_version": "Vorige versie terugzetten",
+    "game_changed": "Het spel is veranderd. {0} is gecontroleerd voor {1}. Uitschakelen?",
+    "disable_unmatched": "Deze mods uitschakelen",
+    "keep_game_mods": "Aan laten",
+    "overlap_line": "{0} overlapt {1}: {2}",
+    "game_started": "sobosuba is gestart met de opgeslagen volgorde.",
+    "err_no_previous": "Er is geen vorige versie."
   },
   "hu": {
     "title": "Sobosuba modkezelő",
@@ -2538,7 +2698,15 @@
     "log_unwritable": "A naplót nem sikerült írni. A művelet nem állt le.",
     "pin_version": "Ez a változat maradjon",
     "pinned": "Rögzítve",
-    "pinned_older": "A rögzített {0} régebbi a szükséges változatnál."
+    "pinned_older": "A rögzített {0} régebbi a szükséges változatnál.",
+    "play_game": "sobosuba inditasa",
+    "revert_version": "Elozo valtozat visszaallitasa",
+    "game_changed": "A jatek megvaltozott. A {0} a {1} verziora lett ellenorizve. Kikapcsolod?",
+    "disable_unmatched": "Ezeknek a modoknak a kikapcsolasa",
+    "keep_game_mods": "Bekapcsolva hagyas",
+    "overlap_line": "A {0} utkozik ezzel: {1}: {2}",
+    "game_started": "A sobosuba a mentett sorrenddel indult.",
+    "err_no_previous": "Nincs elozo valtozat."
   },
   "ro": {
     "title": "Manager de moduri Sobosuba",
@@ -2659,6 +2827,14 @@
     "log_unwritable": "Jurnalul nu a putut fi scris. Operația nu a fost oprită.",
     "pin_version": "Păstrează această versiune",
     "pinned": "Fixat",
-    "pinned_older": "{0} fixat este mai vechi decât versiunea cerută."
+    "pinned_older": "{0} fixat este mai vechi decât versiunea cerută.",
+    "play_game": "Porneste sobosuba",
+    "revert_version": "Revino la versiunea anterioara",
+    "game_changed": "Jocul s-a schimbat. {0} a fost verificat pentru {1}. Il dezactivezi?",
+    "disable_unmatched": "Dezactiveaza aceste moduri",
+    "keep_game_mods": "Lasa-le active",
+    "overlap_line": "{0} se suprapune cu {1}: {2}",
+    "game_started": "sobosuba a pornit cu ordinea salvata.",
+    "err_no_previous": "Nu exista o versiune anterioara."
   }
 }

@@ -6,6 +6,7 @@ const Versions = preload("versions.gd")
 const ReleaseSource = preload("release_source.gd")
 
 var mods: Array = []
+var game_builds: Dictionary = {}
 var error_message := ""
 var _trusted_catalog := false
 var _base_mods: Array = []
@@ -84,6 +85,12 @@ func refresh(source: String = DEFAULT_URL) -> int:
 					owners[game] = index
 		ids.append(mod.id)
 	mods = parsed.mods
+	game_builds = {}
+	if parsed.get("game_builds") is Dictionary:
+		for build_id in parsed.game_builds:
+			var named := str(parsed.game_builds[build_id])
+			if build_id is String and named in ["1.2.3", "1.3.10", "1.3.11"]:
+				game_builds[build_id] = named
 	_trusted_catalog = source == DEFAULT_URL
 	if _trusted_catalog:
 		add_source_defaults(mods)

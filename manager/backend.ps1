@@ -18,8 +18,14 @@ function Get-Target($Request) {
             $text=[IO.File]::ReadAllText($manifest)
             if($text -match '"installdir"\s+"([^"\r\n]+)"' -and $Matches[1] -eq [IO.Path]::GetFileName($game) -and $text -match '"buildid"\s+"([0-9]+)"') {
                 $build=$Matches[1]
-                if($build -eq '26393791'){$detected='1.3.10'}
-                if($build -eq '26465074'){$detected='1.3.11'}
+                $known=@{ '26393791'='1.3.10'; '26465074'='1.3.11' }
+                if($Request.game_builds -is [hashtable]){
+                    foreach($key in $Request.game_builds.Keys){
+                        $named=[string]$Request.game_builds[$key]
+                        if($named -in @('1.2.3','1.3.10','1.3.11')){$known[[string]$key]=$named}
+                    }
+                }
+                if($known.ContainsKey($build)){$detected=$known[$build]}
             }
         }
     }
@@ -157,7 +163,7 @@ function Get-PackageOperations($Target,$Package,$Request,$Context) {
     $root=$Target.root;$receiptPath=Receipt-Path $root $Package.id
     foreach($other in (Read-Receipts $root)) {
         if($other.id -eq $Package.id){continue}
-        foreach($relative in $Package.files){if($other.hashes.ContainsKey($relative) -or $other.bootstrap -eq $relative){Stop-Manager 'file_conflict' @($relative)}}
+        foreach($relative in $Package.files){if($other.hashes.ContainsKey($relative) -or $other.bootstrap -eq $relative){Stop-Manager 'file_conflict' @($relative,$other.name)}}
     }
     $old=@((Read-Receipts $root) | Where-Object {$_.id -eq $Package.id})
     $enabled=$true;$hashes=@{};$operations=@();$hadUnowned=$false
@@ -319,6 +325,66 @@ function Save-Order($Target,$Order) {
     $ops+=,(Loader-Operation $Target)
     Write-Transaction $Target.user $ops
 }
+function Previous-Path([string]$Root,[string]$Id) {return Guard-Path (Join-Path $Root ('.sobo-mod-manager/previous/'+$Id+'.json')) $Root}
+function Save-Previous([string]$Root,$Old) {
+    $files=@{}
+    $paths=@($Old.hashes.Keys)
+    if($Old.bootstrap){$paths+=$Old.bootstrap}
+    foreach($relative in ($paths|Select-Object -Unique)) {
+        $file=Guard-Path (Join-Path $Root ([string]$relative)) $Root
+        if([IO.File]::Exists($file)){$files[[string]$relative]=[Convert]::ToBase64String([IO.File]::ReadAllBytes($file))}
+    }
+    $copy=@{}
+    foreach($key in $Old.Keys){if($key -ne 'root'){$copy[$key]=$Old[$key]}}
+    $dest=Previous-Path $Root $Old.id
+    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($dest))|Out-Null
+    [IO.File]::WriteAllText($dest,(ConvertTo-Json -InputObject @{format=1;receipt=$copy;files=$files} -Depth 8 -Compress))
+}
+function Restore-Previous($Target,[string]$Id) {
+    $path=Previous-Path $Target.root $Id
+    if(-not [IO.File]::Exists($path)){Stop-Manager 'no_previous' @($Id)}
+    $snap=Read-Map ([IO.File]::ReadAllText($path))
+    $receipt=$snap.receipt;$files=$snap.files
+    if($receipt.id -cne $Id){Stop-Manager 'no_previous' @($Id)}
+    $ops=@();$kept=@($files.Keys)
+    $current=@((Read-Receipts $Target.root)|Where-Object {$_.id -eq $Id})
+    if($current.Count){
+        foreach($relative in @($current[0].hashes.Keys)){if([string]$relative -notin $kept){$ops+=,@{path=(Guard-Path (Join-Path $Target.root ([string]$relative)) $Target.root);bytes=$null}}}
+        if($current[0].bootstrap -and [string]$current[0].bootstrap -notin $kept){$ops+=,@{path=(Guard-Path (Join-Path $Target.root ([string]$current[0].bootstrap)) $Target.root);bytes=$null}}
+    }
+    foreach($relative in $files.Keys){$ops+=,@{path=(Guard-Path (Join-Path $Target.root ([string]$relative)) $Target.root);bytes=[Convert]::FromBase64String([string]$files[$relative])}}
+    $ops+=,@{path=(Receipt-Path $Target.root $Id);bytes=(Json-Bytes $receipt)}
+    $ops+=,@{path=$path;bytes=$null}
+    if([string]$receipt.layout -eq 'user-data-styles'){$ops+=,(Loader-Operation $Target)}
+    Write-Transaction $Target.root $ops
+}
+function Collect-Overlaps($Receipts) {
+    $rows=@()
+    foreach($mine in @($Receipts)) {
+        foreach($other in @($Receipts)) {
+            if($other.id -eq $mine.id){continue}
+            foreach($relative in @($mine.hashes.Keys)) {
+                if($other.hashes.ContainsKey($relative) -or [string]$other.bootstrap -eq [string]$relative){$rows+=,@{id=$mine.id;file=[string]$relative;mod_id=$other.id;mod_name=$other.name}}
+            }
+        }
+    }
+    return ,$rows
+}
+function Zip-Overlaps($Root,$Package) {
+    $rows=@()
+    foreach($other in (Read-Receipts $Root)) {
+        if($other.id -eq $Package.id){continue}
+        foreach($relative in @($Package.files)) {
+            if($other.hashes.ContainsKey($relative) -or [string]$other.bootstrap -eq [string]$relative){$rows+=,@{file=[string]$relative;mod_id=$other.id;mod_name=$other.name}}
+        }
+    }
+    return ,$rows
+}
+function Game-Exe($Target) {
+    $names=if($script:managerWindows){@('sobosuba.exe')}else{@('sobosuba.x86_64','sobosuba')}
+    foreach($name in $names){$path=Join-Path $Target.game $name;if([IO.File]::Exists($path)){return $path}}
+    Stop-Manager 'game_missing' @($Target.game)
+}
 function Invoke-Manager($Request) {
     $mutex=[Threading.Mutex]::new($false,'Local\SoboModManager-FileOperations')
     $held=$false
@@ -327,10 +393,22 @@ function Invoke-Manager($Request) {
         if(-not $held){Stop-Manager 'busy'}
         $target=Get-Target $Request
         if($Request.action -in @('target','detect')) {return @{ok=$true;data=$target}}
-        $mutating=$Request.action -in @('install','enable','disable','uninstall','recover','set_order')
+        $mutating=$Request.action -in @('install','enable','disable','uninstall','recover','set_order','revert')
         if($mutating) {
             if(@(Get-Process -Name sobosuba,sobosuba.x86_64,sobosuba.exe -ErrorAction SilentlyContinue).Count){Stop-Manager 'game_running'}
             foreach($root in @($target.game,$target.user)|Select-Object -Unique){Recover-Transaction $root}
+        }
+        if($Request.action -eq 'overlaps') {
+            if($Request.zip){$package=Read-Package $Request.zip;return @{ok=$true;data=@{overlaps=(Zip-Overlaps $target.root $package)}}}
+            $rows=@()
+            foreach($row in (Collect-Overlaps (Read-Receipts $target.root))){if(-not $Request.id -or $row.id -eq $Request.id){$rows+=,$row}}
+            return @{ok=$true;data=@{overlaps=$rows}}
+        }
+        if($Request.action -eq 'launch') {
+            if(@(Get-Process -Name sobosuba,sobosuba.x86_64,sobosuba.exe -ErrorAction SilentlyContinue).Count){Stop-Manager 'game_running'}
+            $exe=Game-Exe $target
+            Start-Process -FilePath $exe -WorkingDirectory $target.game
+            return @{ok=$true;data=@{exe=$exe;order=(Read-Order $target)}}
         }
         if($Request.action -eq 'inspect') {
             $p=Read-Package $Request.zip
@@ -343,6 +421,12 @@ function Invoke-Manager($Request) {
             $plan=Get-DependencyPlan $target $Request
             if($Request.action -ne 'resolve') {
                 if($Request.token -and $Request.token -ne $plan.token){Stop-Manager 'plan_changed'}
+                foreach($change in @($plan.changes)) {
+                    if([string]$change.action -eq 'update' -and [string]$change.previous_version -and [string]$change.previous_version -ne [string]$change.version) {
+                        $older=@((Read-Receipts $target.root)|Where-Object {$_.id -eq $change.id})
+                        if($older.Count){Save-Previous $target.root $older[0]}
+                    }
+                }
                 Write-Transaction $target.root $plan.operations
             }
             $data=$plan.root.Clone();$data.Remove('contents');$data.changes=@($plan.changes);$data.token=$plan.token
@@ -351,7 +435,13 @@ function Invoke-Manager($Request) {
         if($Request.action -eq 'recover'){return @{ok=$true;data=@{}}}
         foreach($root in @($target.game,$target.user)){if([IO.File]::Exists((Guard-Path (Join-Path $root '.sobo-mod-manager/pending.json') $root))){Stop-Manager 'recovery_needed'}}
         if($Request.action -eq 'set_order'){Save-Order $target $Request.order;return @{ok=$true;data=@{order=(Read-Order $target)}}}
+        if($Request.action -eq 'revert'){Restore-Previous $target ([string]$Request.id);return @{ok=$true;data=@{id=$Request.id}}}
         $mods=All-Mods $target
+        $overlapRows=Collect-Overlaps (Read-Receipts $target.root)
+        foreach($mod in @($mods)) {
+            $mod.has_previous=[IO.File]::Exists((Previous-Path $target.root ([string]$mod.id)))
+            $mod.overlaps=@($overlapRows|Where-Object {$_.id -eq $mod.id})
+        }
         if($Request.action -eq 'list'){return @{ok=$true;data=@{mods=@($mods);target=$target;order=(Read-Order $target)}}}
         $m=@($mods | Where-Object {$_.id -eq $Request.id -and (-not $Request.layout -or $_.layout -eq $Request.layout)})
         if($m.Count -ne 1 -or $m[0].manual){Stop-Manager 'adopt_required'};$m=$m[0]
