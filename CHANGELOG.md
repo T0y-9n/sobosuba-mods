@@ -40,6 +40,10 @@ Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new 
 - Add bilingual GitHub contribution instructions, a PR template, an issue form and read-only catalog validation using trusted base code.
 - Add a separate GitHub PR sender with explicit submission, duplicate-update checks and required up-to-date validation. Deployment requires operator-approved credentials and GitHub repository settings.
 
+### Special Sobos 1.3.11-0.6.8, 2026-11-18
+
+- Big Bang now splits each sobo at most 6 times. A 64 still ends as 1s, but a larger one stops 6 steps down (an 8192 stops at 128). This keeps a huge sobo from turning into thousands of pieces, which froze the game. If it is still heavy, lower "Big Bang: most splits per sobo" in the settings (1 to 6, default 6).
+
 ### Special Sobos 1.3.11-0.6.7, 2026-11-15
 
 - Rock sobos are taken out. A rock kept the shape it took mid-merge, and the game kept pulling it back to round, so it could spin on its own and be repaired every frame. Its setting and frequency are gone too.
@@ -249,6 +253,10 @@ MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では
 - 初めての公開。
 - U を押すと、ソボを放つ直前の盤面へ戻れるようになります。5 回まで戻せます。
 - このMODを有効にしている間は、どのモードでも本家のリーダーボードに点数は送信されません。手元の順位表・Steam・フレンドに見える点のどれにも残らないようにしています。
+
+### Special Sobos 1.3.11-0.6.8、2026-11-18
+
+- ビッグバンで 1 つのソボが割れる回数を、最大 6 回までにした。64 は今までどおり 1 まで割れ、それより大きいソボは 6 回で止まる（8192 は 128 で止まる）。大きなソボが何千個にも割れて、ゲームが重くなり固まるのを防ぐため。それでも重いときは、設定の「ビッグバンで割れる最大回数」を減らせる（1〜6 回、既定 6）。
 
 ### Special Sobos 1.3.11-0.6.7、2026-11-15
 

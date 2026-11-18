@@ -5,7 +5,7 @@ const Parameters = preload("special_effect_parameters.gd")
 const WORDS: Dictionary = {
 	"trait liquid": {"en":"liquid sobos", "ja":"液体のソボ"},
 	"trait bigbang": {"en":"bigbang sobos", "ja":"ビッグバンのソボ"},
-	"description bigbang": {"en":"A negative number. Touching the same positive number sets off a chain from itself: every sobo it reaches splits, one step at a time, down to 1. A larger number reaches farther, and 64 reaches the whole board. No sobo merges until about a second after the last split. Two of the same negative number become an ordinary double.", "ja":"負の数。同じ正の数に触れると、自分を中心に連鎖が広がり、届いたソボは 1 段ずつ 1 まで割れる。数が大きいほど遠くまで届き、64 では盤の全部。最後に割れてから約 1 秒は合体しない。同じ負の数どうしは普通の倍になる"},
+	"description bigbang": {"en":"A negative number. Touching the same positive number sets off a chain from itself: every sobo it reaches splits, one step at a time, up to 6 times (a 64 ends as 1s). A larger number reaches farther, and 64 reaches the whole board. No sobo merges until about a second after the last split. Two of the same negative number become an ordinary double.", "ja":"負の数。同じ正の数に触れると、自分を中心に連鎖が広がり、届いたソボは 1 段ずつ、最大 6 回まで割れる（64 なら 1 まで割れる）。数が大きいほど遠くまで届き、64 では盤の全部。最後に割れてから約 1 秒は合体しない。同じ負の数どうしは普通の倍になる"},
 	"description liquid": {"en":"Soft, heavy sobos that spread and settle in the stack.", "ja":"盤面で柔らかく重くなり、広がって沈むソボ"},
 	"trait washer": {"en":"tornado sobos", "ja":"トルネードソボ"},
 	"trait shuffle": {"en":"change sobos", "ja":"チェンジソボ"},
@@ -408,7 +408,7 @@ func bang_stages(magnitude: int) -> int:
 	while n > 1:
 		n = int(n / 2)
 		stages += 1
-	return stages
+	return mini(stages, int(number("bang_max_stages")))
 
 
 func bigbang_touch(mode: SceneClassic, delta: float, gravity: float) -> void:

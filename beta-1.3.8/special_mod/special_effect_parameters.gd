@@ -7,6 +7,7 @@ const VALUES: Dictionary = {
 	"weight_darkmatter": [3.0, 0.0, 100.0, false, "added_weights", "Dark matter frequency", "ダークマターの出現比率"],
 	"weight_shuffle": [3.0, 0.0, 100.0, false, "added_weights", "Change frequency", "チェンジの出現比率"],
 	"weight_bigbang": [0.75, 0.0, 100.0, false, "added_weights", "Big Bang frequency", "ビッグバンの出現比率"],
+	"bang_max_stages": [6.0, 1.0, 6.0, true, "bigbang", "Big Bang: most splits per sobo", "ビッグバンで割れる最大回数"],
 	"extra_delay": [0.8, 0.0, 30.0, false, "washer", "Tornado start delay (s)", "トルネードが効き始めるまで（秒）"],
 	"extra_max_targets": [8.0, 1.0, 32.0, true, "washer", "Most sobos a tornado pushes", "トルネードが押す最大個数"],
 	"washer_range": [4.0, 1.0, 20.0, false, "washer", "Tornado range (radii)", "トルネードの届く範囲（半径の倍数）"],
@@ -21,6 +22,7 @@ static func group_label(group: String) -> String:
 	var labels: Dictionary = {
 		"added_weights": ["Frequency: tornado, liquid, dark matter, change, Big Bang", "出現比率: トルネード・液体・ダークマター・チェンジ・ビッグバン"],
 		"washer": ["Tornado", "トルネード"], "liquid": ["Liquid", "液体"],
+		"bigbang": ["Big Bang", "ビッグバン"],
 	}
 	return labels[group][1 if TranslationServer.get_locale().begins_with("ja") else 0]
 
