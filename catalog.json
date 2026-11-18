@@ -42,13 +42,13 @@
     {
       "id": "special_sobo",
       "name": "Special Sobos (beta)",
-      "version": "1.3.11-0.6.7",
+      "version": "1.3.11-0.6.8",
       "game_versions": [
         "1.3.11"
       ],
       "summary": "Beta for sobosuba 1.3.11 with Small, Puffy, Magnet, Throwing, Tornado, Liquid, Dark matter, Change and Big Bang sobos and numeric settings.",
-      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.6.7/Special-Sobos-1.3.11-0.6.7.zip",
-      "sha256": "c055cca4fb4840858dce8e46298e2341c57f17f4bfd142310b73f38511dc3343",
+      "zip": "https://github.com/T0y-9n/sobosuba-mods/releases/download/special-1.3.11-0.6.8/Special-Sobos-1.3.11-0.6.8.zip",
+      "sha256": "48d8a6b1fa766912e23b70d8588a5c1533ed8f0e67897a712ce13a5713386eeb",
       "game_credit": {
         "text": "sobosuba by keepee",
         "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
