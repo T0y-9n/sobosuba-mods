@@ -27,8 +27,6 @@ func word(key: String, args: Array = []) -> String:
 	return text
 
 func error_word(key: String, args: Array = []) -> String:
-	if key == "credit_required":
-		return word("err_credit_required")
 	if key == "pinned_older":
 		return word("pinned_older", args)
 	if key == "no_previous":

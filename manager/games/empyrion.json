@@ -1,0 +1,2 @@
+{ "format_version": 1, "id": "empyrion", "name": "Empyrion - Galactic Survival", "steam_appid": 383120, "screen": "library",
+  "places": [ { "id": "workshop", "reader": "workshop" } ] }

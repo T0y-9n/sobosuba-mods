@@ -1,0 +1,2 @@
+{ "format_version": 1, "id": "overcooked-2", "name": "Overcooked! 2", "steam_appid": 728880, "screen": "library",
+  "places": [ { "id": "plugins", "reader": "bepinex", "path": "{game}/BepInEx/plugins" } ] }

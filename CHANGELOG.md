@@ -2,6 +2,17 @@
 
 Mod versions are `<sobosuba version>-<mod version>`. Server changes need no new download.
 
+### Sobosuba Mod Manager 0.3.0-alpha.17, 2026-11-20
+
+For sobosuba by keepee. The original game is required.
+Get the game at https://store.steampowered.com/app/1946560/sobosuba
+
+- Mod details always show the game's credit and Steam link. Installing or updating a mod no longer shows warnings about missing game credits in the mod or its README.
+- The light theme now uses white and navy, the dark theme colors are refreshed, and installed mods are listed one per line.
+- The catalog now offers the new versions SoboSandbox 1.4.0 and GreenScreenSobos 1.3.1 by Typhe681, for sobosuba 1.3.11.
+
+You can update from the Mod Manager.
+
 ### Sobosuba Mod Manager 0.3.0-alpha.16, 2026-11-15
 
 - Keep the previous copy of a mod when you update it, and restore that version in one step.
@@ -222,6 +233,16 @@ Changed: 5s now appear more often.
 ## 日本語
 
 MOD の版は `<sobosuba の版>-<MOD の版>` です。サーバの変更では、入れ直しは要りません。
+
+### Sobosuba Mod Manager 0.3.0-alpha.17、2026-11-20
+
+keepee さんの sobosuba 用です。遊ぶには本家のゲームが要ります。
+ゲームは https://store.steampowered.com/app/1946560/sobosuba から購入できます。
+
+- MOD の詳細に原作の作者表示と Steam へのリンクを常に表示します。導入や更新では、MOD や README の原作表示の欠けを警告しません。
+- 明るい表示を白と濃紺の配色にし、暗い表示の色も整えました。導入済みの MOD を 1 行ずつ並べるようにしました。
+- カタログの Typhe681 さんの SoboSandbox と GreenScreenSobos を、新しい版（1.4.0・1.3.1）に上げました。どちらも sobosuba 1.3.11 用です。
+- 管理アプリから更新できます。
 
 ### Sobosuba Mod Manager 0.3.0-alpha.16、2026-11-15
 

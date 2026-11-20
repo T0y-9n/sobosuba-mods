@@ -13,12 +13,15 @@ static func library_paths(steam: String) -> Array[String]:
 			libraries.append(library)
 	return libraries
 
-static func find_game() -> String:
+static func find_game(process: RefCounted = null) -> String:
 	var steam := "C:/Program Files (x86)/Steam"
 	var roots: Array[String] = []
 	if OS.get_name() == "Windows":
 		var output: Array = []
-		var exit_code := OS.execute("reg.exe", ["query", "HKCU\\Software\\Valve\\Steam", "/v", "SteamPath"], output, false, false)
+		var arguments := PackedStringArray(["query", "HKCU\\Software\\Valve\\Steam", "/v", "SteamPath"])
+		var exit_code: int = process.execute("reg.exe", arguments, output) if process != null else OS.execute("reg.exe", arguments, output, false, false)
+		if process != null and process.cancelled():
+			return ""
 		if exit_code == 0 and not output.is_empty():
 			var pattern := RegEx.new()
 			pattern.compile("SteamPath\\s+REG_SZ\\s+([^\\r\\n]+)")
@@ -30,7 +33,11 @@ static func find_game() -> String:
 		var home := OS.get_environment("HOME")
 		for relative in [".local/share/Steam", ".steam/steam", ".var/app/com.valvesoftware.Steam/.local/share/Steam"]:
 			var output: Array = []
-			if OS.execute("/usr/bin/realpath", ["-e", home.path_join(relative)], output, false) == 0 and not output.is_empty():
+			var arguments := PackedStringArray(["-e", home.path_join(relative)])
+			var exit_code: int = process.execute("/usr/bin/realpath", arguments, output) if process != null else OS.execute("/usr/bin/realpath", arguments, output, false)
+			if process != null and process.cancelled():
+				return ""
+			if exit_code == 0 and not output.is_empty():
 				roots.append(str(output[0]).strip_edges())
 	for root in roots:
 		for library in library_paths(root):

@@ -3,6 +3,7 @@ extends Node
 const Platform = preload("platform.gd")
 const Versions = preload("versions.gd")
 const Catalog = preload("catalog.gd")
+const HubMode = preload("hub/hub_mode.gd")
 const RELEASES := "https://api.github.com/repos/T0y-9n/sobosuba-mods/releases?per_page=100&page="
 const BASE := "https://github.com/T0y-9n/sobosuba-mods/releases/download/"
 var pending: Dictionary = {}
@@ -155,7 +156,7 @@ func run_helper(mode: String, job: String) -> Dictionary:
 	return worker.wait_to_finish()
 
 func check_update(catalog: Node) -> bool:
-	if OS.has_feature("editor") or OS.get_name() not in ["Windows", "Linux"]:
+	if HubMode.active or OS.has_feature("editor") or OS.get_name() not in ["Windows", "Linux"]:
 		return true
 	if not pending.is_empty():
 		return true

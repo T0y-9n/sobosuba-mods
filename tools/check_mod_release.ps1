@@ -3,7 +3,6 @@ $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot '../manager/package.ps1')
 try {
     $package=Read-Package ([IO.Path]::GetFullPath($Zip))
-    if(-not (Valid-GameCredit $package.game_credit)){Stop-Manager 'credit_required'}
     [ordered]@{
         id=$package.id
         version=$package.version

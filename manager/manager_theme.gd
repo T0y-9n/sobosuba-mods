@@ -1,21 +1,21 @@
-# Hallmark · macrostructure: Split Studio · tone: utilitarian · theme: Cobalt
+# Hallmark · macrostructure: Split Studio · tone: utilitarian · theme: White and Navy
 # Native Godot tokens. Pre-emit critique: P4 H5 E4 S5 R5 V4.
 extends RefCounted
 
-const PAPER := Color("f2f5fa")
+const PAPER := Color("f7f8fa")
 const SURFACE := Color("ffffff")
-const INK := Color("172c46")
-const MUTED := Color("52647b")
-const RULE := Color("cbd5e2")
-const ACCENT := Color("2458ba")
-const ACCENT_HOVER := Color("1b4698")
-const ACCENT_SOFT := Color("eaf0fc")
-const FOCUS := Color("275ed0")
-const DISABLED := Color("e9edf3")
-const DISABLED_INK := Color("69788c")
-const SUCCESS := Color("176047")
-const SUCCESS_SOFT := Color("e5f3ec")
-const DANGER := Color("a42f43")
+const INK := Color("14171c")
+const MUTED := Color("5f6774")
+const RULE := Color("e2e5ea")
+const ACCENT := Color("1f3a5f")
+const ACCENT_HOVER := Color("172c49")
+const ACCENT_SOFT := Color("e8edf4")
+const FOCUS := Color("1f3a5f")
+const DISABLED := Color("eef0f3")
+const DISABLED_INK := Color("5f6774")
+const SUCCESS := Color("1f3a5f")
+const SUCCESS_SOFT := Color("e8edf4")
+const DANGER := Color("9c2b3e")
 const DANGER_SOFT := Color("fbedf0")
 const BODY_FONTS := ["Segoe UI", "Yu Gothic UI", "Microsoft YaHei UI", "Microsoft JhengHei UI", "Malgun Gothic"]
 const SPACE_SM := 8
@@ -37,22 +37,22 @@ static func resolve_appearance(choice: String, os_dark: bool) -> String:
 static func colors(name: String) -> Dictionary:
 	if name == "dark":
 		return {
-			"paper": Color("0e1726"),
-			"surface": Color("17263a"),
-			"ink": Color("e7eef8"),
-			"muted": Color("a9b8cc"),
-			"rule": Color("314864"),
-			"accent": Color("2458ba"),
-			"accent_hover": Color("1b4698"),
-			"accent_soft": Color("1a3054"),
-			"focus": Color("8eb6ff"),
-			"disabled": Color("121c2e"),
-			"disabled_ink": Color("93a6be"),
-			"success": Color("8fd0aa"),
-			"success_soft": Color("163528"),
-			"danger": Color("ffb3c0"),
-			"danger_soft": Color("3f2430"),
-			"on_accent": Color("e7eef8"),
+			"paper": Color("0f1319"),
+			"surface": Color("171c24"),
+			"ink": Color("e8ebf0"),
+			"muted": Color("9aa3b2"),
+			"rule": Color("2c3440"),
+			"accent": Color("9db8de"),
+			"accent_hover": Color("b7cbe9"),
+			"accent_soft": Color("1f2c40"),
+			"focus": Color("9db8de"),
+			"disabled": Color("1c222b"),
+			"disabled_ink": Color("8791a1"),
+			"success": Color("9db8de"),
+			"success_soft": Color("1f2c40"),
+			"danger": Color("f0a3b0"),
+			"danger_soft": Color("3a2229"),
+			"on_accent": Color("0f1319"),
 		}
 	return {
 		"paper": PAPER,
@@ -109,6 +109,8 @@ static func create() -> Theme:
 	var result := Theme.new()
 	result.default_font = font()
 	result.default_font_size = 16
+	result.set_type_variation("MutedLabel", "Label")
+	result.set_color("font_color", "MutedLabel", tone("muted"))
 	for type in ["Label", "Button", "OptionButton", "CheckBox", "PopupMenu", "LineEdit"]:
 		result.set_color("font_color", type, tone("ink"))
 		result.set_color("font_hover_color", type, tone("ink"))
@@ -128,6 +130,16 @@ static func create() -> Theme:
 	result.set_icon("arrow", "OptionButton", icon('<path d="m5 8 5 5 5-5" fill="none" stroke="#' + tone("ink").to_html(false) + '" stroke-width="2"/>'))
 	result.set_constant("arrow_margin", "OptionButton", 12)
 	result.set_stylebox("panel", "PanelContainer", box(tone("surface")))
+	result.set_stylebox("panel", "Tree", box(tone("surface")))
+	result.set_stylebox("selected", "Tree", box(tone("accent_soft"), Color.TRANSPARENT, 0, 4, 4))
+	result.set_stylebox("selected_focus", "Tree", box(tone("accent_soft"), tone("focus"), 1, 4, 4))
+	result.set_stylebox("cursor", "Tree", box(Color.TRANSPARENT, tone("focus"), 1, 4, 4))
+	result.set_stylebox("cursor_unfocused", "Tree", box(Color.TRANSPARENT, tone("rule"), 1, 4, 4))
+	for state in ["normal", "hover", "pressed"]:
+		result.set_stylebox("title_button_" + state, "Tree", box(tone("surface") if state == "normal" else tone("accent_soft"), tone("rule"), 1, 0, 4))
+	for key in ["font_color", "font_selected_color", "title_button_color"]:
+		result.set_color(key, "Tree", tone("ink"))
+	result.set_color("guide_color", "Tree", tone("rule"))
 	result.set_stylebox("panel", "PopupMenu", box(tone("surface")))
 	result.set_stylebox("hover", "PopupMenu", box(tone("accent_soft"), Color.TRANSPARENT, 0, 4))
 	result.set_color("font_hover_color", "PopupMenu", tone("ink"))

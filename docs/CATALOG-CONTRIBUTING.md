@@ -24,22 +24,13 @@ The authoritative catalog is `catalog.json` on this GitHub repository’s `main`
 
 - The ZIP metadata read by the manager (`mod-package.json`, or `mods/<id>/mod.json` for that layout) must have the catalog `id`, the version derived from the Release tag, and a `game_versions` array compatible with the selected game version. Updates must retain the listed installation layout.
   管理アプリが読むZIP内の定義書（`mod-package.json`、またはその導入形式の`mods/<id>/mod.json`）に、カタログと同じ`id`、Releaseのタグに対応する版、選択したゲーム版に対応する`game_versions`配列が必要です。更新では掲載済みの導入形式を保ちます。
-- The ZIP metadata must contain these exact `game_credit` values. The author repository’s README at the Release tag must name sobosuba and keepee and include the same Steam store URL, so players can reach the original game.
-  ZIPの定義書には、次の固定値と完全に一致する`game_credit`が必要です。Releaseのタグ時点の作者リポジトリのREADMEにも、sobosuba、原作者keepeeさん、同じSteam購入先を記載してください。MODから原作へたどれるようにするための条件です。
-
-```json
-{
-  "game_credit": {
-    "text": "sobosuba by keepee",
-    "store_url": "https://store.steampowered.com/app/1946560/sobosuba"
-  }
-}
-```
+The manager displays `sobosuba by keepee` and [the Steam store](https://store.steampowered.com/app/1946560/sobosuba) for every MOD. ZIP `game_credit` and attribution in the author's README are not publication or automatic-update requirements. Existing `game_credit` may remain. A README link to the original game is recommended, not required.
+管理アプリが、すべてのMODに `sobosuba by keepee` とSteam購入先を表示します。ZIPの `game_credit` と作者READMEの原作表示は、掲載と自動更新の条件ではありません。既存の `game_credit` は残せます。READMEから原作へリンクすることは推奨ですが、必須ではありません。
 
 ## Review and updates / 検査と更新
 
-Include the author repository, Release, ZIP, digest and tagged README in the PR. Edit `catalog.json`. If you also change `manager/catalog.json`, keep it byte-identical to `catalog.json`. Checks fetch the actual API data, ZIP and README and apply the manager’s release-verification rules. New MOD additions require human review and merge.
-PRには作者リポジトリ、Release、ZIP、digest、タグ時点のREADMEを添えてください。`catalog.json`を編集します。`manager/catalog.json`も変更する場合は、`catalog.json`と同じバイトにそろえます。検査では実際のAPI情報・ZIP・READMEを取得し、管理アプリと同じ受入条件で確認します。新しいMODの追加は、人が確認して合流します。
+Include the author repository, Release, ZIP and digest in the PR. Edit `catalog.json`. If you also change `manager/catalog.json`, keep it byte-identical to `catalog.json`. Checks fetch the actual API data and ZIP and verify SHA256 and package metadata. New MOD additions require human review and merge.
+PRには作者リポジトリ、Release、ZIP、digestを添えてください。`catalog.json`を編集します。`manager/catalog.json`も変更する場合は、`catalog.json`と同じバイトにそろえます。検査では実際のAPI情報・ZIPを取得し、SHA256と定義書を確認します。新しいMODの追加は、人が確認して合流します。
 
 Thor can propose newer releases of already listed MODs through GitHub PRs. Those update PRs may merge automatically after the same checks succeed.
 掲載済みMODの新版は、ThorがGitHubへ更新PRを作ります。同じ検査が通った更新PRは自動で合流できます。

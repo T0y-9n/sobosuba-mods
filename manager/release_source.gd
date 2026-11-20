@@ -1,8 +1,6 @@
 extends RefCounted
 
 const Versions = preload("versions.gd")
-const CREDIT_TEXT := "sobosuba by keepee"
-const CREDIT_URL := "https://store.steampowered.com/app/1946560/sobosuba"
 const CACHE_ROOT := "user://release-cache"
 var statuses: Dictionary = {}
 
@@ -88,28 +86,7 @@ static func select_release(entry: Dictionary, releases: Array) -> Dictionary:
 			best.failure = ""
 	return best
 
-static func package_credit(path: String, mod_id: String) -> bool:
-	var archive := ZIPReader.new()
-	if archive.open(path) != OK:
-		return false
-	var metadata_path := "mod-package.json" if archive.file_exists("mod-package.json") else "mods/" + mod_id + "/mod.json"
-	var metadata: Variant = JSON.parse_string(archive.read_file(metadata_path).get_string_from_utf8())
-	archive.close()
-	if not metadata is Dictionary or not metadata.get("game_credit") is Dictionary:
-		return false
-	return metadata.game_credit.get("text") == CREDIT_TEXT and metadata.game_credit.get("store_url") == CREDIT_URL
-
-func readme_credit(catalog: Node, source: Dictionary, tag: String) -> bool:
-	var response: Dictionary = await catalog.request_bytes("https://api.github.com/repos/" + str(source.github) + "/readme?ref=" + tag.uri_encode(), 1024 * 1024)
-	if response.error != OK:
-		return false
-	var data: Variant = JSON.parse_string(response.body.get_string_from_utf8())
-	if not data is Dictionary or data.get("encoding") != "base64" or not data.get("content") is String:
-		return false
-	var text := Marshalls.base64_to_utf8(data.content)
-	return text.to_lower().contains("sobosuba") and text.to_lower().contains("keepee") and text.contains(CREDIT_URL)
-
-func verify(catalog: Node, base: Dictionary, candidate: Dictionary, game: String, inspect: Callable, require_credit: bool = true) -> Dictionary:
+func verify(catalog: Node, base: Dictionary, candidate: Dictionary, game: String, inspect: Callable) -> Dictionary:
 	if not str(candidate.get("failure", "")).is_empty():
 		return {"failure":candidate.failure}
 	if not catalog.valid_hash(str(candidate.get("sha256", ""))) or not valid_location(candidate, base.source):
@@ -126,25 +103,11 @@ func verify(catalog: Node, base: Dictionary, candidate: Dictionary, game: String
 		return {"failure":"metadata"}
 	if not Versions.supports_game(metadata.game_versions, game) or catalog.entry_layout(metadata) != catalog.entry_layout(base):
 		return {"failure":"metadata"}
-	var warnings: Array = []
-	if not package_credit(path, base.id):
-		if require_credit:
-			return {"failure":"game_credit"}
-		warnings.append("game_credit")
-	if not await readme_credit(catalog, base.source, candidate.tag):
-		if require_credit:
-			return {"failure":"readme"}
-		warnings.append("readme")
 	var entry := base.duplicate(true)
 	for field in ["version", "zip", "sha256"]:
 		entry[field] = candidate[field]
 	entry.game_versions = metadata.game_versions.duplicate()
-	entry.erase("game_credit")
-	if "game_credit" not in warnings:
-		entry.game_credit = {"text":CREDIT_TEXT, "store_url":CREDIT_URL}
-	entry.credit_warning = "game_credit" in warnings
-	entry.release_warnings = warnings.duplicate()
-	return {"entry":entry, "warnings":warnings}
+	return {"entry":entry, "warnings":[]}
 
 func cache_path(base: Dictionary) -> String:
 	return ProjectSettings.globalize_path(CACHE_ROOT.path_join(key(base).sha256_text() + ".json"))
@@ -157,7 +120,7 @@ func save_cache(base: Dictionary, candidate: Dictionary, checked_at: int, reason
 	var file := FileAccess.open(temporary, FileAccess.WRITE)
 	if file == null:
 		return false
-	var record := {"schema":1, "id":base.id, "source":source_identity(base.source), "candidate":candidate, "checked_at":checked_at, "reason":reason, "readme_verified":reason.is_empty() and "readme" not in warnings, "warnings":warnings.duplicate()}
+	var record := {"schema":1, "id":base.id, "source":source_identity(base.source), "candidate":candidate, "checked_at":checked_at, "reason":reason, "readme_verified":false, "warnings":warnings.duplicate()}
 	record.integrity = JSON.stringify(record).sha256_text()
 	file.store_string(JSON.stringify(record))
 	file.flush()
@@ -194,7 +157,7 @@ func load_cache(catalog: Node, base: Dictionary) -> Dictionary:
 	for warning in warnings:
 		if warning not in ["game_credit", "readme"]:
 			return {"failure":"cache_invalid"}
-	if not record.get("readme_verified") is bool or (record.reason == "" and not record.readme_verified and "readme" not in warnings):
+	if not record.get("readme_verified") is bool:
 		return {"failure":"cache_invalid"}
 	if record.checked_at <= 0 or record.checked_at > Time.get_unix_time_from_system() + 300:
 		return {"failure":"cache_invalid"}
@@ -209,7 +172,7 @@ func status(base: Dictionary, candidate: Dictionary, reason: String, cached: Dic
 	var cached_reason: String = cached.get("reason", "")
 	return {"error":"author_release_unavailable" if reason in ["unavailable", "cache_invalid"] else "author_release_rejected", "version":candidate.get("version", base.version), "reason":cached_reason if reason == "unavailable" and not cached_reason.is_empty() else reason, "checked_at":cached.get("checked_at", int(Time.get_unix_time_from_system())), "cached":cached.has("candidate"), "cached_version":cached.get("candidate", {}).get("version", ""), "cached_reason":cached_reason, "warnings":cached.get("warnings", [])}
 
-func refresh(catalog: Node, entries: Array, game: String, inspect: Callable, trusted: bool, require_credit: bool = true) -> Dictionary:
+func refresh(catalog: Node, entries: Array, game: String, inspect: Callable, trusted: bool) -> Dictionary:
 	statuses = {}
 	var output := entries.duplicate(true)
 	var repositories := {}
@@ -238,7 +201,7 @@ func refresh(catalog: Node, entries: Array, game: String, inspect: Callable, tru
 			var releases: Variant = repositories[repository]
 			var candidate: Dictionary = select_release(base, releases) if releases is Array else {}
 			var checked_at := int(Time.get_unix_time_from_system())
-			var result := await verify(catalog, base, candidate, game, inspect, require_credit) if not candidate.is_empty() else {}
+			var result := await verify(catalog, base, candidate, game, inspect) if not candidate.is_empty() else {}
 			var reason := "unavailable" if not releases is Array else str(result.get("failure", ""))
 			var warnings: Array = result.get("warnings", [])
 			var cache_error: bool = not candidate.is_empty() and not save_cache(base, candidate, checked_at, reason, warnings)

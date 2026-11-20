@@ -48,13 +48,15 @@ static func powershell() -> String:
 
 ## Other running processes of this same executable file. A copy started hidden by an older
 ## self-update helper stays invisible and keeps the old executable in use (Windows only).
-static func other_copies() -> int:
+static func other_copies(boot_process: RefCounted = null) -> int:
 	if OS.get_name() != "Windows":
 		return 0
 	var path := OS.get_executable_path().replace("/", "\\").replace("'", "''")
 	var command := "@(Get-Process | Where-Object { $_.Id -ne %d -and $_.Path -eq '%s' }).Count" % [OS.get_process_id(), path]
 	var output: Array = []
-	if OS.execute(powershell(), ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", command], output) != 0 or output.is_empty():
+	var arguments := PackedStringArray(["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", command])
+	var code := OS.execute(powershell(), arguments, output) if boot_process == null else int(boot_process.execute(powershell(), arguments, output))
+	if code != 0 or output.is_empty():
 		return 0
 	return str(output[0]).strip_edges().to_int()
 

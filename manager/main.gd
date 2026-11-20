@@ -10,6 +10,8 @@ const SelfUpdate = preload("self_update.gd")
 const ManagerLog = preload("manager_log.gd")
 const UiTheme = preload("manager_theme.gd")
 const Platform = preload("platform.gd")
+const HubMode = preload("hub/hub_mode.gd")
+const BootTrace = preload("hub/boot_trace.gd")
 var store := Store.new()
 var settings := Settings.new()
 var words := Words.new()
@@ -70,6 +72,10 @@ var notice_error := ""
 var notice_args: Array = []
 var notice_mod: Dictionary = {}
 var another_copy := false
+var hub_startup: Dictionary = {}
+var _hub_workers: Array[Thread] = []
+var hub_closing := false
+var hub_starting := true
 
 ## The self-update helper of alpha.10 and earlier restarts the manager with a hidden window style.
 ## Windows applies that style to the first show only, so showing the window again brings it up.
@@ -77,6 +83,8 @@ func manager_heading() -> String:
 	return "Sobosuba Mod Manager " + SelfUpdate.current_version()
 
 func show_manager_version() -> void:
+	if HubMode.active:
+		return
 	var shown := manager_heading()
 	DisplayServer.window_set_title(shown)
 	get_window().title = shown
@@ -92,49 +100,86 @@ func _ready() -> void:
 		add_child(catalog)
 		add_child(self_update)
 		UiTheme.apply(settings.appearance, DisplayServer.is_dark_mode())
-		build_screen()
+		await build_screen()
 		await get_tree().process_frame
-		var probe := FileAccess.open("user://update-probe.json", FileAccess.WRITE)
-		if probe == null:
-			get_tree().quit(1)
+		if HubMode.active:
+			# The shell owns probe completion after all game screens are built.
+			hub_starting = false
 			return
-		probe.store_string(JSON.stringify({"ok":true, "version":SelfUpdate.current_version(), "sha256":FileAccess.get_sha256(OS.get_executable_path())}))
-		probe.flush()
-		var error := probe.get_error()
-		probe.close()
-		get_tree().quit(0 if error == OK else 1)
+		finish_update_probe()
 		return
 	show_window()
 	show_manager_version()
-	another_copy = Platform.other_copies() > 0
-	settings.load_file()
+	if HubMode.active and not hub_startup.is_empty():
+		another_copy = hub_startup.another_copy
+		settings = hub_startup.settings
+	else:
+		another_copy = Platform.other_copies() > 0
+		settings.load_file()
 	if not settings.locale.is_empty():
 		words.set_locale(settings.locale)
 	store.game_folder = settings.game_folder
 	store.game_version = settings.game_version
 	store.user_data = settings.user_data
 	if store.game_folder.is_empty():
-		store.game_folder = SteamFolders.find_game()
+		store.game_folder = str(hub_startup.game_folder) if HubMode.active and not hub_startup.is_empty() else SteamFolders.find_game()
 	busy = true
 	await detect_version()
+	if hub_closing:
+		hub_starting = false
+		return
 	add_child(catalog)
 	add_child(self_update)
 	self_update.load_state()
 	UiTheme.apply(settings.appearance, DisplayServer.is_dark_mode())
-	build_screen()
+	var ui_started := Time.get_ticks_msec()
+	await build_screen()
+	if hub_closing:
+		hub_starting = false
+		return
+	if HubMode.active:
+		print("Mod Hub boot sobosuba_ui ", Time.get_ticks_msec() - ui_started)
 	get_window().files_dropped.connect(drop_zips)
 	busy = false
 	await refresh()
+	if hub_closing:
+		hub_starting = false
+		return
 	update_timer = Timer.new()
 	update_timer.wait_time = 1800.0
 	update_timer.timeout.connect(check_updates)
 	add_child(update_timer)
 	update_timer.start()
-	check_updates.call_deferred()
+	store.boot_process = null
+	if not HubMode.active:
+		check_updates.call_deferred()
+	hub_starting = false
+
+func finish_update_probe() -> void:
+	var probe := FileAccess.open("user://update-probe.json", FileAccess.WRITE)
+	if probe == null:
+		get_tree().quit(1)
+		return
+	probe.store_string(JSON.stringify({"ok":true, "version":SelfUpdate.current_version(), "sha256":FileAccess.get_sha256(OS.get_executable_path())}))
+	probe.flush()
+	var error := probe.get_error()
+	probe.close()
+	get_tree().quit(0 if error == OK else 1)
 
 func _notification(what: int) -> void:
+	if hub_closing:
+		return
 	if what == NOTIFICATION_WM_CLOSE_REQUEST and not busy:
 		close_manager()
+
+func _exit_tree() -> void:
+	for worker in _hub_workers:
+		worker.wait_to_finish()
+	_hub_workers.clear()
+	# Detection can be cancelled before these owned helpers enter the tree.
+	for helper in [catalog, self_update]:
+		if helper.get_parent() == null:
+			helper.free()
 
 func close_manager(restart: bool = false) -> void:
 	if busy or native_dialog_open or install_dialog.visible or operation_dialog.visible:
@@ -185,6 +230,8 @@ func card(parent: Node) -> VBoxContainer:
 	return layout
 
 func build_screen() -> void:
+	var trace := BootTrace.begin("main", "sobosuba/ui/title")
+	var ui_stage := Time.get_ticks_msec()
 	theme = UiTheme.create()
 	get_window().theme = theme
 	background = ColorRect.new()
@@ -208,18 +255,39 @@ func build_screen() -> void:
 	var title := label(manager_heading(), 26)
 	title.name = "ManagerTitle"
 	heading.add_child(title)
+	BootTrace.end("main", "sobosuba/ui/title", trace)
+	if HubMode.active:
+		ui_stage = await boot_ui_frame("sobosuba_title", ui_stage)
+		if hub_closing:
+			return
+	trace = BootTrace.begin("coroutine", "sobosuba/ui/languages")
 	action(heading, "install_zip", choose_zip, "primary")
 	language_picker = OptionButton.new()
 	language_picker.custom_minimum_size = Vector2(180, 44)
+	if HubMode.active:
+		language_picker.fit_to_longest_item = false
 	for code in Words.LANGUAGES:
+		var language_trace := BootTrace.begin("main", "sobosuba/language/" + str(code))
 		language_picker.add_item(Words.LANGUAGES[code])
 		language_picker.set_item_metadata(language_picker.item_count - 1, code)
 		language_picker.get_popup().set_item_as_radio_checkable(language_picker.item_count - 1, true)
 		if code == words.locale:
 			language_picker.select(language_picker.item_count - 1)
+		BootTrace.end("main", "sobosuba/language/" + str(code), language_trace)
+		if HubMode.active:
+			await get_tree().process_frame
+			if hub_closing:
+				language_picker.free()
+				return
 	language_picker.item_selected.connect(func(index): change_locale(str(language_picker.get_item_metadata(index))))
 	heading.add_child(language_picker)
 	controls.append(language_picker)
+	BootTrace.end("coroutine", "sobosuba/ui/languages", trace)
+	if HubMode.active:
+		ui_stage = await boot_ui_frame("sobosuba_languages", ui_stage)
+		if hub_closing:
+			return
+	trace = BootTrace.begin("main", "sobosuba/ui/heading")
 	appearance_picker = OptionButton.new()
 	appearance_picker.custom_minimum_size = Vector2(160, 44)
 	for choice in ["system", "light", "dark"]:
@@ -231,6 +299,12 @@ func build_screen() -> void:
 	heading.add_child(appearance_picker)
 	controls.append(appearance_picker)
 	caption(layout, "drop_hint", 14)
+	BootTrace.end("main", "sobosuba/ui/heading", trace)
+	if HubMode.active:
+		ui_stage = await boot_ui_frame("sobosuba_heading", ui_stage)
+		if hub_closing:
+			return
+	trace = BootTrace.begin("main", "sobosuba/ui/location")
 	var location := card(layout)
 	var path_row := HBoxContainer.new()
 	path_row.add_theme_constant_override("separation", UiTheme.SPACE_MD)
@@ -264,6 +338,12 @@ func build_screen() -> void:
 	detected_label = label("", 14)
 	version_row.add_child(detected_label)
 	manager_update_check = update_checkbox(version_row, "manager_auto_update", settings.manager_auto_update, set_manager_updates)
+	BootTrace.end("main", "sobosuba/ui/location", trace)
+	if HubMode.active:
+		ui_stage = await boot_ui_frame("sobosuba_location", ui_stage)
+		if hub_closing:
+			return
+	trace = BootTrace.begin("main", "sobosuba/ui/workbench")
 	var workbench := HBoxContainer.new()
 	workbench.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	workbench.add_theme_constant_override("separation", UiTheme.SPACE_LG)
@@ -334,6 +414,12 @@ func build_screen() -> void:
 	detail_actions = HBoxContainer.new()
 	detail_actions.add_theme_constant_override("separation", UiTheme.SPACE_SM)
 	detail_layout.add_child(detail_actions)
+	BootTrace.end("main", "sobosuba/ui/workbench", trace)
+	if HubMode.active:
+		ui_stage = await boot_ui_frame("sobosuba_workbench", ui_stage)
+		if hub_closing:
+			return
+	trace = BootTrace.begin("main", "sobosuba/ui/footer")
 	var footer := card(layout)
 	var result_row := HBoxContainer.new()
 	result_row.add_theme_constant_override("separation", UiTheme.SPACE_MD)
@@ -364,21 +450,21 @@ func build_screen() -> void:
 	restart_button.visible = false
 	recovery_button = action(tools, "recover", recover)
 	recovery_button.visible = false
-	folder_dialog = FileDialog.new()
-	folder_dialog.use_native_dialog = true
-	folder_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	folder_dialog.file_mode = FileDialog.FILE_MODE_OPEN_DIR
-	folder_dialog.dir_selected.connect(func(path): native_dialog_open = false; select_folder(path))
-	folder_dialog.canceled.connect(func(): native_dialog_open = false)
-	add_child(folder_dialog)
-	zip_dialog = FileDialog.new()
-	zip_dialog.use_native_dialog = true
-	zip_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	zip_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
-	zip_dialog.filters = PackedStringArray(["*.zip"])
-	zip_dialog.file_selected.connect(func(path): native_dialog_open = false; inspect_zip(path))
-	zip_dialog.canceled.connect(func(): native_dialog_open = false)
-	add_child(zip_dialog)
+	BootTrace.end("main", "sobosuba/ui/footer", trace)
+	if HubMode.active:
+		ui_stage = await boot_ui_frame("sobosuba_footer", ui_stage)
+		if hub_closing:
+			return
+	trace = BootTrace.begin("main", "sobosuba/ui/zip_dialog")
+	if not HubMode.active:
+		create_folder_dialog()
+		create_zip_dialog()
+	BootTrace.end("main", "sobosuba/ui/zip_dialog", trace)
+	if HubMode.active:
+		ui_stage = await boot_ui_frame("sobosuba_zip_dialog", ui_stage)
+		if hub_closing:
+			return
+	trace = BootTrace.begin("main", "sobosuba/ui/confirmation_dialogs")
 	install_dialog = ConfirmationDialog.new()
 	install_dialog.get_label().hide()
 	var preview_box := VBoxContainer.new()
@@ -406,19 +492,56 @@ func build_screen() -> void:
 	translate_filters()
 	for dialog in [install_dialog, operation_dialog]:
 		UiTheme.style_button(dialog.get_ok_button(), "primary")
+	if HubMode.active:
+		print("Mod Hub boot sobosuba_dialogs ", Time.get_ticks_msec() - ui_stage)
+	BootTrace.end("main", "sobosuba/ui/confirmation_dialogs", trace)
+
+func boot_ui_frame(stage: String, started: int) -> int:
+	print("Mod Hub boot ", stage, " ", Time.get_ticks_msec() - started)
+	await get_tree().process_frame
+	return Time.get_ticks_msec()
+
+func create_folder_dialog() -> void:
+	if folder_dialog != null:
+		return
+	folder_dialog = FileDialog.new()
+	folder_dialog.use_native_dialog = true
+	folder_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	folder_dialog.file_mode = FileDialog.FILE_MODE_OPEN_DIR
+	folder_dialog.title = words.word("choose_folder")
+	folder_dialog.dir_selected.connect(func(path): native_dialog_open = false; select_folder(path))
+	folder_dialog.canceled.connect(func(): native_dialog_open = false)
+	add_child(folder_dialog)
 
 func choose_folder() -> void:
 	if not busy:
+		create_folder_dialog()
 		native_dialog_open = true
 		folder_dialog.popup_centered_ratio(0.8)
 
+func create_zip_dialog() -> void:
+	if zip_dialog != null:
+		return
+	zip_dialog = FileDialog.new()
+	zip_dialog.use_native_dialog = true
+	zip_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	zip_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	zip_dialog.filters = PackedStringArray(["*.zip"])
+	zip_dialog.title = words.word("choose_zip")
+	zip_dialog.file_selected.connect(func(path): native_dialog_open = false; inspect_zip(path))
+	zip_dialog.canceled.connect(func(): native_dialog_open = false)
+	add_child(zip_dialog)
+
 func choose_zip() -> void:
 	if not busy:
+		create_zip_dialog()
 		native_dialog_open = true
 		zip_dialog.popup_centered_ratio(0.8)
 
 func drop_zips(paths: PackedStringArray) -> void:
-	if busy or native_dialog_open or install_dialog.visible or operation_dialog.visible or folder_dialog.visible or zip_dialog.visible:
+	if HubMode.active and not is_visible_in_tree():
+		return
+	if busy or native_dialog_open or install_dialog.visible or operation_dialog.visible or (folder_dialog != null and folder_dialog.visible) or (zip_dialog != null and zip_dialog.visible):
 		return
 	if paths.size() != 1 or paths[0].get_extension().to_lower() != "zip":
 		notice_error = ""
@@ -458,9 +581,12 @@ func invoke(operation: String, extra: Dictionary = {}) -> Dictionary:
 	var error := thread.start(store.request.bind(operation, payload))
 	if error != OK:
 		return {"ok": false, "error": "io_error"}
+	if HubMode.active:
+		_hub_workers.append(thread)
 	while thread.is_alive():
 		await get_tree().create_timer(0.03).timeout
 	var result: Dictionary = thread.wait_to_finish()
+	_hub_workers.erase(thread)
 	if operation in ["install", "enable", "disable", "uninstall", "set_order", "recover", "revert"]:
 		note_operation(operation, extra, result)
 	return result
@@ -474,12 +600,16 @@ func refresh() -> void:
 	notice_mod = {}
 	set_busy(true)
 	await read_state()
+	if hub_closing:
+		return
 	consider_game_change()
 	set_busy(false)
 	render_notice()
 
 func read_state() -> void:
 	var result: Dictionary = await invoke("list")
+	if hub_closing:
+		return
 	if result.ok:
 		mods = result.data.mods
 		for mod: Dictionary in mods:
@@ -503,14 +633,18 @@ func clear_children(parent: Node) -> void:
 		parent.remove_child(item)
 		item.queue_free()
 
-func status_badge(mod: Dictionary) -> PanelContainer:
+func status_badge(mod: Dictionary, compact: bool = false) -> PanelContainer:
 	var status := "manual" if mod.get("manual", false) else ("enabled" if mod.get("enabled", false) else "disabled")
 	var badge := PanelContainer.new()
 	var on := status == "enabled"
-	badge.add_theme_stylebox_override("panel", UiTheme.box(UiTheme.tone("success_soft") if on else UiTheme.tone("disabled"), Color.TRANSPARENT, 0, 5, 8))
+	var style := UiTheme.box(UiTheme.tone("success_soft") if on else UiTheme.tone("disabled"), Color.TRANSPARENT, 0, 5, 8)
+	if compact:
+		style.content_margin_top = 2
+		style.content_margin_bottom = 2
+	badge.add_theme_stylebox_override("panel", style)
 	var text := label(words.word(status), 13)
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
-	paint(text, "success" if on else "muted")
+	paint(text, "success" if on else "disabled_ink")
 	badge.add_child(text)
 	return badge
 
@@ -548,6 +682,12 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	if draggable:
 		content.add_child(drag_handle())
 		button.set_drag_forwarding(row_drag_data.bind(mod), row_can_drop.bind(mod, button), row_drop.bind(mod, button))
+	if not is_catalog:
+		compact_library_content(button, content, mod)
+		if draggable:
+			button.tooltip_text += "\n" + words.word("drag_to_reorder")
+		ignore_pointer(button)
+		return
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_child(text)
@@ -559,9 +699,6 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 		paint(name_label, "disabled_ink")
 	text.add_child(name_label)
 	var version_label := label("MOD " + str(mod.get("version", "")), 14)
-	var latest := catalog.find(mod.id, store.game_version)
-	if not is_catalog and not settings.is_pinned(str(mod.id)) and catalog.has_update(mod, store.game_version) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
-		version_label.text += " → " + str(latest.version)
 	version_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	version_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	version_label.clip_text = true
@@ -572,10 +709,6 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 	game_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	game_label.clip_text = true
 	text.add_child(game_label)
-	if not is_catalog and settings.is_pinned(str(mod.id)):
-		var pinned_label := label(words.word("pinned"), 14)
-		pinned_label.name = "Pinned"
-		text.add_child(pinned_label)
 	if layout_blocked:
 		paint(version_label, "disabled_ink")
 		paint(game_label, "disabled_ink")
@@ -598,13 +731,47 @@ func add_library_row(mod: Dictionary, is_catalog: bool = false) -> void:
 		button.tooltip_text += "\n" + release_note
 	text.minimum_size_changed.connect(func(): button.custom_minimum_size.y = maxf(112.0, text.get_combined_minimum_size().y + 24.0))
 	button.custom_minimum_size.y = maxf(112.0, text.get_combined_minimum_size().y + 24.0)
-	if not is_catalog:
-		var badge := status_badge(mod)
-		badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		content.add_child(badge)
-	if draggable:
-		button.tooltip_text += "\n" + words.word("drag_to_reorder")
 	ignore_pointer(button)
+
+func compact_library_content(button: Button, content: HBoxContainer, mod: Dictionary) -> void:
+	button.custom_minimum_size.y = 40
+	content.offset_top = 4
+	content.offset_bottom = -4
+	var text := HBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_theme_constant_override("separation", UiTheme.SPACE_SM)
+	content.add_child(text)
+	var name_label := label(str(mod.name), 16)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.clip_text = true
+	name_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	text.add_child(name_label)
+	var version_label := label(str(mod.get("version", "")), 14)
+	version_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	version_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	version_label.clip_text = true
+	version_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var latest := catalog.find(mod.id, store.game_version)
+	if not settings.is_pinned(str(mod.id)) and catalog.has_update(mod, store.game_version) and Versions.supports_game(latest.get("game_versions", []), store.game_version):
+		version_label.text += " → " + str(latest.version)
+	text.add_child(version_label)
+	# Give the name its natural width when it fits, reserving room for the adjacent version.
+	var fit_name := func() -> void:
+		var version_width := version_label.get_theme_font("font").get_string_size(version_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, version_label.get_theme_font_size("font_size")).x
+		version_label.custom_minimum_size.x = minf(version_width, maxf(0.0, text.size.x * 0.5))
+		var natural := name_label.get_theme_font("font").get_string_size(name_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, name_label.get_theme_font_size("font_size")).x
+		name_label.custom_minimum_size.x = minf(natural, maxf(0.0, text.size.x - version_label.get_combined_minimum_size().x - UiTheme.SPACE_SM))
+	text.resized.connect(fit_name)
+	fit_name.call()
+	if legacy_layout_blocked(mod):
+		paint(name_label, "disabled_ink")
+	var badge := status_badge(mod, true)
+	badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	content.add_child(badge)
+	for note in [compatibility_warning(mod), author_release_note(mod), words.word("pinned") if settings.is_pinned(str(mod.id)) else ""]:
+		if not note.is_empty():
+			button.tooltip_text += "\n" + note
 
 # Three short lines at the left of a row the loader orders.
 func drag_handle() -> Control:
@@ -615,7 +782,7 @@ func drag_handle() -> Control:
 	handle.draw.connect(func() -> void:
 		for line in 3:
 			var y := handle.size.y / 2.0 + (line - 1) * 6.0
-			handle.draw_line(Vector2(2, y), Vector2(handle.size.x - 2, y), UiTheme.MUTED, 2.0, true))
+			handle.draw_line(Vector2(2, y), Vector2(handle.size.x - 2, y), UiTheme.tone("muted"), 2.0, true))
 	return handle
 
 func select_mod(key: String) -> void:
@@ -665,16 +832,19 @@ func compatibility_warning(mod: Dictionary) -> String:
 	return words.word("compatibility_warning", [", ".join(declared), store.game_version])
 
 func render_rows() -> void:
+	var trace := BootTrace.begin("main", "sobosuba/render_rows")
 	clear_children(rows)
 	path_label.text = store.game_folder if not store.game_folder.is_empty() else words.word("err_target")
 	path_label.tooltip_text = path_label.text
 	detected_label.text = words.word("detected", [target.detected]) if not str(target.get("detected", "")).is_empty() else words.word("selected")
 	library_count.text = words.word("mod_count", [mods.size()])
+	var all_mods_trace := BootTrace.begin("main", "sobosuba/all_mods")
 	var installed: Array = in_load_order(mods).filter(matches_filters)
 	var installed_keys: Array = mods.map(mod_key)
 	var available: Array = catalog.for_game(store.game_version).filter(func(mod: Dictionary) -> bool: return str(mod.id) + "|" + catalog.entry_layout(mod) not in installed_keys and matches_filters(mod))
 	var visible_mods := installed + available
 	var keys: Array = visible_mods.map(mod_key)
+	BootTrace.end("main", "sobosuba/all_mods", all_mods_trace)
 	if selected_mod_key not in keys:
 		selected_mod_key = str(keys[0]) if not keys.is_empty() else ""
 	selected_mod = {}
@@ -698,6 +868,7 @@ func render_rows() -> void:
 			action(rows, "clear_filters", clear_filters)
 	render_details()
 	bindings = bindings.filter(func(item): return is_instance_valid(item.node) and not item.node.is_queued_for_deletion())
+	BootTrace.end("main", "sobosuba/render_rows", trace)
 
 func render_details() -> void:
 	clear_children(details)
@@ -829,7 +1000,7 @@ func row_drag_data(_at_position: Vector2, mod: Dictionary) -> Variant:
 	if busy:
 		return null
 	var preview := PanelContainer.new()
-	preview.add_theme_stylebox_override("panel", UiTheme.box(UiTheme.ACCENT_SOFT, UiTheme.ACCENT))
+	preview.add_theme_stylebox_override("panel", UiTheme.box(UiTheme.tone("accent_soft"), UiTheme.tone("accent")))
 	preview.add_child(label(str(mod.name), 16))
 	set_drag_preview(preview)
 	return {"load_order_id": str(mod.id)}
@@ -884,14 +1055,6 @@ func render_notice() -> void:
 	var warning := compatibility_warning(notice_mod) if notice_key == "changed" and notice_error.is_empty() else ""
 	if not warning.is_empty():
 		notice.text += "\n" + warning
-	if notice_key in ["changed", "offline"] and notice_mod.get("credit_warning", false):
-		notice.text += "\n" + words.word("credit_warning")
-		warning = words.word("credit_warning")
-	if notice_key in ["changed", "offline"]:
-		for change in notice_mod.get("changes", []):
-			if change.get("credit_warning", false) and change.get("id") != notice_mod.get("id"):
-				warning = words.word("credit_warning")
-				notice.text += "\n" + str(change.name) + "\n" + warning
 	if another_copy:
 		warning = words.word("another_copy")
 		notice.text += "\n" + warning
@@ -908,8 +1071,10 @@ func render_notice() -> void:
 		keep_game_button.visible = asking
 
 func translate_dialogs() -> void:
-	folder_dialog.title = words.word("choose_folder")
-	zip_dialog.title = words.word("choose_zip")
+	if folder_dialog != null:
+		folder_dialog.title = words.word("choose_folder")
+	if zip_dialog != null:
+		zip_dialog.title = words.word("choose_zip")
 	for dialog in [install_dialog, operation_dialog]:
 		dialog.title = words.word("confirm")
 		dialog.ok_button_text = words.word("confirm")
@@ -920,8 +1085,6 @@ func translate_dialogs() -> void:
 		var changes := PackedStringArray()
 		for change in pending_package.get("changes", []):
 			changes.append(str(change.name) + " (" + str(change.version) + ") - " + words.word("plan_" + str(change.action)))
-			if change.get("credit_warning", false):
-				changes.append(words.word("credit_warning"))
 		var summary := words.word("dependency_plan") + "\n" + "\n".join(changes) + "\n\n" if not changes.is_empty() else ""
 		var overlaps := PackedStringArray()
 		for item in pending_package.get("overlaps", []):
@@ -937,9 +1100,6 @@ func translate_dialogs() -> void:
 
 func mod_notes(mod: Dictionary) -> String:
 	var parts := PackedStringArray()
-	var credit: Variant = mod.get("game_credit")
-	if mod.get("credit_warning", false) or not credit is Dictionary or credit.get("text") != "sobosuba by keepee" or credit.get("store_url") != "https://store.steampowered.com/app/1946560/sobosuba":
-		parts.append(words.word("credit_warning"))
 	parts.append("sobosuba by keepee\nhttps://store.steampowered.com/app/1946560/sobosuba")
 	var release_note := author_release_note(mod)
 	if not release_note.is_empty():
@@ -964,26 +1124,21 @@ func author_release_note(mod: Dictionary) -> String:
 	var message := ""
 	if error == "author_release_unavailable":
 		message = words.word(error)
-	elif error == "author_release_rejected":
+	elif error == "author_release_rejected" and status.get("reason", "") not in ["game_credit", "readme"]:
 		message = words.word(error, [str(status.get("version", "")), author_release_reason(str(status.get("reason", "metadata")))])
 	if status.get("cached", false):
 		var checked_at := int(status.get("checked_at", 0))
 		var checked := Time.get_datetime_string_from_unix_time(checked_at, true) + " UTC"
 		var cached := words.word("author_release_cached", [str(status.get("cached_version", status.get("version", ""))), checked])
 		message += (" " if not message.is_empty() else "") + cached
-		if not str(status.get("cached_reason", "")).is_empty():
+		if str(status.get("cached_reason", "")) not in ["", "game_credit", "readme"]:
 			message += " " + words.word("author_release_rejected", [str(status.get("cached_version", "")), author_release_reason(str(status.cached_reason))])
 	if status.get("cache_error", false):
 		message += (" " if not message.is_empty() else "") + words.error_word("io_error")
-	var warnings: Array = status.get("warnings", mod.get("release_warnings", []))
-	if "game_credit" in warnings:
-		message += ("\n" if not message.is_empty() else "") + words.word("credit_warning")
-	if "readme" in warnings:
-		message += ("\n" if not message.is_empty() else "") + words.word("credit_readme_warning")
 	return message
 
 func author_release_reason(reason: String) -> String:
-	return words.word("author_release_" + (reason if reason in ["game_credit", "readme", "metadata", "sha256", "download", "source", "cache_invalid"] else "metadata"))
+	return words.word("author_release_" + (reason if reason in ["metadata", "sha256", "download", "source", "cache_invalid"] else "metadata"))
 
 func description_note(value: Variant) -> String:
 	if value is String:
@@ -1024,7 +1179,8 @@ func restyle(node: Node) -> void:
 		node.add_theme_color_override("font_color", UiTheme.tone(str(node.get_meta("paint"))))
 	if node is Button and str(node.get_meta("variant", "")) != "":
 		UiTheme.style_button(node, str(node.get_meta("variant")))
-	for child in node.get_children():
+	# Dialog action buttons are internal children too.
+	for child in node.get_children(true):
 		restyle(child)
 
 func change_locale(locale: String) -> void:
@@ -1326,6 +1482,8 @@ func reload_catalog() -> void:
 	await check_updates()
 
 func check_updates() -> void:
+	if hub_closing:
+		return
 	if busy or native_dialog_open or install_dialog.visible or operation_dialog.visible:
 		# Retry a deferred check after one minute without interrupting the current operation.
 		if update_timer != null:
