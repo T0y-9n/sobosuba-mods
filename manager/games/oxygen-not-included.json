@@ -1,0 +1,2 @@
+{ "format_version": 1, "id": "oxygen-not-included", "name": "Oxygen Not Included", "steam_appid": 457140, "screen": "library",
+  "places": [ { "id": "mods", "reader": "oni", "path": "{documents}/Klei/OxygenNotIncluded/mods" } ] }

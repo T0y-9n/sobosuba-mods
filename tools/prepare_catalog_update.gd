@@ -131,13 +131,13 @@ func run() -> void:
 			if not result.has("entry"):
 				rejected.append({"id":base.id, "variant":choice.variant, "version":candidate.version, "sha256":candidate.sha256, "reason":result.get("failure", "metadata")})
 				continue
-			if checking and (proposed.get("game_versions") != result.entry.game_versions or proposed.get("game_credit") != result.entry.game_credit):
+			if checking and proposed.get("game_versions") != result.entry.game_versions:
 				errors.append({"id":base.id, "variant":choice.variant, "reason":"metadata"})
 				continue
 			var target: Dictionary = choice.entry
 			var before := {}
 			var after := {}
-			for field in ["version", "zip", "sha256", "game_versions", "game_credit"]:
+			for field in ["version", "zip", "sha256", "game_versions"]:
 				before[field] = target.get(field)
 				after[field] = result.entry[field]
 				target[field] = result.entry[field]

@@ -1,0 +1,2 @@
+{ "format_version": 1, "id": "x4-foundations", "name": "X4: Foundations", "steam_appid": 392160, "screen": "library",
+  "places": [ { "id": "extensions", "reader": "x4", "path": "{game}/extensions", "user": "{documents}/Egosoft/X4" } ] }

@@ -15,7 +15,7 @@ import zipfile
 
 REPOSITORY = "T0y-9n/sobosuba-mods"
 WORKFLOW_PATH = ".github/workflows/catalog-check.yml"
-FIELDS = {"version", "zip", "sha256", "game_versions", "game_credit"}
+FIELDS = {"version", "zip", "sha256", "game_versions"}
 PATHS = {"catalog.json", "manager/catalog.json"}
 SUBMISSION_BRANCH = "catalog-update/verified-releases"
 

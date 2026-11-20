@@ -39,13 +39,7 @@ body:
   - type: input
     id: readme
     attributes:
-      label: README at the Release tag / Releaseのタグ時点のREADME
+      label: README (optional) / README（任意）
+      description: A link to the original game is recommended, not required. / 原作へのリンクは推奨で、掲載条件ではありません。
     validations:
-      required: true
-  - type: checkboxes
-    id: credit
-    attributes:
-      label: Required credit / 必要な作者表示
-      options:
-        - label: The ZIP metadata and author README meet the linked game-credit requirements. / ZIPの定義書と作者のREADMEが、案内にある原作者表示の条件を満たしています。
-          required: true
+      required: false

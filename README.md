@@ -23,14 +23,17 @@ After installing it, add your own `.png`, `.jpg` or `.ogv` files to the `greensc
 If several files are present, the mod picks one at random. See the [author's instructions](https://github.com/Typhe681/GreenScreenSobos/tree/v1.0.0) for the Windows and Linux paths.
 The catalog downloads the original ZIP directly from the author.
 
-[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.10)
+[Sobosuba Mod Manager for Windows and Linux](https://github.com/T0y-9n/sobosuba-mods/releases/tag/manager-v0.3.0-alpha.17)
 manages mods for 1.2.3, 1.3.10 and 1.3.11. Choose the mod package matching your game.
 Manager alpha.9 selects the matching Prime Sobos release from the catalog for 1.2.3 or 1.3.11.
 These two releases keep separate installation locations and update settings; neither replaces the other.
 Earlier managers still read the original 1.2.3 catalog entry. Update the manager to select the 1.3.11 catalog release.
 For 1.3.11 installation, see [the package guide](beta-1.3.8/PRIME-SOBOS-en.md).
 From alpha.9, missing package credit or unverified GitHub README credit shows a warning and installation can continue.
-From alpha.10, you can change the load order of mods from the mod details. Sobo Crash Fix, Prime Sobos 1.3.11-1.0.9 and Special Sobos 0.6.7 support it.
+From alpha.10, you can change the load order of mods from the mod details. From alpha.11, System, Light and Dark switch immediately and the choice is saved. Sobo Crash Fix, Prime Sobos 1.3.11-1.0.9 and Special Sobos 0.6.7 support it.
+From alpha.15, the manager shows its own version in the window title and the heading, keeps a log you can open or copy, and a mod can stay on the version you pin.
+From alpha.16, an update keeps the previous copy so you can restore it, overlapping files name the other mod, a game-version change asks before leaving old mods enabled, and Play starts sobosuba with the saved mod order.
+From alpha.17, mod details keep the original game credit and Steam link, while installing or updating a mod no longer warns about credits missing from its ZIP or README.
 
 [English](#english) | [日本語](#日本語)
 
@@ -158,7 +161,7 @@ To keepee: all ideas, code and assets in my sobosuba mods and in the Sobo Mod Ma
 
 ## Catalog listing requirements
 
-The mod author's GitHub README must credit sobosuba by keepee and link to the [original game](https://store.steampowered.com/app/1946560/sobosuba). The ZIP metadata must contain `game_credit` with `text` set to `sobosuba by keepee` and `store_url` set to `https://store.steampowered.com/app/1946560/sobosuba`. These two requirements let players follow a mod back to the original game.
+The manager displays sobosuba by keepee and https://store.steampowered.com/app/1946560/sobosuba for every MOD. ZIP game_credit and attribution in the author README are not catalog or automatic-update requirements. Linking to the original game in your README is recommended.
 
 ## 日本語
 
@@ -173,6 +176,10 @@ sobosubaはkeepeeさんの作品です。このMODを使うには原作が必要
 - ゲーム1.3.11用の [Music Sobos 1.3.11-1.2.0](https://github.com/T0y-9n/sobosuba-mods/releases/tag/music-1.3.11-1.2.0)。自分の曲を 1 曲流すと、ソボが曲に合わせて揺れる MOD です。重い数字ほど揺れは小さくなります。曲そのものは入っていません。
 - ゲーム1.2.3用の [1.2.3-1.0.6](https://github.com/T0y-9n/sobosuba-mods/releases/tag/1.2.3-1.0.6)。
 - Typhe681さんの [SoboSandbox 1.3.0](https://github.com/Typhe681/SoboSandbox/releases/tag/v1.3.0) と [GreenScreenSobos 1.0.0](https://github.com/Typhe681/GreenScreenSobos/releases/tag/v1.0.0)。
+
+管理アプリ 0.3.0-alpha.15 は、起動した直後から自分の版を窓の題と見出しに出し、操作のログを残して画面から開いたり写したりでき、MOD を今の版のまま固定できます。
+管理アプリ 0.3.0-alpha.16 は、更新の前の版へ戻せ、重なるファイルの相手の MOD を出し、ゲームの版が変わったら無効にするか聞き、保存した並びで sobosuba を起動できます。
+管理アプリ 0.3.0-alpha.17 は、MOD の詳細の原作表示と Steam へのリンクを保ち、導入や更新で ZIP や README の作者表示の欠けを警告しません。
 
 SoboSandboxのMOD版1.3.0には、対応ゲーム版として1.3.9・1.3.10・1.3.11が挙げられています。
 
@@ -298,4 +305,4 @@ keepee さんへ: 私の sobosuba の MOD と Sobo Mod Manager にあるアイ�
 
 ## カタログの掲載条件
 
-MOD作者のGitHub READMEに、本家作者のkeepeeさんと購入先を記載してください。ZIPの定義書には、textをsobosuba by keepee、store_urlをhttps://store.steampowered.com/app/1946560/sobosuba とするgame_creditが必要です。この2点は、MODから原作へたどれるようにするための条件です。
+管理アプリがすべてのMODに sobosuba by keepee と https://store.steampowered.com/app/1946560/sobosuba を表示します。ZIPのgame_creditと作者READMEの原作表示は、掲載と自動更新の条件ではありません。READMEから原作へリンクすることを推奨します。

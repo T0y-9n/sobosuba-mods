@@ -1,0 +1,4 @@
+{ "format_version": 1, "id": "rv-there-yet", "name": "RV There Yet?", "steam_appid": 3949040, "screen": "library",
+  "places": [ { "id": "ue4ss", "reader": "ue4ss", "path": "{game}/Ride/Binaries/Win64/ue4ss/Mods" },
+              { "id": "paks", "reader": "paks", "path": "{game}/Ride/Content/Paks/~mods" } ],
+  "sources": { "thunderstore": "rv-there-yet" } }

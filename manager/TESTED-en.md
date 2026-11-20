@@ -1,4 +1,12 @@
-# Sobosuba Mod Manager 0.3.0-alpha.16
+# Sobosuba Mod Manager 0.3.0-alpha.17
+
+Release preparation: the version and documentation are aligned for alpha.17. Packaged startup, hashes and updating from the previous public release are not yet checked for this version; they will be checked after the version change is merged.
+
+A source run with Godot 4.7.2 on Windows, using --headless --update-probe and isolated application data, returned ok=true and version 0.3.0-alpha.17 at 2026-11-20 04:48:07-04:48:08 UTC. Its engine hash matched the real executable, the process exited with code 0, and the Windows job recorded no remaining processes. The version/documentation check was 1 successful test, with no failures or skips. This was a source run, not the packaged executable.
+
+The records below belong to their named earlier versions.
+
+## Checks recorded for 0.3.0-alpha.16
 
 Checked on Windows with dedicated test game and user-data folders, using Prime Sobos 1.0.7 and 1.0.9.
 

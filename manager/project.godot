@@ -6,9 +6,16 @@ config/name="Sobosuba Mod Manager"
 
 config/icon="res://assets/sobosuba-mod-manager.png"
 
-config/version="0.3.0-alpha.16"
+config/version="0.3.0-alpha.17"
 
 run/main_scene="res://main.tscn"
+run/main_scene.hub="res://hub/hub.tscn"
+
+boot_splash/image.hub="res://assets/hub_title.png"
+boot_splash/bg_color.hub=Color(0.0588235, 0.0745098, 0.0980392, 1)
+boot_splash/minimum_display_time.hub=0
+boot_splash/show_image.hub=true
+boot_splash/stretch_mode.hub=1
 
 config/features=PackedStringArray("4.7", "GL Compatibility")
 

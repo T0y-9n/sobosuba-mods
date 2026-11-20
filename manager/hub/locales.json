@@ -1,0 +1,26 @@
+{
+  "en": {
+    "boot_name": "Mod Hub", "boot_loading": "Loading — %s", "boot_discover": "Finding games", "boot_game": "Reading %s",
+    "col_name": "Name", "col_version": "Version", "col_origin": "Source", "col_enabled": "State",
+    "col_installed": "Installed", "col_update": "Update",
+    "origin_workshop": "Workshop", "origin_official": "Official", "origin_local": "Local", "origin_dev": "Dev", "origin_manual": "Manual",
+    "enabled_on": "On", "enabled_off": "Off", "unknown": "Unknown",
+    "update_available": "Update available", "update_none": "Up to date",
+    "place_workshop": "Steam Workshop", "place_oni": "Game mod list", "place_x4": "Extensions",
+    "place_bepinex": "BepInEx plugins", "place_ue4ss": "UE4SS mods", "place_paks": "Pak mods",
+    "count": "%d items", "count_on": "%d items, %d on", "empty_place": "No mods here.",
+    "unreadable": "Could not read %s.", "titles_missing": "Titles could not be fetched. Showing item numbers."
+  },
+  "ja": {
+    "boot_name": "Mod Hub", "boot_loading": "読み込んでいます — %s", "boot_discover": "ゲームを探しています", "boot_game": "%s を読んでいます",
+    "col_name": "名前", "col_version": "版", "col_origin": "出どころ", "col_enabled": "状態",
+    "col_installed": "入れた日", "col_update": "更新",
+    "origin_workshop": "Workshop", "origin_official": "公式", "origin_local": "Local", "origin_dev": "Dev", "origin_manual": "手置き",
+    "enabled_on": "入", "enabled_off": "切", "unknown": "不明",
+    "update_available": "更新あり", "update_none": "最新",
+    "place_workshop": "Steam Workshop", "place_oni": "ゲームの MOD 一覧", "place_x4": "拡張",
+    "place_bepinex": "BepInEx の plugins", "place_ue4ss": "UE4SS の Mods", "place_paks": "pak の MOD",
+    "count": "%d 件", "count_on": "%d 件（入 %d）", "empty_place": "MOD はありません。",
+    "unreadable": "%s を読めませんでした。", "titles_missing": "題名を取れませんでした（番号で出しています）。"
+  }
+}
