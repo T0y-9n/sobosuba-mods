@@ -175,6 +175,23 @@
         "tag_prefix": "v",
         "asset": "ModSettings{version}.zip"
       }
+    },
+    {
+      "id": "sobosuika",
+      "name": "SoboSuika",
+      "version": "1.0.0",
+      "game_versions": [
+        "1.3.11"
+      ],
+      "summary": "Adds a Suika gamemode.",
+      "author": "Typhe681",
+      "zip": "https://github.com/Typhe681/SoboSuika/releases/download/v1.0.0/SoboSuika1.0.0.zip",
+      "sha256": "ee32e80f0a5d86d8a1aed8332da5e6607a3485c30f9c99eccd9523d076f4d11f",
+      "source": {
+        "github": "Typhe681/SoboSuika",
+        "tag_prefix": "v",
+        "asset": "SoboSuika{version}.zip"
+      }
     }
   ]
 }
