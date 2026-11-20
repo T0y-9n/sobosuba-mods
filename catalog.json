@@ -158,6 +158,23 @@
         "tag_prefix": "v",
         "asset": "GreenScreenSobos{version}.zip"
       }
+    },
+    {
+      "id": "modsettings",
+      "name": "SoboModSettings",
+      "version": "1.1.1",
+      "game_versions": [
+        "1.3.11"
+      ],
+      "summary": "Framework that shows other mods' config files in the in-game settings menu.",
+      "author": "Typhe681",
+      "zip": "https://github.com/Typhe681/SoboModSettings/releases/download/v1.1.1/ModSettings1.1.1.zip",
+      "sha256": "69bedb1a2edb02391dc7f449fca2b69bbe8905d8f594f620d9bbadbba141b287",
+      "source": {
+        "github": "Typhe681/SoboModSettings",
+        "tag_prefix": "v",
+        "asset": "ModSettings{version}.zip"
+      }
     }
   ]
 }
