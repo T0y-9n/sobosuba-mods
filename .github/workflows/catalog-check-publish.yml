@@ -96,11 +96,10 @@ jobs:
           pull_number = int(identity[1])
           head_sha = identity[2]
           main_sha = api(repository + '/git/ref/heads/main')['object']['sha']
-          references = [item for item in run.get('pull_requests', []) if item.get('number') == pull_number]
-          if (run.get('head_sha') != head_sha or len(references) != 1
-                  or references[0].get('base', {}).get('sha') != main_sha
-                  or references[0].get('head', {}).get('sha') != head_sha):
-              raise ValueError('Validation run does not match the PR head and current main')
+          # GitHub leaves run.pull_requests empty for runs from fork PRs, so the PR
+          # head and base are checked against the pulls API in validate_current_pull().
+          if run.get('head_sha') != head_sha:
+              raise ValueError('Validation run does not match the PR head')
           pull_path = repository + '/pulls/' + str(pull_number)
 
           def validate_current_pull():
